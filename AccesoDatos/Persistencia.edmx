@@ -1,0 +1,265 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="Persistencia.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2012" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityContainer Name="PersistenciaStoreContainer">
+    <EntitySet Name="CuentaSet" EntityType="Persistencia.Store.CuentaSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="UsuarioSet" EntityType="Persistencia.Store.UsuarioSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="AvanceSet" EntityType="Persistencia.Store.AvanceSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="PersonajeCorredorSet" EntityType="Persistencia.Store.PersonajeCorredorSet" store:Type="Tables" Schema="dbo" />
+    <AssociationSet Name="CuentaUsuario" Association="Persistencia.Store.CuentaUsuario">
+      <End Role="Cuenta" EntitySet="CuentaSet" />
+      <End Role="Usuario" EntitySet="UsuarioSet" />
+    </AssociationSet>
+    <AssociationSet Name="UsuarioAvance" Association="Persistencia.Store.UsuarioAvance">
+      <End Role="Usuario" EntitySet="UsuarioSet" />
+      <End Role="Avance" EntitySet="AvanceSet" />
+    </AssociationSet>
+    <AssociationSet Name="AvancePersonajeCorredor" Association="Persistencia.Store.AvancePersonajeCorredor">
+      <End Role="Avance" EntitySet="AvanceSet" />
+      <End Role="PersonajeCorredor" EntitySet="PersonajeCorredorSet" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="CuentaSet">
+    <Key>
+      <PropertyRef Name="Usuario" />
+    </Key>
+    <Property Name="Usuario" Type="nvarchar" Nullable="false" MaxLength="50" />
+    <Property Name="Password" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="CodigoVerificacion" Type="nvarchar" Nullable="false" MaxLength="10" />
+    <Property Name="Valida" Type="bit" Nullable="false" />
+    <Property Name="Usuario1_Id" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="UsuarioSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Edad" Type="nvarchar" Nullable="false" MaxLength="3" />
+    <Property Name="CorreoElectronico" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Avance_Id" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="AvanceSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="UvCoins" Type="int" Nullable="false" />
+    <Property Name="MejorPuntuacion" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="PersonajeCorredorSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Nombre" Type="nvarchar" Nullable="false" MaxLength="50" />
+    <Property Name="Precio" Type="int" Nullable="false" />
+    <Property Name="Poder" Type="nvarchar" Nullable="false" MaxLength="50" />
+    <Property Name="AvanceId" Type="int" Nullable="false" />
+  </EntityType>
+  <Association Name="CuentaUsuario">
+    <End Role="Cuenta" Type="Persistencia.Store.CuentaSet" Multiplicity="*" />
+    <End Role="Usuario" Type="Persistencia.Store.UsuarioSet" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Usuario">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Cuenta">
+        <PropertyRef Name="Usuario1_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="UsuarioAvance">
+    <End Role="Usuario" Type="Persistencia.Store.UsuarioSet" Multiplicity="*" />
+    <End Role="Avance" Type="Persistencia.Store.AvanceSet" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Avance">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Usuario">
+        <PropertyRef Name="Avance_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="AvancePersonajeCorredor">
+    <End Role="Avance" Type="Persistencia.Store.AvanceSet" Multiplicity="1" />
+    <End Role="PersonajeCorredor" Type="Persistencia.Store.PersonajeCorredorSet" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Avance">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="PersonajeCorredor">
+        <PropertyRef Name="AvanceId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" Namespace="Persistencia" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" annotation:UseStrongSpatialTypes="false">
+        <EntityContainer Name="PersistenciaContainer" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="CuentaSet" EntityType="Persistencia.Cuenta" />
+          <EntitySet Name="UsuarioSet" EntityType="Persistencia.Usuario" />
+          <EntitySet Name="AvanceSet" EntityType="Persistencia.Avance" />
+          <EntitySet Name="PersonajeCorredorSet" EntityType="Persistencia.PersonajeCorredor" />
+          <AssociationSet Name="CuentaUsuario" Association="Persistencia.CuentaUsuario">
+            <End Role="Cuenta" EntitySet="CuentaSet" />
+            <End Role="Usuario" EntitySet="UsuarioSet" />
+          </AssociationSet>
+          <AssociationSet Name="UsuarioAvance" Association="Persistencia.UsuarioAvance">
+            <End Role="Usuario" EntitySet="UsuarioSet" />
+            <End Role="Avance" EntitySet="AvanceSet" />
+          </AssociationSet>
+          <AssociationSet Name="AvancePersonajeCorredor" Association="Persistencia.AvancePersonajeCorredor">
+            <End Role="Avance" EntitySet="AvanceSet" />
+            <End Role="PersonajeCorredor" EntitySet="PersonajeCorredorSet" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="Cuenta">
+          <Key>
+            <PropertyRef Name="Usuario" />
+          </Key>
+          <Property Name="Usuario" Type="String" Nullable="false" MaxLength="50" />
+          <Property Name="Password" Type="String" Nullable="false" />
+          <Property Name="CodigoVerificacion" Type="String" Nullable="false" MaxLength="10" />
+          <Property Name="Valida" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Usuario1" Relationship="Persistencia.CuentaUsuario" FromRole="Cuenta" ToRole="Usuario" />
+        </EntityType>
+        <EntityType Name="Usuario">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Edad" Type="String" Nullable="false" MaxLength="3" />
+          <Property Name="CorreoElectronico" Type="String" Nullable="false" />
+          <NavigationProperty Name="Cuenta" Relationship="Persistencia.CuentaUsuario" FromRole="Usuario" ToRole="Cuenta" />
+          <NavigationProperty Name="Avance" Relationship="Persistencia.UsuarioAvance" FromRole="Usuario" ToRole="Avance" />
+        </EntityType>
+        <EntityType Name="Avance">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UvCoins" Type="Int32" Nullable="false" />
+          <Property Name="MejorPuntuacion" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Usuario" Relationship="Persistencia.UsuarioAvance" FromRole="Avance" ToRole="Usuario" />
+          <NavigationProperty Name="PersonajeCorredor" Relationship="Persistencia.AvancePersonajeCorredor" FromRole="Avance" ToRole="PersonajeCorredor" />
+        </EntityType>
+        <EntityType Name="PersonajeCorredor">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" Nullable="false" MaxLength="50" />
+          <Property Name="Precio" Type="Int32" Nullable="false" />
+          <Property Name="Poder" Type="String" Nullable="false" MaxLength="50" />
+          <NavigationProperty Name="Avance" Relationship="Persistencia.AvancePersonajeCorredor" FromRole="PersonajeCorredor" ToRole="Avance" />
+          <Property Name="AvanceId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <Association Name="CuentaUsuario">
+          <End Type="Persistencia.Cuenta" Role="Cuenta" Multiplicity="1" />
+          <End Type="Persistencia.Usuario" Role="Usuario" Multiplicity="1" />
+        </Association>
+        <Association Name="UsuarioAvance">
+          <End Type="Persistencia.Usuario" Role="Usuario" Multiplicity="1" />
+          <End Type="Persistencia.Avance" Role="Avance" Multiplicity="1" />
+        </Association>
+        <Association Name="AvancePersonajeCorredor">
+          <End Type="Persistencia.Avance" Role="Avance" Multiplicity="1" />
+          <End Type="Persistencia.PersonajeCorredor" Role="PersonajeCorredor" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Avance">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="PersonajeCorredor">
+              <PropertyRef Name="AvanceId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+    <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="PersistenciaStoreContainer" CdmEntityContainer="PersistenciaContainer">
+    <EntitySetMapping Name="CuentaSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Persistencia.Cuenta)">
+        <MappingFragment StoreEntitySet="CuentaSet">
+          <ScalarProperty Name="Usuario" ColumnName="Usuario" />
+          <ScalarProperty Name="Password" ColumnName="Password" />
+          <ScalarProperty Name="CodigoVerificacion" ColumnName="CodigoVerificacion" />
+          <ScalarProperty Name="Valida" ColumnName="Valida" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="UsuarioSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Persistencia.Usuario)">
+        <MappingFragment StoreEntitySet="UsuarioSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Edad" ColumnName="Edad" />
+          <ScalarProperty Name="CorreoElectronico" ColumnName="CorreoElectronico" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="AvanceSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Persistencia.Avance)">
+        <MappingFragment StoreEntitySet="AvanceSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="UvCoins" ColumnName="UvCoins" />
+          <ScalarProperty Name="MejorPuntuacion" ColumnName="MejorPuntuacion" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="PersonajeCorredorSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Persistencia.PersonajeCorredor)">
+        <MappingFragment StoreEntitySet="PersonajeCorredorSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+          <ScalarProperty Name="Precio" ColumnName="Precio" />
+          <ScalarProperty Name="Poder" ColumnName="Poder" />
+          <ScalarProperty Name="AvanceId" ColumnName="AvanceId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <AssociationSetMapping Name="CuentaUsuario" TypeName="Persistencia.CuentaUsuario" StoreEntitySet="CuentaSet">
+      <EndProperty Name="Usuario">
+        <ScalarProperty Name="Id" ColumnName="Usuario1_Id" />
+      </EndProperty>
+      <EndProperty Name="Cuenta">
+        <ScalarProperty Name="Usuario" ColumnName="Usuario" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="UsuarioAvance" TypeName="Persistencia.UsuarioAvance" StoreEntitySet="UsuarioSet">
+      <EndProperty Name="Avance">
+        <ScalarProperty Name="Id" ColumnName="Avance_Id" />
+      </EndProperty>
+      <EndProperty Name="Usuario">
+        <ScalarProperty Name="Id" ColumnName="Id" />
+      </EndProperty>
+    </AssociationSetMapping>
+  </EntityContainerMapping>
+</Mapping></edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <edmx:Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </edmx:Connection>
+    <edmx:Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="False" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Ninguno" />
+        <DesignerProperty Name="UseLegacyProvider" Value="False" />
+      </DesignerInfoPropertySet>
+    </edmx:Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

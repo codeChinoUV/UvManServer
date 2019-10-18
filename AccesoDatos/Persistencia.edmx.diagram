@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="075e315cc4ed4c60baa8bd955b62abdf" Name="Diagram1" >
+        <EntityTypeShape EntityType="Persistencia.Cuenta" Width="1.5" PointX="0.875" PointY="0.625" />
+        <EntityTypeShape EntityType="Persistencia.Usuario" Width="1.5" PointX="3.625" PointY="0.625" />
+        <EntityTypeShape EntityType="Persistencia.Avance" Width="1.5" PointX="6.375" PointY="0.625" />
+        <EntityTypeShape EntityType="Persistencia.PersonajeCorredor" Width="1.5" PointX="6.5" PointY="3.5" />
+        <AssociationConnector Association="Persistencia.CuentaUsuario" />
+        <AssociationConnector Association="Persistencia.UsuarioAvance" />
+        <AssociationConnector Association="Persistencia.AvancePersonajeCorredor" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
