@@ -57,34 +57,44 @@ namespace GameChatService.Servicio
                 {
                     lock (sincronizarObjeto)
                     {
-                        cuentasConetadas.Add(cuenta, ActualCallback);
-                        cuentas.Add(cuenta);
                         foreach (Cuenta cuentaClave in cuentasConetadas.Keys)
                         {
-                            IChatServiceCallback callback = cuentasConetadas[cuentaClave];
-                            Debug.WriteLine("Le estoy notificanfo al usuario " + cuentaClave.usuario);
-                            try
-                            {
-                                callback.RefrescarCuentasConectadas(cuentas);
-                                callback.Unirse(cuenta);
-                            }
-                            catch (Exception ex)
-                            {
-                                cuentasConetadas.Remove(cuenta);
-                                Debug.Write("Ocurrio la excepcion: " + ex.Message);
-                                throw new FaultException(ex.Message);
-                                //return false;
-                            }
+                            
+                                IChatServiceCallback callback = cuentasConetadas[cuentaClave];
+                                Debug.WriteLine("Le estoy notificanfo al usuario " + cuentaClave.usuario);
+                                try
+                                {
+                                    callback.RefrescarCuentasConectadas(cuentas);
+                                    callback.Unirse(cuenta);
+                                }
+                                catch (Exception ex)
+                                {
+                                    cuentasConetadas.Remove(cuenta);
+                                    //Debug.Write("Ocurrio la excepcion: " + ex.Message);
+                                    throw new FaultException(ex.Message);
+                                    return false;
+                                }
+                            
                         }
-
                     }
+                    cuentasConetadas.Add(cuenta, ActualCallback);
+                    cuentas.Add(cuenta);
                     Debug.Write("Se termino de sincronizar todos los hilos");
                         return true;
-                    }
                 }
-                    return false;
+            }
+            return false;
         }
 
+        public List<Cuenta> ObtenerCuentasConectadas()
+        {
+            return cuentas;
+        }
+
+        /// <summary>
+        /// Termina la sesion de una cuenta en el servicio de chat
+        /// </summary>
+        /// <param name="cuenta">Cuenta</param>
         public void Desconectar(Cuenta cuenta)
         {
             foreach (Cuenta cuentaClave in cuentasConetadas.Keys)

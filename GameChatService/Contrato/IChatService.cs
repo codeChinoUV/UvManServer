@@ -16,6 +16,9 @@ namespace GameChatService
         [OperationContract(IsInitiating = true)]
         bool Conectar(Cuenta cuenta);
 
+        [OperationContract]
+        List<Cuenta> ObtenerCuentasConectadas();
+
         [OperationContract(IsOneWay = true)]
         void EnviarMensaje(Message mensaje);
 
