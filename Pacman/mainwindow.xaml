@@ -5,16 +5,39 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pacman"
         mc:Ignorable="d"
-        Title="Servidor" Height="450" Width="800">
+        Title="Servidor" Height="600" Width="800">
     <Grid>
-        <Label Content="Direccion IP:" HorizontalAlignment="Left" Margin="19,20,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="lEstado" Content="Estado" HorizontalAlignment="Left" Margin="91,80,0,0" VerticalAlignment="Top"/>
-        <TextBlock x:Name="txtDireccionIp" HorizontalAlignment="Left" Margin="107,23,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="21" Width="91" IsEnabled="False"/>
-        <Label x:Name="label" Content="Puerto:&#xD;&#xA;" HorizontalAlignment="Left" Margin="198,20,0,0" VerticalAlignment="Top" Height="26"/>
-        <TextBlock x:Name="txtPuerto" HorizontalAlignment="Left" Margin="274,23,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="21" Width="64"/>
-        <Button x:Name="bIniciar" Content="Iniciar" HorizontalAlignment="Left" Margin="19,141,0,0" VerticalAlignment="Top" Width="75" Click="BIniciar_Click"/>
-        <Button x:Name="bDetener" Content="Detener" HorizontalAlignment="Left" Margin="263,141,0,0" VerticalAlignment="Top" Width="75" Click="BDetener_Click"/>
+        <Label Content="Direccion IP:" HorizontalAlignment="Left" Margin="19,46,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lEstadoServicioCuenta" Content="Estado" HorizontalAlignment="Left" Margin="91,80,0,0" VerticalAlignment="Top"/>
+        <TextBlock x:Name="lDireccionIpServicioCuenta" HorizontalAlignment="Left" Margin="107,49,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="21" Width="320" IsEnabled="False"/>
+        <Label x:Name="label" Content="Puerto:&#xD;&#xA;" HorizontalAlignment="Left" Margin="442,46,0,0" VerticalAlignment="Top" Height="26"/>
+        <TextBlock x:Name="lPuertoServicioCuentas" HorizontalAlignment="Left" Margin="518,49,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="21" Width="64"/>
+        <Button x:Name="bIniciarServicioCuenta" Content="Iniciar" HorizontalAlignment="Left" Margin="707,121,0,0" VerticalAlignment="Top" Width="75" Click="BIniciarServicioCuenta_Click"/>
+        <Button x:Name="bDetenerServicioCuenta" Content="Detener" HorizontalAlignment="Left" Margin="19,121,0,0" VerticalAlignment="Top" Width="75" Click="BDetenerServicioCuenta_Click"/>
         <Label x:Name="label1" Content="Estado:" HorizontalAlignment="Left" Margin="19,80,0,0" VerticalAlignment="Top"/>
-
+        <Separator HorizontalAlignment="Left" Height="18" Margin="0,146,0,0" VerticalAlignment="Top" Width="792"/>
+        <Label x:Name="label2" Content="Servicio de cuentas" HorizontalAlignment="Left" Margin="19,10,0,0" VerticalAlignment="Top"/>
+        <Label Content="Direccion IP:" HorizontalAlignment="Left" Margin="19,204,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lEstadoServicioChat" Content="Estado" HorizontalAlignment="Left" Margin="91,238,0,0" VerticalAlignment="Top"/>
+        <TextBlock x:Name="lDireccionIpServicioChat" HorizontalAlignment="Left" Margin="107,207,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="21" Width="320" IsEnabled="False"/>
+        <Label x:Name="label_Copy" Content="Puerto:&#xA;" HorizontalAlignment="Left" Margin="442,204,0,0" VerticalAlignment="Top" Height="26"/>
+        <TextBlock x:Name="lPuertoServicioChat" HorizontalAlignment="Left" Margin="518,207,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="21" Width="64"/>
+        <Button x:Name="bIniciarServicioChat" Content="Iniciar" HorizontalAlignment="Left" Margin="707,279,0,0" VerticalAlignment="Top" Width="75" Click="BIniciarServicioChat_Click"/>
+        <Button x:Name="bDetenerServicioChat" Content="Detener" HorizontalAlignment="Left" Margin="19,279,0,0" VerticalAlignment="Top" Width="75" Click="BDetenerServicioChat_Click"/>
+        <Label x:Name="label1_Copy" Content="Estado:" HorizontalAlignment="Left" Margin="19,238,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="label2_Copy" Content="Servicio de chat" HorizontalAlignment="Left" Margin="19,168,0,0" VerticalAlignment="Top"/>
+        <Separator HorizontalAlignment="Left" Height="18" Margin="0,463,0,0" VerticalAlignment="Top" Width="792"/>
+        <Label Content="Direccion IP:" HorizontalAlignment="Left" Margin="19,365,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lEstadoServicioSesion" Content="Estado" HorizontalAlignment="Left" Margin="91,399,0,0" VerticalAlignment="Top"/>
+        <TextBlock x:Name="lDireccionIpServicioSesion" HorizontalAlignment="Left" Margin="107,368,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="21" Width="320" IsEnabled="False"/>
+        <Label x:Name="label_Copy1" Content="Puerto:&#xA;" HorizontalAlignment="Left" Margin="442,365,0,0" VerticalAlignment="Top" Height="26"/>
+        <TextBlock x:Name="lPuertoServicioSesion" HorizontalAlignment="Left" Margin="518,368,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="21" Width="64"/>
+        <Button x:Name="bIniciarServicioSesion" Content="Iniciar" HorizontalAlignment="Left" Margin="707,440,0,0" VerticalAlignment="Top" Width="75" Click="BIniciarServicioSesion_Click" />
+        <Button x:Name="bDetenerServicioSesion" Content="Detener" HorizontalAlignment="Left" Margin="19,440,0,0" VerticalAlignment="Top" Width="75" Click="BDetenerServicioSesion_Click" />
+        <Label x:Name="label1_Copy1" Content="Estado:" HorizontalAlignment="Left" Margin="19,399,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="label2_Copy1" Content="Servicio de sesiones" HorizontalAlignment="Left" Margin="19,329,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="label2_Copy2" Content="Todos los servicios" HorizontalAlignment="Left" Margin="19,479,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="bIniciarServicioChat_Copy1" Content="Iniciar" HorizontalAlignment="Left" Margin="707,522,0,0" VerticalAlignment="Top" Width="75" />
+        <Button x:Name="bDetenerServicioChat_Copy1" Content="Detener" HorizontalAlignment="Left" Margin="19,522,0,0" VerticalAlignment="Top" Width="75" />
     </Grid>
 </Window>

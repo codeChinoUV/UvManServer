@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using LogicaDelNegocio.Modelo;
 
 namespace GameChatService.Dominio
 {
@@ -11,7 +12,7 @@ namespace GameChatService.Dominio
     public class Message
     {
         [DataMember]
-        public Cuenta remitente { get; set; }
+        public CuentaModel remitente { get; set; }
         [DataMember]
         public String mensaje { get; set; }
         [DataMember]

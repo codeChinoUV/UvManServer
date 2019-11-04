@@ -8,7 +8,7 @@
         <EntityTypeShape EntityType="Persistencia.Cuenta" Width="1.5" PointX="0.875" PointY="0.625" />
         <EntityTypeShape EntityType="Persistencia.Usuario" Width="1.5" PointX="3.625" PointY="0.625" />
         <EntityTypeShape EntityType="Persistencia.Avance" Width="1.5" PointX="6.375" PointY="0.625" />
-        <EntityTypeShape EntityType="Persistencia.PersonajeCorredor" Width="1.5" PointX="6.5" PointY="3.5" />
+        <EntityTypeShape EntityType="Persistencia.PersonajeCorredor" Width="1.5" PointX="6.375" PointY="3.5" />
         <AssociationConnector Association="Persistencia.CuentaUsuario" />
         <AssociationConnector Association="Persistencia.UsuarioAvance" />
         <AssociationConnector Association="Persistencia.AvancePersonajeCorredor" />

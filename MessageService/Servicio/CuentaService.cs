@@ -11,7 +11,8 @@ using LogicaDelNegocio.DataAccess;
 using System.Data.Entity.Core;
 using LogicaDelNegocio.Modelo;
 using CuentaService.Contrato;
-using CuentaService.Dominio;
+using SessionService.Dominio.Enum;
+using MessageService.Dominio.Enum;
 
 namespace CuentaService.Servicio
 {
@@ -26,141 +27,66 @@ namespace CuentaService.Servicio
         /// <summary>
         /// Guarda un User en la base de datos si el nombre de usuario no existe en la base de datos.
         /// </summary>
-        /// <param name="newUser">User</param>
-        /// <returns> 1 si el usuario se registro correctamente
-        /// 0 si el usuario ya existe en la base de datos
-        /// -1 si ocurrio algun error con la base de datos </returns>
-        public int CheckIn(Cuenta nuevaCuenta)
+        /// <param name="newUser">CuentaModel</param>
+        /// <returns>EnumEstadoRegistro</returns>
+        public EnumEstadoRegistro CheckIn(CuentaModel nuevaCuenta)
         {
-            int estadoRegistro = 0;
+            EnumEstadoRegistro estadoDelRegistro = EnumEstadoRegistro.UsuarioExistente;
             if (nuevaCuenta != null)
             {
                 try
                 {
-                    CuentaModel cuenta = ConvertirACuentaModel(nuevaCuenta);
-                    cuenta.informacionDeUsuario = ConvertirAUsuarioModel(nuevaCuenta.datosDelUsuario);
-                    CuentaModel cuentaAlmacenda = persistenciaCuenta.CheckIn(cuenta);
+                    CuentaModel cuentaAlmacenda = persistenciaCuenta.Registrarse(nuevaCuenta);
                     if (cuentaAlmacenda != null)
                     {
                         EnviarCorreoDeVerificacion(cuentaAlmacenda);
-                        estadoRegistro = 1;
+                        estadoDelRegistro = EnumEstadoRegistro.RegistroCorrecto;
                     }
                 }
                 catch (EntityException)
                 {
-                    estadoRegistro = -1;
+                    estadoDelRegistro = EnumEstadoRegistro.ErrorEnBaseDatos; 
                 }
             }
-            return estadoRegistro;
+            return estadoDelRegistro;
         }
 
         /// <summary>
         /// Verifica si el codigo introducido para la cuenta coincide con el de la cuenta
         /// </summary>
         /// <param name="code">String</param>
-        /// <param name="cuenta">Cuenta</param>
-        /// <returns>1 si la cuenta se verifico correctamente, 0 si no coinciden los codigos, -1 ocurrio un error</returns>
-        public int VerifyAccount(String code, Cuenta cuenta)
+        /// <param name="cuenta">CuentaModel</param>
+        /// <returns>EnumEstadoVerificarCuenta</returns>
+        public EnumEstadoVerificarCuenta VerifyAccount(String code, CuentaModel cuenta)
         {
-            int estadoVerificacion = 0;
-            CuentaModel cuentaModelARecuperar = ConvertirACuentaModel(cuenta);
+            EnumEstadoVerificarCuenta estadoVerificacion = EnumEstadoVerificarCuenta.NoCoincideElCodigo;
             try
             {
-                CuentaModel cuentaAVerificar = persistenciaCuenta.RecuperarCuenta(cuentaModelARecuperar);
+                CuentaModel cuentaAVerificar = persistenciaCuenta.RecuperarCuenta(cuenta);
                 if (cuentaAVerificar.VerificarCuenta(code))
                 {
-                    if (persistenciaCuenta.VerifyAccount(cuentaAVerificar))
+                    if (persistenciaCuenta.VerificarCuenta(cuentaAVerificar))
                     {
-                        estadoVerificacion = 1;
+                        estadoVerificacion = EnumEstadoVerificarCuenta.VerificadaCorrectamente;
                     }
                     else
                     {
-                        estadoVerificacion = -1;
+                        estadoVerificacion = EnumEstadoVerificarCuenta.ErrorEnBaseDatos;
                     }
                 }
             }
             catch (EntityException)
             {
-                estadoVerificacion = -1;
+                estadoVerificacion = EnumEstadoVerificarCuenta.ErrorEnBaseDatos;
             }
             return estadoVerificacion;
-        }
-
-        /// <summary>
-        /// Verifica que el nombre de usuario y la contraseña se encuentren en la base de datos y 
-        /// logea la cuenta en el sistema
-        /// </summary>
-        /// <param name="cuenta">Cuenta</param>
-        /// <returns>1 si se logeo correctamente, 0 si las credenciales no son validas o -1 si ocurrio un error</returns>
-        //public int LogIn(Cuenta cuenta)
-        //{
-        //    CuentaModel cuentaIniciarSesion = ConvertirACuentaModel(cuenta);
-        //    int existeCuenta = persistenciaCuenta.LogIn(cuentaIniciarSesion);
-        //    if (existeCuenta == 1)
-        //    {
-        //        CuentaModel cuentaRecuperada = persistenciaCuenta.RecuperarCuenta(cuentaIniciarSesion);
-        //        ManejoSesion sesiones = ManejoSesion.Instancia();
-        //        Boolean sesionCreada = sesiones.CrearSesion(cuentaRecuperada);
-        //        if (sesionCreada)
-        //        {
-        //            return 1;
-        //        }
-        //        return -1;
-        //    }
-        //    return existeCuenta;
-
-        //}
-
-        /// <summary>
-        /// Termina la sesion de la cuenta en el servidor
-        /// </summary>
-        /// <param name="cuenta">Cuenta</param>
-        /// <returns>1 si se cerro correctamente, -1 si no</returns>
-        //public int LogOut(Cuenta cuenta)
-        //{
-        //    CuentaModel cuentaATerminar = ConvertirACuentaModel(cuenta);
-        //    if (ManejoSesion.Instancia().TerminarSesion(cuentaATerminar))
-        //    {
-        //        return 1;
-        //    }
-        //    return -1;
-        //}
-
-        /// <summary>
-        /// Convierte una Cuenta en una CuentaModel
-        /// </summary>
-        /// <param name="cuentaConvertir">CuentaModel</param>
-        /// <returns>Cuenta</returns>
-        private CuentaModel ConvertirACuentaModel(Cuenta cuentaConvertir)
-        {
-            return new CuentaModel()
-            {
-                nombreUsuario = cuentaConvertir.usuario,
-                contrasena = cuentaConvertir.contrasena,
-                verificado = cuentaConvertir.verificada,
-                codigoVerificacion = cuentaConvertir.codigoVerificacion
-            };
-        }
-
-        /// <summary>
-        /// Convierte un Usuaro en UsuarioModel
-        /// </summary>
-        /// <param name="usuarioConvertir">UsuarioModel</param>
-        /// <returns>Usuario</returns>
-        private UsuarioModel ConvertirAUsuarioModel(Usuario usuarioConvertir)
-        {
-            return new UsuarioModel()
-            {
-                correo = usuarioConvertir.correo,
-                edad = usuarioConvertir.edad
-            };
         }
 
         /// <summary>
         /// Envia un correo a la Cuenta con su codigo de verificación
         /// </summary>
         /// <param name="cuentaAVerificar"></param>
-        /// <returns></returns>
+        /// <returns>Boolean</returns>
         private Boolean EnviarCorreoDeVerificacion(CuentaModel cuentaAVerificar)
         {
             String contenido = ClienteCorreo.GenerarContenidoVerificacion(cuentaAVerificar.codigoVerificacion);

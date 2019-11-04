@@ -19,8 +19,8 @@ namespace LogicaDelNegocio.DataAccess
         /// Almacena en la base de datos una cuenta si el nombre de usuario no se repite
         /// </summary>
         /// <param name="cuentaNueva">CuentaModel</param>
-        /// <returns> 1 si la cuenta se registro correctamente, 0 si la cuenta ya existe</returns>
-        public CuentaModel CheckIn(CuentaModel cuentaNueva)
+        /// <returns>CuentaModel</returns>
+        public CuentaModel Registrarse(CuentaModel cuentaNueva)
         {
             CuentaModel cuentaGuardada = null;
             try
@@ -51,7 +51,7 @@ namespace LogicaDelNegocio.DataAccess
         /// </summary>
         /// <param name="cuentaLogIn">CuentaModel</param>
         /// <returns>1 si las credenciales son validas, 0 si no, -1 si la cuenta no esta verificada</returns>
-        public int LogIn(CuentaModel cuentaLogIn)
+        public int IniciarSesion(CuentaModel cuentaLogIn)
         {
             try
             {
@@ -59,10 +59,16 @@ namespace LogicaDelNegocio.DataAccess
                 {
                     int loginValido = 0;
                     cuentaLogIn.contrasena = Encriptador.ComputeSha256Hash(cuentaLogIn.contrasena);
+                    Debug.WriteLine(cuentaLogIn.contrasena);
+                    
+
                     int cuentaExistente = persistencia.CuentaSet.Where
                         (cuenta => cuenta.Usuario == cuentaLogIn.nombreUsuario
                         && cuenta.Password == cuentaLogIn.contrasena).Count();
-                    if(cuentaExistente == 1)
+                    //Cuenta cuentaRecuperada = persistencia.CuentaSet.Where(cuenta => cuenta.Usuario == cuentaLogIn.nombreUsuario).FirstOrDefault();
+                    //Debug.WriteLine(cuentaRecuperada.Password);
+
+                    if (cuentaExistente == 1)
                     {
                         if (persistencia.CuentaSet.Where(cuenta => cuenta.Usuario == cuentaLogIn.nombreUsuario
                         && cuenta.Password == cuentaLogIn.contrasena && cuenta.Valida).Count() == 1)
@@ -87,8 +93,8 @@ namespace LogicaDelNegocio.DataAccess
         /// Cambia el estado de la cuenta de no verificada a verificada
         /// </summary>
         /// <param name="cuenta"></param>
-        /// <returns>Bool</returns>
-        public Boolean VerifyAccount(CuentaModel cuenta)
+        /// <returns>Boolean</returns>
+        public Boolean VerificarCuenta(CuentaModel cuenta)
         {
             try
             {
@@ -274,7 +280,7 @@ namespace LogicaDelNegocio.DataAccess
                     }
                     return null;
                 }
-            }catch(EntityException ex)
+            }catch(EntityException)
             {
                 throw;
             }

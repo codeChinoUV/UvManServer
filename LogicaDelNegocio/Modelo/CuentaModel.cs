@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
 
 namespace LogicaDelNegocio.Modelo
 {
@@ -10,12 +11,19 @@ namespace LogicaDelNegocio.Modelo
     /// Clase Cuenta
     /// Contiene todos los atributos para la autenticación del usuario
     /// </summary>
+    
+    [DataContract]
     public class CuentaModel
     {
+        [DataMember]
         public String nombreUsuario { get; set; }
+        [DataMember]
         public String contrasena { get; set; }
+        [DataMember]
         public UsuarioModel informacionDeUsuario { get; set; }
+        [DataMember]
         public Boolean verificado { get; set; }
+        [DataMember]
         public String codigoVerificacion { get; set; }
         
         /// <summary>

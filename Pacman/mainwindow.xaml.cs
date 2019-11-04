@@ -3,19 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Description;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using GameChatService;
 using GameChatService.Servicio;
+using CuentaService.Contrato;
+using CuentaService.Servicio;
+using SessionService.Contrato;
+using System.Windows.Controls;
 
 namespace Pacman
 {
@@ -26,119 +20,204 @@ namespace Pacman
     {
         private ServiceHost cuentaHost;
         private ServiceHost chatHost;
-        private int  CONEXIONES_MAXIMAS_PERMITIDAS = 5;
-        private int TIEMPO_ESPERA_INACTIVIDAD = 30;
-        private int TIEMPO_ESPERA_PAQUETE = 2;
-        private int LLAMADAS_SIMULTANEAS_PERMITIDAS = 10;
-        private Boolean CONEXION_CONFIABLE = true;
+        private ServiceHost sesionHost;
+        private String ENDPOINT_TCP_SERVICIO_CHAT = "net.tcp://localhost:8192/ChatService";
+        private String ENDPOINT_HTTP_SERVICIO_CHAT = "http://localhost:8182/ChatService";
+        private String ENDPOINT_TCP_SERVICIO_CUENTA = "net.tcp://localhost:8092/CuentaService";
+        private String ENDPOINT_HTTP_SERVICIO_CUENTA = "http://localhost:8082/CuentaService";
+        private String ENDPOINT_TCP_SERVICIO_SESION = "net.tcp://localhost:7972/SessionService";
+        private String ENDPOINT_HTTP_SERVICIO_SESION = "http://localhost:7982/SessionService";
+
 
         public MainWindow()
         {
             InitializeComponent();
+            lDireccionIpServicioChat.Text = ENDPOINT_TCP_SERVICIO_CHAT;
+            lDireccionIpServicioCuenta.Text = ENDPOINT_TCP_SERVICIO_CUENTA;
+            lDireccionIpServicioSesion.Text = ENDPOINT_TCP_SERVICIO_SESION;
         }
 
-        private void BIniciar_Click(object sender, RoutedEventArgs e)
+
+
+        private void BIniciarServicioCuenta_Click(object sender, RoutedEventArgs e)
         {
-            bIniciar.IsEnabled = false;
-            //String direccion = "localhost";
-            //String puertoTcp = "8192";
-            //String direccionChat = "/CuentaService";
-            //String direccionMetadatos = "/WPFHost/mex";
-            //String puertoHttp = "8182";
-            //Uri direccionTpc = new Uri("net.tcp://" + direccion + ":" + puertoTcp + direccionChat);
-            //Uri direccionHttp = new Uri("http://" + direccion + ":" + puertoHttp + direccionChat);
-
-            //Uri[] baseAdresses = { direccionTpc, direccionHttp };
+            bIniciarServicioCuenta.IsEnabled = false;
             Uri[] uris = new Uri[2];
-            String direccion = "net.tcp://localhost:8192/CuentaService";
-            String direccionHttp = "http://localhost:8182/CuentaService";
-            uris[0] = new Uri(direccion);
-            uris[1] = new Uri(direccionHttp);
-            IChatService servicio = new ChatService();
-            cuentaHost = new ServiceHost(typeof(CuentaService.Servicio.CuentaService));
-            chatHost = new ServiceHost(servicio, uris);
+            uris[0] = new Uri(ENDPOINT_TCP_SERVICIO_CUENTA);
+            uris[1] = new Uri(ENDPOINT_HTTP_SERVICIO_CUENTA);
+            ICuentaService servicioDeCuenta = new CuentaService.Servicio.CuentaService();
+            cuentaHost = new ServiceHost(servicioDeCuenta, uris);
             NetTcpBinding binding = new NetTcpBinding(SecurityMode.None);
-            chatHost.AddServiceEndpoint(typeof(IChatService), binding, String.Empty);
-            //NetTcpBinding tcpBinding = new NetTcpBinding(SecurityMode.None);
-
-            //tcpBinding.MaxConnections = CONEXIONES_MAXIMAS_PERMITIDAS;
-            //tcpBinding.CloseTimeout = new TimeSpan(0, 0, TIEMPO_ESPERA_INACTIVIDAD);
-            //tcpBinding.ReceiveTimeout = new TimeSpan(0, 0, TIEMPO_ESPERA_PAQUETE);
-            //tcpBinding.ReliableSession.Enabled = CONEXION_CONFIABLE;
-            //tcpBinding.ReliableSession.InactivityTimeout = new TimeSpan(0, 0, 10);
-
-            //ServiceThrottlingBehavior comportamientoDeconcurrenciaDelServicio = chatHost.Description.Behaviors.Find<ServiceThrottlingBehavior>();
-
-            //if (comportamientoDeconcurrenciaDelServicio == null)
-            //{
-            //    comportamientoDeconcurrenciaDelServicio = new ServiceThrottlingBehavior();
-            //    comportamientoDeconcurrenciaDelServicio.MaxConcurrentCalls = LLAMADAS_SIMULTANEAS_PERMITIDAS;
-            //    comportamientoDeconcurrenciaDelServicio.MaxConcurrentSessions = CONEXIONES_MAXIMAS_PERMITIDAS;
-            //    chatHost.Description.Behaviors.Add(comportamientoDeconcurrenciaDelServicio);
-            //}
-
-            //chatHost.AddServiceEndpoint(typeof(GameChatService.IChatService), tcpBinding, "tcp");
-
+            cuentaHost.AddServiceEndpoint(typeof(ICuentaService), binding, String.Empty);
             ServiceMetadataBehavior comportamientoDelaMetadata = new ServiceMetadataBehavior();
             comportamientoDelaMetadata.HttpGetEnabled = true;
-            chatHost.Description.Behaviors.Add(comportamientoDelaMetadata);
-
-            //chatHost.AddServiceEndpoint(typeof(IMetadataExchange), MetadataExchangeBindings.CreateMexTcpBinding(), "net.tcp://" + direccionHttp
-            //    + ":" + puertoHttp + direccionMetadatos);
-
+            cuentaHost.Description.Behaviors.Add(comportamientoDelaMetadata);
             try
             {
                 cuentaHost.Closed += hostCuentaOnClosed;
                 cuentaHost.Open();
-                chatHost.Closed += hostChatOnClosed;
-                chatHost.Open();
             }
             catch (Exception excepcion)
             {
-                lEstado.Content = excepcion.Message;
+                lEstadoServicioCuenta.Content = excepcion.Message;
             }
             finally
             {
-                if (cuentaHost.State == CommunicationState.Opened && chatHost.State == CommunicationState.Opened)
+                if (cuentaHost.State == CommunicationState.Opened)
                 {
-                    lEstado.Content = "Activo";
-                    bDetener.IsEnabled = true;
+                    lEstadoServicioCuenta.Content = "Activo";
+                    bDetenerServicioCuenta.IsEnabled = true;
                 }
             }
-
-
         }
 
         private void hostCuentaOnClosed(Object sender, EventArgs e)
         {
-            lEstado.Content += " Cerrada cuenta";
+            lEstadoServicioCuenta.Content += "Servicio cerrado";
         }
 
         private void hostChatOnClosed(Object sender, EventArgs e)
         {
-            lEstado.Content += ", Cerrada chat";
+            lEstadoServicioChat.Content += "Servicio cerrado";
         }
 
-        private void BDetener_Click(object sender, RoutedEventArgs e)
+        private void hostSesionOnClosed(Object sender, EventArgs e)
         {
-            if (cuentaHost != null && chatHost != null )
+            lEstadoServicioSesion.Content += "Servicio cerrado";
+        }
+
+        private void BDetenerServicioChat_Click(object sender, RoutedEventArgs e)
+        {
+            if (chatHost != null )
             {
                 try
                 {
-                    cuentaHost.Close();
                     chatHost.Close();
                 }
                 catch (Exception excepcion)
                 {
-                    lEstado.Content = excepcion.Message;
+                    lEstadoServicioChat.Content = excepcion.Message;
                 }
                 finally
                 {
-                    if (cuentaHost.State == CommunicationState.Closed && chatHost.State == CommunicationState.Closed)
+                    if (chatHost.State == CommunicationState.Closed)
                     {
-                        lEstado.Content = "Cerrada";
-                        bIniciar.IsEnabled = true;
-                        bDetener.IsEnabled = false;
+                        lEstadoServicioChat.Content = "Cerrada";
+                        bIniciarServicioChat.IsEnabled = true;
+                        bDetenerServicioChat.IsEnabled = false;
+                    }
+                }
+            }
+        }
+
+        private void BIniciarServicioChat_Click(object sender, RoutedEventArgs e)
+        {
+            bIniciarServicioChat.IsEnabled = false;
+            Uri[] uris = new Uri[2];
+            uris[0] = new Uri(ENDPOINT_TCP_SERVICIO_CHAT);
+            uris[1] = new Uri(ENDPOINT_HTTP_SERVICIO_CHAT);
+            IChatService servicioDeChat = new ChatService();
+            chatHost = new ServiceHost(servicioDeChat, uris);
+            NetTcpBinding binding = new NetTcpBinding(SecurityMode.None);
+            chatHost.AddServiceEndpoint(typeof(IChatService), binding, String.Empty);
+            ServiceMetadataBehavior comportamientoDelaMetadata = new ServiceMetadataBehavior();
+            comportamientoDelaMetadata.HttpGetEnabled = true;
+            chatHost.Description.Behaviors.Add(comportamientoDelaMetadata);
+            try
+            {
+                chatHost.Closed += hostChatOnClosed;
+                chatHost.Open();
+            }
+            catch (Exception excepcionDelServicio)
+            {
+                lEstadoServicioChat.Content = excepcionDelServicio.Message;
+            }
+            finally
+            {
+                if (chatHost.State == CommunicationState.Opened)
+                {
+                    lEstadoServicioChat.Content = "Activo";
+                    bDetenerServicioChat.IsEnabled = true;
+                }
+            }
+        }
+
+        private void BDetenerServicioCuenta_Click(object sender, RoutedEventArgs e)
+        {
+            if (cuentaHost != null)
+            {
+                try
+                {
+                    cuentaHost.Close();
+                }
+                catch (Exception excepcion)
+                {
+                    lEstadoServicioCuenta.Content = excepcion.Message;
+                }
+                finally
+                {
+                    if (cuentaHost.State == CommunicationState.Closed)
+                    {
+                        lEstadoServicioCuenta.Content = "Cerrada";
+                        bIniciarServicioCuenta.IsEnabled = true;
+                        bDetenerServicioCuenta.IsEnabled = false;
+                    }
+                }
+            }
+        }
+
+        private void BIniciarServicioSesion_Click(object sender, RoutedEventArgs e)
+        {
+            bIniciarServicioSesion.IsEnabled = false;
+            Uri[] uris = new Uri[2];
+            uris[0] = new Uri(ENDPOINT_TCP_SERVICIO_SESION);
+            uris[1] = new Uri(ENDPOINT_HTTP_SERVICIO_SESION);
+            ISessionService servicioDeSesion = new SessionService.Servicio.SessionService();
+            sesionHost = new ServiceHost(servicioDeSesion, uris);
+            NetTcpBinding binding = new NetTcpBinding(SecurityMode.None);
+            sesionHost.AddServiceEndpoint(typeof(ISessionService), binding, String.Empty);
+            ServiceMetadataBehavior comportamientoDelaMetadata = new ServiceMetadataBehavior();
+            comportamientoDelaMetadata.HttpGetEnabled = true;
+            sesionHost.Description.Behaviors.Add(comportamientoDelaMetadata);
+            try
+            {
+                sesionHost.Closed += hostSesionOnClosed;
+                sesionHost.Open();
+            }
+            catch (Exception excepcionDelServicio)
+            {
+                throw;
+                //lEstadoServicioSesion.Content = excepcionDelServicio.Message;
+            }
+            finally
+            {
+                if (sesionHost.State == CommunicationState.Opened)
+                {
+                    lEstadoServicioSesion.Content = "Activo";
+                    bDetenerServicioSesion.IsEnabled = true;
+                }
+            }
+        }
+
+        private void BDetenerServicioSesion_Click(object sender, RoutedEventArgs e)
+        {
+            if (sesionHost != null)
+            {
+                try
+                {
+                    sesionHost.Close();
+                }
+                catch (Exception excepcion)
+                {
+                    lEstadoServicioSesion.Content = excepcion.Message;
+                }
+                finally
+                {
+                    if (sesionHost.State == CommunicationState.Closed)
+                    {
+                        lEstadoServicioSesion.Content = "Cerrada";
+                        bIniciarServicioSesion.IsEnabled = true;
+                        bDetenerServicioSesion.IsEnabled = false;
                     }
                 }
             }

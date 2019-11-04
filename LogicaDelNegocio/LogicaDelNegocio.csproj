@@ -43,6 +43,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -58,6 +59,7 @@
     <Compile Include="Modelo\PersonajeCorredorModel.cs" />
     <Compile Include="Modelo\UsuarioModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\SessionManager.cs" />
     <Compile Include="Util\ClienteCorreo.cs" />
     <Compile Include="Util\Encriptador.cs" />
     <Compile Include="Util\GeneradorCodigo.cs" />

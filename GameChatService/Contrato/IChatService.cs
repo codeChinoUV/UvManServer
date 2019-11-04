@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.Text;
 using GameChatService.Dominio;
+using LogicaDelNegocio.Modelo;
 
 namespace GameChatService
 {
@@ -14,19 +15,19 @@ namespace GameChatService
     public interface IChatService
     {
         [OperationContract(IsInitiating = true)]
-        bool Conectar(Cuenta cuenta);
+        bool Conectar(CuentaModel cuenta);
 
         [OperationContract]
-        List<Cuenta> ObtenerCuentasConectadas();
+        List<CuentaModel> ObtenerCuentasConectadas();
 
         [OperationContract(IsOneWay = true)]
         void EnviarMensaje(Message mensaje);
 
         [OperationContract(IsOneWay = true)]
-        void EstaEscribiendo(Cuenta cuenta);
+        void EstaEscribiendo(String cuenta);
 
         [OperationContract(IsOneWay = true, IsTerminating = true)]
-        void Desconectar(Cuenta cuenta);
+        void Desconectar(CuentaModel cuenta);
     }
 
     

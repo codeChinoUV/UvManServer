@@ -56,8 +56,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contrato\ICuentaService.cs" />
-    <Compile Include="Dominio\Cuenta.cs" />
-    <Compile Include="Dominio\Usuario.cs" />
+    <Compile Include="Dominio\Enum\EnumEstadoRegistro.cs" />
+    <Compile Include="Dominio\Enum\EnumEstadoVerificarCuenta.cs" />
     <Compile Include="Servicio\CuentaService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -72,6 +72,10 @@
     <ProjectReference Include="..\LogicaDelNegocio\LogicaDelNegocio.csproj">
       <Project>{2a05c103-70cc-4289-ab3a-297e467df17b}</Project>
       <Name>LogicaDelNegocio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SessionService\SessionService.csproj">
+      <Project>{E4408397-E6E0-4296-9483-B0406AC90CA6}</Project>
+      <Name>SessionService</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

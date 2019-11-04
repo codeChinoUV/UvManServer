@@ -5,24 +5,25 @@ using System.Linq;
 using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
+using LogicaDelNegocio.Modelo;
 
 namespace GameChatService.Contrato
 {
     public interface IChatServiceCallback
     {
         [OperationContract(IsOneWay = true)]
-        void RefrescarCuentasConectadas(List<Cuenta> cuentasConectadas);
+        void RefrescarCuentasConectadas(List<CuentaModel> cuentasConectadas);
 
         [OperationContract(IsOneWay = true)]
         void RecibirMensaje(Message mensaje);
 
         [OperationContract(IsOneWay = true)]
-        void EstaEscribiendoCallback(Cuenta cuenta);
+        void EstaEscribiendoCallback(String cuenta);
 
         [OperationContract(IsOneWay = true)]
-        void Unirse(Cuenta cuenta);
+        void Unirse(CuentaModel cuenta);
 
         [OperationContract(IsOneWay = true)]
-        void Abandonar(Cuenta cuenta);
+        void Abandonar(CuentaModel cuenta);
     }
 }

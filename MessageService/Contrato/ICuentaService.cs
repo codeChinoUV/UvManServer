@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ServiceModel;
-using CuentaService.Dominio;
+using LogicaDelNegocio.Modelo;
+using MessageService.Dominio.Enum;
 
 namespace CuentaService.Contrato
 {
@@ -12,9 +13,9 @@ namespace CuentaService.Contrato
     public interface ICuentaService
     {
         [OperationContract]
-        int CheckIn(Cuenta newUser);
+        EnumEstadoRegistro CheckIn(CuentaModel newUser);
 
         [OperationContract]
-        int VerifyAccount(String code, Cuenta cuenta);
+        EnumEstadoVerificarCuenta VerifyAccount(String code, CuentaModel cuenta);
     }
 }
