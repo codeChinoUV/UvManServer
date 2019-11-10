@@ -8,13 +8,25 @@ using LogicaDelNegocio.DataAccess.Interfaces;
 using System.Data.Entity.Core;
 using LogicaDelNegocio.Util;
 using System.Diagnostics;
+using System.Threading;
 
 namespace SessionService.Servicio
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single,
-    ConcurrencyMode = ConcurrencyMode.Multiple)]
+    ConcurrencyMode = ConcurrencyMode.Multiple,
+    UseSynchronizationContext = false)]
+
     public class SessionService : ISessionService
     {
+
+        private object ObjetoDeSincronizacion = new object();
+
+        public ISessionServiceCallback actualCallback {
+            get {
+                return OperationContext.Current.GetCallbackChannel<ISessionServiceCallback>();
+            }
+        }
+
         /// <summary>
         /// Termina la sesion de una ceunta en el servidor
         /// </summary>
@@ -41,7 +53,8 @@ namespace SessionService.Servicio
                 {
                     CuentaModel cuentaCompleta = persistenciaCuenta.RecuperarCuenta(cuenta);
                     SessionManager manejadorDeSesiones = SessionManager.GetSessionManager();
-                    if (manejadorDeSesiones.AgregarCuentaLogeada(cuentaCompleta))
+                    Thread hiloDeSeguimientoDeCliente = SeguirEstadoDelCliente(cuentaCompleta,actualCallback);
+                    if (manejadorDeSesiones.AgregarCuentaLogeada(cuentaCompleta, null))
                     {
                         return EnumEstadoInicioSesion.InicioSesionCorrecto;
                     }
@@ -51,10 +64,65 @@ namespace SessionService.Servicio
                     }
                 }
                 return (EnumEstadoInicioSesion) existeCuenta ;
-            }catch(EntityException ex)
+            }catch(EntityException)
             {
-                //throw;
                 return EnumEstadoInicioSesion.ErrorBaseDatos;
+            }
+        }
+
+        /// <summary>
+        /// Crea un hilo para seguir el estado del cliente
+        /// </summary>
+        /// <param name="cuentaASeguir">CuentaModel</param>
+        /// <param name="callbackActual">ISessionService</param>
+        /// <returns>Thread</returns>
+        private Thread SeguirEstadoDelCliente(CuentaModel cuentaASeguir, ISessionServiceCallback callbackActual)
+        {
+            EstadoCliente estadoCliente = new EstadoCliente(actualCallback,cuentaASeguir);
+            Thread hiloEstadoDelCliente = new Thread(new ThreadStart(estadoCliente.ChecarEstadoDelCliente));
+            hiloEstadoDelCliente.Start();
+            return hiloEstadoDelCliente;
+        }
+
+    }
+
+    class EstadoCliente
+    {
+        
+        private ISessionServiceCallback actualCallback;
+        private CuentaModel cuentaSiguiendo;
+        private int TIEMPO_ESPERA_CHECAR_CLIENTE = 2500;
+
+        public EstadoCliente(ISessionServiceCallback actualCallback, CuentaModel cuentaSiguiendo)
+        {
+            this.actualCallback = actualCallback;
+            this.cuentaSiguiendo = cuentaSiguiendo;
+        }
+
+        public void ChecarEstadoDelCliente()
+        {
+            SessionManager manejadorDeSesiones = SessionManager.GetSessionManager();
+            Thread.Sleep(TIEMPO_ESPERA_CHECAR_CLIENTE);
+            if (actualCallback != null)
+            {
+                try
+                {
+                    Boolean estaVivo = false;
+                    do
+                    {
+                        estaVivo = actualCallback.EstaVivo();
+                        Debug.WriteLine("Regreso true despues de un segundo " + cuentaSiguiendo.nombreUsuario);
+                        Thread.Sleep(TIEMPO_ESPERA_CHECAR_CLIENTE);
+                    } while (estaVivo);
+                }
+                catch (ObjectDisposedException)
+                {
+                    manejadorDeSesiones.QuitarCuentaLogeada(cuentaSiguiendo);
+                }
+                catch (CommunicationException)
+                {
+                    manejadorDeSesiones.QuitarCuentaLogeada(cuentaSiguiendo);
+                }
             }
         }
     }

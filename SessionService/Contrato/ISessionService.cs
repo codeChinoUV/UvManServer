@@ -10,15 +10,16 @@ using LogicaDelNegocio.Modelo;
 
 namespace SessionService.Contrato
 {
-    
-    [ServiceContract]
+
+    [ServiceContract(CallbackContract = typeof(ISessionServiceCallback), SessionMode = SessionMode.Required)]
     public interface ISessionService
     {
-        [OperationContract]
+        [OperationContract(IsInitiating = true)]
         EnumEstadoInicioSesion IniciarSesion(CuentaModel cuenta);
 
-        [OperationContract]
+        [OperationContract(IsTerminating = true)]
         void CerrarSesion(CuentaModel cuenta);
+        
         
     }
 }
