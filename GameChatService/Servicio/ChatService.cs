@@ -3,10 +3,7 @@ using GameChatService.Dominio;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.ServiceModel;
-using System.Text;
-using System.Threading.Tasks;
 using LogicaDelNegocio.Modelo;
 using LogicaDelNegocio.Util;
 
@@ -19,8 +16,8 @@ namespace GameChatService.Servicio
     public class ChatService:IChatService
     {
         Dictionary<CuentaModel, IChatServiceCallback> cuentasConetadas = new Dictionary<CuentaModel, IChatServiceCallback>();
-        List<CuentaModel> cuentas = new List<CuentaModel>();
-        Object sincronizarObjeto = new object();
+        readonly List<CuentaModel> cuentas = new List<CuentaModel>();
+        readonly Object sincronizarObjeto = new object();
 
         public IChatServiceCallback ActualCallback {
             get {
@@ -57,6 +54,7 @@ namespace GameChatService.Servicio
             SessionManager manejadorDeSesiones = SessionManager.GetSessionManager();
             if (ActualCallback != null)
             {
+                manejadorDeSesiones.UsuarioDesconectado += CerroSesionGlobal;
                 if (!cuentasConetadas.ContainsValue(ActualCallback) && !ExisteCuenta(cuenta.nombreUsuario) && 
                     manejadorDeSesiones.VerificarCuentaLogeada(cuenta))
                 {
@@ -88,21 +86,18 @@ namespace GameChatService.Servicio
         /// <param name="cuenta">Cuenta</param>
         public void Desconectar(CuentaModel cuenta)
         {
-            foreach (CuentaModel cuentaClave in cuentasConetadas.Keys)
+            CuentaModel cuentaClave = ObtenerCuentaEnElDiccionario(cuenta);
+            lock (sincronizarObjeto)
             {
-                if (cuentaClave.nombreUsuario == cuentaClave.nombreUsuario)
+                if(cuentaClave != null)
                 {
-                    lock (sincronizarObjeto)
-                    {
-                        cuentasConetadas.Remove(cuentaClave);
-                        cuentas.Remove(cuentaClave);
-                        foreach (IChatServiceCallback callback in cuentasConetadas.Values)
-                        {
-                            callback.RefrescarCuentasConectadas(cuentas);
-                            callback.Abandonar(cuenta);
-                        }
-                    }
-                    return;
+                    cuentasConetadas.Remove(cuentaClave);
+                    cuentas.Remove(cuentaClave);
+                }
+                foreach (IChatServiceCallback callback in cuentasConetadas.Values)
+                {
+                    callback.RefrescarCuentasConectadas(cuentas);
+                    callback.Abandonar(cuenta);
                 }
             }
         }
@@ -163,6 +158,35 @@ namespace GameChatService.Servicio
                 }
             }
             return true;
+        }
+
+        /// <summary>
+        /// Cierra la sesion en el chat si se cerro sesion global y no se cerro en el chat
+        /// </summary>
+        /// <param name="cuenta">CuentaModel</param>
+        private void CerroSesionGlobal(CuentaModel cuenta)
+        {
+            if (ExisteCuenta(cuenta.nombreUsuario))
+            {
+                Desconectar(cuenta);
+            }
+        }
+
+        /// <summary>
+        /// Recupera del diccionario de listas conectadas la cuenta que tenga el mismo nombre que la parcial que se paso por parametro
+        /// </summary>
+        /// <param name="parcial">CuentaModel</param>
+        /// <returns>CuentaModel</returns>
+        private CuentaModel ObtenerCuentaEnElDiccionario(CuentaModel parcial)
+        {
+            foreach (CuentaModel cuentaClave in cuentasConetadas.Keys)
+            {
+                if (cuentaClave.nombreUsuario == parcial.nombreUsuario)
+                {
+                    return cuentaClave;
+                }
+            }
+            return null;
         }
     }
 }

@@ -2,18 +2,18 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace LogicaDelNegocio.Util
 {
     public sealed class SessionManager
     {
-        private static List<CuentaModel> cuentasLogeadas = new List<CuentaModel>();
-        private static Dictionary<CuentaModel, Thread> cuentasLogeadasPrueba = new Dictionary<CuentaModel, Thread>();
+        private static Dictionary<CuentaModel, Thread> cuentasLogeadas = new Dictionary<CuentaModel, Thread>();
         private static SessionManager manejadorDeSesiones = new SessionManager();
+        public delegate void NotificacionSobreUsuario(CuentaModel cuenta);
+        public event NotificacionSobreUsuario UsuarioDesconectado;
+        public event NotificacionSobreUsuario UsuarioConectado;
+
 
 
         private SessionManager()
@@ -37,14 +37,15 @@ namespace LogicaDelNegocio.Util
         /// <returns>Boolean</returns>
         public Boolean AgregarCuentaLogeada(CuentaModel cuenta, Thread hiloDeSeguimientoDelCliente)
         {
-            foreach(CuentaModel cuentaLogeada in cuentasLogeadas)
+            foreach(CuentaModel cuentaLogeada in cuentasLogeadas.Keys)
             {
                 if(cuentaLogeada.nombreUsuario == cuenta.nombreUsuario)
                 {
                     return false;
                 }
             }
-            cuentasLogeadasPrueba.Add(cuenta, hiloDeSeguimientoDelCliente);
+            UsuarioConectado?.Invoke(cuenta);
+            cuentasLogeadas.Add(cuenta, hiloDeSeguimientoDelCliente);
             return true;
         }
         
@@ -55,14 +56,25 @@ namespace LogicaDelNegocio.Util
         /// <param name="cuenta">CuentaModel</param>
         public void QuitarCuentaLogeada(CuentaModel cuenta)
         {
-            Thread hiloDeSeguimientoDelCliente = cuentasLogeadasPrueba[cuenta];
-            if(hiloDeSeguimientoDelCliente != null)
+            CuentaModel cuentaActual = null;
+            foreach(CuentaModel cuentaEnElDiccionario in cuentasLogeadas.Keys)
             {
-                hiloDeSeguimientoDelCliente.Abort();
+                if(cuentaEnElDiccionario.nombreUsuario == cuenta.nombreUsuario)
+                {
+                    cuentaActual = cuentaEnElDiccionario;
+                }
             }
-            cuentasLogeadas.Remove(cuenta);
-            Debug.WriteLine("Se ha quitado el cleinte {0} de la sesion", cuenta.nombreUsuario);
-
+            if(cuentaActual != null)
+            {
+                Thread hiloDeSeguimientoDelCliente = cuentasLogeadas[cuentaActual];
+                if (hiloDeSeguimientoDelCliente != null)
+                {
+                    hiloDeSeguimientoDelCliente.Abort();
+                }
+                cuentasLogeadas.Remove(cuentaActual);
+                UsuarioDesconectado?.Invoke(cuenta);
+                Debug.WriteLine("Se ha quitado el cleinte {0} de la sesion", cuenta.nombreUsuario);
+            }
         }
 
 
@@ -73,7 +85,7 @@ namespace LogicaDelNegocio.Util
         /// <returns>Boolean</returns>
         public Boolean VerificarCuentaLogeada(CuentaModel cuenta)
         {
-            foreach(CuentaModel cuentaLogeada in cuentasLogeadas)
+            foreach(CuentaModel cuentaLogeada in cuentasLogeadas.Keys)
             {
                 if(cuentaLogeada.nombreUsuario == cuenta.nombreUsuario)
                 {

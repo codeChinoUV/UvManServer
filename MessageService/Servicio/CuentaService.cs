@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.ServiceModel;
-using System.Text;
-using System.Threading.Tasks;
-using LogicaDelNegocio;
 using LogicaDelNegocio.Util;
 using LogicaDelNegocio.DataAccess.Interfaces;
 using LogicaDelNegocio.DataAccess;
 using System.Data.Entity.Core;
 using LogicaDelNegocio.Modelo;
 using CuentaService.Contrato;
-using SessionService.Dominio.Enum;
 using MessageService.Dominio.Enum;
 
 namespace CuentaService.Servicio
@@ -29,14 +23,14 @@ namespace CuentaService.Servicio
         /// </summary>
         /// <param name="newUser">CuentaModel</param>
         /// <returns>EnumEstadoRegistro</returns>
-        public EnumEstadoRegistro CheckIn(CuentaModel nuevaCuenta)
+        public EnumEstadoRegistro CheckIn(CuentaModel newUser)
         {
             EnumEstadoRegistro estadoDelRegistro = EnumEstadoRegistro.UsuarioExistente;
-            if (nuevaCuenta != null)
+            if (newUser != null)
             {
                 try
                 {
-                    CuentaModel cuentaAlmacenda = persistenciaCuenta.Registrarse(nuevaCuenta);
+                    CuentaModel cuentaAlmacenda = persistenciaCuenta.Registrarse(newUser);
                     if (cuentaAlmacenda != null)
                     {
                         EnviarCorreoDeVerificacion(cuentaAlmacenda);

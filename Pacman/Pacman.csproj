@@ -118,6 +118,10 @@
       <Project>{6357d85b-3649-4ec8-81e6-179714d20f03}</Project>
       <Name>GameChatService</Name>
     </ProjectReference>
+    <ProjectReference Include="..\LogicaDelNegocio\LogicaDelNegocio.csproj">
+      <Project>{2A05C103-70CC-4289-AB3A-297E467DF17B}</Project>
+      <Name>LogicaDelNegocio</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MessageService\CuentaService.csproj">
       <Project>{0f775098-e0a2-4e90-9b24-79c61dccc8cd}</Project>
       <Name>CuentaService</Name>

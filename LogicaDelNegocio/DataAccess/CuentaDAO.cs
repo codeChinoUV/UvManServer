@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Data.Entity.Core;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LogicaDelNegocio.DataAccess.Interfaces;
 using LogicaDelNegocio.Modelo;
 using AccesoDatos;
 using LogicaDelNegocio.Util;
-using System.Data.Entity.Validation;
 using System.Diagnostics;
 
 namespace LogicaDelNegocio.DataAccess
@@ -49,29 +46,29 @@ namespace LogicaDelNegocio.DataAccess
         /// <summary>
         /// Verifica si las credenciales ingresadas son validas para la cuenta ingresada
         /// </summary>
-        /// <param name="cuentaLogIn">CuentaModel</param>
+        /// <param name="cuenta">CuentaModel</param>
         /// <returns>1 si las credenciales son validas, 0 si no, -1 si la cuenta no esta verificada</returns>
-        public int IniciarSesion(CuentaModel cuentaLogIn)
+        public int IniciarSesion(CuentaModel cuenta)
         {
             try
             {
                 using (PersistenciaContainer persistencia = new PersistenciaContainer())
                 {
                     int loginValido = 0;
-                    cuentaLogIn.contrasena = Encriptador.ComputeSha256Hash(cuentaLogIn.contrasena);
-                    Debug.WriteLine(cuentaLogIn.contrasena);
+                    cuenta.contrasena = Encriptador.ComputeSha256Hash(cuenta.contrasena);
+                    Debug.WriteLine(cuenta.contrasena);
                     
 
                     int cuentaExistente = persistencia.CuentaSet.Where
-                        (cuenta => cuenta.Usuario == cuentaLogIn.nombreUsuario
-                        && cuenta.Password == cuentaLogIn.contrasena).Count();
+                        (cuentaEnDB => cuentaEnDB.Usuario == cuenta.nombreUsuario
+                        && cuentaEnDB.Password == cuenta.contrasena).Count();
                     //Cuenta cuentaRecuperada = persistencia.CuentaSet.Where(cuenta => cuenta.Usuario == cuentaLogIn.nombreUsuario).FirstOrDefault();
                     //Debug.WriteLine(cuentaRecuperada.Password);
 
                     if (cuentaExistente == 1)
                     {
-                        if (persistencia.CuentaSet.Where(cuenta => cuenta.Usuario == cuentaLogIn.nombreUsuario
-                        && cuenta.Password == cuentaLogIn.contrasena && cuenta.Valida).Count() == 1)
+                        if (persistencia.CuentaSet.Where(cuentaEnDB => cuentaEnDB.Usuario == cuenta.nombreUsuario
+                        && cuentaEnDB.Password == cuenta.contrasena && cuentaEnDB.Valida).Count() == 1)
                         {
                             loginValido = 1;
                         }

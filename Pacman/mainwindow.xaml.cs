@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Description;
 using System.Windows;
 using GameChatService;
 using GameChatService.Servicio;
 using CuentaService.Contrato;
-using CuentaService.Servicio;
 using SessionService.Contrato;
-using System.Windows.Controls;
+using System.Net;
+using LogicaDelNegocio.Modelo;
+using LogicaDelNegocio.Util;
+using System.Threading;
 
 namespace Pacman
 {
@@ -21,23 +22,61 @@ namespace Pacman
         private ServiceHost cuentaHost;
         private ServiceHost chatHost;
         private ServiceHost sesionHost;
+        private String DireccionIP;
         private String ENDPOINT_TCP_SERVICIO_CHAT = "net.tcp://localhost:8192/ChatService";
         private String ENDPOINT_HTTP_SERVICIO_CHAT = "http://localhost:8182/ChatService";
         private String ENDPOINT_TCP_SERVICIO_CUENTA = "net.tcp://localhost:8092/CuentaService";
         private String ENDPOINT_HTTP_SERVICIO_CUENTA = "http://localhost:8082/CuentaService";
         private String ENDPOINT_TCP_SERVICIO_SESION = "net.tcp://localhost:7972/SessionService";
         private String ENDPOINT_HTTP_SERVICIO_SESION = "http://localhost:7982/SessionService";
+        public List<CuentaModel> cuentasConectadas = new List<CuentaModel>();
+        private SessionManager manejadorDesesiones = SessionManager.GetSessionManager();
 
-
-        public MainWindow()
+        private void CargarUsuariosConectados()
         {
-            InitializeComponent();
+            DGUsuariosConectados.ItemsSource = null;
+            DGUsuariosConectados.ItemsSource = cuentasConectadas;
+        }
+
+        private void ObtenerDireccionIpLocal()
+        {
+            IPHostEntry host;
+            host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily.ToString() == "InterNetwork")
+                {
+                    DireccionIP = ip.ToString();
+                }
+            }
+        }
+
+        private void MostrarDireccionesDeServicios()
+        {
             lDireccionIpServicioChat.Text = ENDPOINT_TCP_SERVICIO_CHAT;
             lDireccionIpServicioCuenta.Text = ENDPOINT_TCP_SERVICIO_CUENTA;
             lDireccionIpServicioSesion.Text = ENDPOINT_TCP_SERVICIO_SESION;
+            lDireccionIp.Content = DireccionIP;
         }
 
+        private void SuscribirseAEscuchaDeServicioDeSession()
+        {
+            manejadorDesesiones.UsuarioConectado += NuevoUsuarioEnSession;
+            manejadorDesesiones.UsuarioDesconectado += UsuarioDejoSession;
+        }
 
+        public MainWindow()
+        {
+            cuentasConectadas.Add(new CuentaModel()
+            {
+                nombreUsuario = "chino"
+            });
+            InitializeComponent();
+            ObtenerDireccionIpLocal();
+            CargarUsuariosConectados();
+            MostrarDireccionesDeServicios();
+            SuscribirseAEscuchaDeServicioDeSession();
+        }
 
         private void BIniciarServicioCuenta_Click(object sender, RoutedEventArgs e)
         {
@@ -186,8 +225,7 @@ namespace Pacman
             }
             catch (Exception excepcionDelServicio)
             {
-                throw;
-                //lEstadoServicioSesion.Content = excepcionDelServicio.Message;
+                lEstadoServicioSesion.Content = excepcionDelServicio.Message;
             }
             finally
             {
@@ -222,5 +260,18 @@ namespace Pacman
                 }
             }
         }
+        
+        private void UsuarioDejoSession(CuentaModel cuenta)
+        {
+            cuentasConectadas.Remove(cuenta);
+            Dispatcher.BeginInvoke(new ThreadStart(CargarUsuariosConectados));
+        }
+   
+        private void NuevoUsuarioEnSession(CuentaModel cuenta)
+        {
+            cuentasConectadas.Add(cuenta);
+            Dispatcher.BeginInvoke(new ThreadStart(CargarUsuariosConectados));
+        }
+
     }
 }
