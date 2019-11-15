@@ -8,10 +8,10 @@ namespace GameChatService.Dominio
     public class Message
     {
         [DataMember]
-        public CuentaModel remitente { get; set; }
+        public CuentaModel Remitente { get; set; }
         [DataMember]
-        public String mensaje { get; set; }
+        public String Mensaje { get; set; }
         [DataMember]
-        public DateTime horaEnvio { get; set; }
+        public DateTime HoraEnvio { get; set; }
     }
 }

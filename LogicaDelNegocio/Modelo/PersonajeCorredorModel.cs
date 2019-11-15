@@ -10,17 +10,13 @@ namespace LogicaDelNegocio.Modelo
     public class PersonajeCorredorModel
     {
         [DataMember]
-        public double velocidad { get; set; }
+        public double Velocidad { get; set; }
         [DataMember]
-        public String nombre { get; set; }
+        public String Nombre { get; set; }
         [DataMember]
-        public String poder { get; set; }
+        public String Poder { get; set; }
         [DataMember]
-        public int precio { get; set; }
+        public int Precio { get; set; }
 
-        public PersonajeCorredorModel()
-        {
-            velocidad = 0.2;
-        }
     }
 }

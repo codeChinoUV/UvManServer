@@ -7,7 +7,6 @@ using LogicaDelNegocio.DataAccess;
 using LogicaDelNegocio.DataAccess.Interfaces;
 using System.Data.Entity.Core;
 using LogicaDelNegocio.Util;
-using System.Diagnostics;
 using System.Threading;
 
 namespace SessionService.Servicio
@@ -21,7 +20,7 @@ namespace SessionService.Servicio
 
         private object ObjetoDeSincronizacion = new object();
 
-        public ISessionServiceCallback actualCallback {
+        public ISessionServiceCallback ActualCallback {
             get {
                 return OperationContext.Current.GetCallbackChannel<ISessionServiceCallback>();
             }
@@ -30,31 +29,30 @@ namespace SessionService.Servicio
         /// <summary>
         /// Termina la sesion de una ceunta en el servidor
         /// </summary>
-        /// <param name="cuenta"></param>
-        public void CerrarSesion(CuentaModel cuenta)
+        /// <param name="Cuenta"></param>
+        public void CerrarSesion(CuentaModel Cuenta)
         {
-            SessionManager manejadorDeSesiones = SessionManager.GetSessionManager();
-            manejadorDeSesiones.QuitarCuentaLogeada(cuenta);
+            SessionManager ManejadorDeSesiones = SessionManager.GetSessionManager();
+            ManejadorDeSesiones.QuitarCuentaLogeada(Cuenta);
         }
 
         /// <summary>
         /// Inicia sesion en el servidor si las credenciales pasadas en cuenta son validas
         /// </summary>
-        /// <param name="cuenta"></param>
+        /// <param name="Cuenta"></param>
         /// <returns>EnumEstadoInicioSesion</returns>
-        public EnumEstadoInicioSesion IniciarSesion(CuentaModel cuenta)
+        public EnumEstadoInicioSesion IniciarSesion(CuentaModel Cuenta)
         {
-            ICuentaDAO persistenciaCuenta = new CuentaDAO();
-            Debug.WriteLine(cuenta.nombreUsuario);
+            ICuentaDAO PersistenciaCuenta = new CuentaDAO();
             try
             {
-                int existeCuenta = persistenciaCuenta.IniciarSesion(cuenta);
-                if (existeCuenta == 1)
+                int ExisteCuenta = PersistenciaCuenta.IniciarSesion(Cuenta);
+                if (ExisteCuenta == 1)
                 {
-                    CuentaModel cuentaCompleta = persistenciaCuenta.RecuperarCuenta(cuenta);
-                    SessionManager manejadorDeSesiones = SessionManager.GetSessionManager();
-                    Thread hiloDeSeguimientoDeCliente = SeguirEstadoDelCliente(cuentaCompleta,actualCallback);
-                    if (manejadorDeSesiones.AgregarCuentaLogeada(cuentaCompleta, null))
+                    CuentaModel CuentaCompleta = PersistenciaCuenta.RecuperarCuenta(Cuenta);
+                    SessionManager ManejadorDeSesiones = SessionManager.GetSessionManager();
+                    Thread HiloDeSeguimientoDeCliente = SeguirEstadoDelCliente(CuentaCompleta,ActualCallback);
+                    if (ManejadorDeSesiones.AgregarCuentaLogeada(CuentaCompleta, null))
                     {
                         return EnumEstadoInicioSesion.InicioSesionCorrecto;
                     }
@@ -63,7 +61,7 @@ namespace SessionService.Servicio
                         return EnumEstadoInicioSesion.SeEncuentraLogeada;
                     }
                 }
-                return (EnumEstadoInicioSesion) existeCuenta ;
+                return (EnumEstadoInicioSesion) ExisteCuenta ;
             }catch(EntityException)
             {
                 return EnumEstadoInicioSesion.ErrorBaseDatos;
@@ -73,15 +71,15 @@ namespace SessionService.Servicio
         /// <summary>
         /// Crea un hilo para seguir el estado del cliente
         /// </summary>
-        /// <param name="cuentaASeguir">CuentaModel</param>
-        /// <param name="callbackActual">ISessionService</param>
+        /// <param name="CuentaASeguir">CuentaModel</param>
+        /// <param name="CallbackActual">ISessionService</param>
         /// <returns>Thread</returns>
-        private Thread SeguirEstadoDelCliente(CuentaModel cuentaASeguir, ISessionServiceCallback callbackActual)
+        private Thread SeguirEstadoDelCliente(CuentaModel CuentaASeguir, ISessionServiceCallback CallbackActual)
         {
-            EstadoCliente estadoCliente = new EstadoCliente(actualCallback,cuentaASeguir);
-            Thread hiloEstadoDelCliente = new Thread(new ThreadStart(estadoCliente.ChecarEstadoDelCliente));
-            hiloEstadoDelCliente.Start();
-            return hiloEstadoDelCliente;
+            EstadoCliente EstadoCliente = new EstadoCliente(ActualCallback,CuentaASeguir);
+            Thread HiloEstadoDelCliente = new Thread(new ThreadStart(EstadoCliente.ChecarEstadoDelCliente));
+            HiloEstadoDelCliente.Start();
+            return HiloEstadoDelCliente;
         }
 
     }
@@ -89,39 +87,41 @@ namespace SessionService.Servicio
     class EstadoCliente
     {
         
-        private ISessionServiceCallback actualCallback;
-        private CuentaModel cuentaSiguiendo;
-        private int TIEMPO_ESPERA_CHECAR_CLIENTE = 2500;
+        private ISessionServiceCallback ActualCallback;
+        private CuentaModel CuentaSiguiendo;
+        private const int TIEMPO_ESPERA_CHECAR_CLIENTE = 2500;
 
-        public EstadoCliente(ISessionServiceCallback actualCallback, CuentaModel cuentaSiguiendo)
+        public EstadoCliente(ISessionServiceCallback ActualCallback, CuentaModel CuentaSiguiendo)
         {
-            this.actualCallback = actualCallback;
-            this.cuentaSiguiendo = cuentaSiguiendo;
+            this.ActualCallback = ActualCallback;
+            this.CuentaSiguiendo = CuentaSiguiendo;
         }
 
+        /// <summary>
+        /// Monitorea el estado de un cliente llamado
+        /// </summary>
         public void ChecarEstadoDelCliente()
         {
-            SessionManager manejadorDeSesiones = SessionManager.GetSessionManager();
+            SessionManager ManejadorDeSesiones = SessionManager.GetSessionManager();
             Thread.Sleep(TIEMPO_ESPERA_CHECAR_CLIENTE);
-            if (actualCallback != null)
+            if (ActualCallback != null)
             {
                 try
                 {
-                    Boolean estaVivo = false;
+                    Boolean EstaVivo = false;
                     do
                     {
-                        estaVivo = actualCallback.EstaVivo();
-                        Debug.WriteLine("Regreso true despues de un segundo " + cuentaSiguiendo.nombreUsuario);
+                        EstaVivo = ActualCallback.EstaVivo();
                         Thread.Sleep(TIEMPO_ESPERA_CHECAR_CLIENTE);
-                    } while (estaVivo);
+                    } while (EstaVivo);
                 }
                 catch (ObjectDisposedException)
                 {
-                    manejadorDeSesiones.QuitarCuentaLogeada(cuentaSiguiendo);
+                    ManejadorDeSesiones.QuitarCuentaLogeada(CuentaSiguiendo);
                 }
                 catch (CommunicationException)
                 {
-                    manejadorDeSesiones.QuitarCuentaLogeada(cuentaSiguiendo);
+                    ManejadorDeSesiones.QuitarCuentaLogeada(CuentaSiguiendo);
                 }
             }
         }

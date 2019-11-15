@@ -15,77 +15,78 @@ namespace CuentaService.Servicio
     UseSynchronizationContext = false)]
     public class CuentaService : ICuentaService
     {
-        private ClienteCorreo clienteCorreo = new ClienteCorreo();
-        ICuentaDAO persistenciaCuenta = new CuentaDAO();
+        private ClienteCorreo ClienteCorreo = new ClienteCorreo();
+        ICuentaDAO PersistenciaCuenta = new CuentaDAO();
 
         /// <summary>
         /// Guarda un User en la base de datos si el nombre de usuario no existe en la base de datos.
         /// </summary>
-        /// <param name="newUser">CuentaModel</param>
+        /// <param name="CuentaNueva">CuentaModel</param>
         /// <returns>EnumEstadoRegistro</returns>
-        public EnumEstadoRegistro CheckIn(CuentaModel newUser)
+        public EnumEstadoRegistro Registrarse(CuentaModel CuentaNueva)
         {
-            EnumEstadoRegistro estadoDelRegistro = EnumEstadoRegistro.UsuarioExistente;
-            if (newUser != null)
+            EnumEstadoRegistro EstadoDelRegistro = EnumEstadoRegistro.UsuarioExistente;
+            if (CuentaNueva != null)
             {
                 try
                 {
-                    CuentaModel cuentaAlmacenda = persistenciaCuenta.Registrarse(newUser);
-                    if (cuentaAlmacenda != null)
+                    CuentaModel CuentaAlmacenda = PersistenciaCuenta.Registrarse(CuentaNueva);
+                    if (CuentaAlmacenda != null)
                     {
-                        EnviarCorreoDeVerificacion(cuentaAlmacenda);
-                        estadoDelRegistro = EnumEstadoRegistro.RegistroCorrecto;
+                        EnviarCorreoDeVerificacion(CuentaAlmacenda);
+                        EstadoDelRegistro = EnumEstadoRegistro.RegistroCorrecto;
                     }
                 }
                 catch (EntityException)
                 {
-                    estadoDelRegistro = EnumEstadoRegistro.ErrorEnBaseDatos; 
+                    EstadoDelRegistro = EnumEstadoRegistro.ErrorEnBaseDatos; 
+                    //Enviar detalles de la información
                 }
             }
-            return estadoDelRegistro;
+            return EstadoDelRegistro;
         }
 
         /// <summary>
         /// Verifica si el codigo introducido para la cuenta coincide con el de la cuenta
         /// </summary>
-        /// <param name="code">String</param>
-        /// <param name="cuenta">CuentaModel</param>
+        /// <param name="CodigoDeVerificacion">String</param>
+        /// <param name="CuentaAVerficar">CuentaModel</param>
         /// <returns>EnumEstadoVerificarCuenta</returns>
-        public EnumEstadoVerificarCuenta VerifyAccount(String code, CuentaModel cuenta)
+        public EnumEstadoVerificarCuenta VerificarCuenta(String CodigoDeVerificacion, CuentaModel CuentaAVerficar)
         {
-            EnumEstadoVerificarCuenta estadoVerificacion = EnumEstadoVerificarCuenta.NoCoincideElCodigo;
+            EnumEstadoVerificarCuenta EstadoVerificacion = EnumEstadoVerificarCuenta.NoCoincideElCodigo;
             try
             {
-                CuentaModel cuentaAVerificar = persistenciaCuenta.RecuperarCuenta(cuenta);
-                if (cuentaAVerificar.VerificarCuenta(code))
+                CuentaModel CuentaAVerificarCompleta = PersistenciaCuenta.RecuperarCuenta(CuentaAVerficar);
+                if (CuentaAVerificarCompleta.VerificarCuenta(CodigoDeVerificacion))
                 {
-                    if (persistenciaCuenta.VerificarCuenta(cuentaAVerificar))
+                    if (PersistenciaCuenta.VerificarCuenta(CuentaAVerificarCompleta))
                     {
-                        estadoVerificacion = EnumEstadoVerificarCuenta.VerificadaCorrectamente;
+                        EstadoVerificacion = EnumEstadoVerificarCuenta.VerificadaCorrectamente;
                     }
                     else
                     {
-                        estadoVerificacion = EnumEstadoVerificarCuenta.ErrorEnBaseDatos;
+                        EstadoVerificacion = EnumEstadoVerificarCuenta.ErrorEnBaseDatos;
                     }
                 }
             }
             catch (EntityException)
             {
-                estadoVerificacion = EnumEstadoVerificarCuenta.ErrorEnBaseDatos;
+                EstadoVerificacion = EnumEstadoVerificarCuenta.ErrorEnBaseDatos;
             }
-            return estadoVerificacion;
+            return EstadoVerificacion;
         }
 
         /// <summary>
         /// Envia un correo a la Cuenta con su codigo de verificación
         /// </summary>
-        /// <param name="cuentaAVerificar"></param>
+        /// <param name="CuentaAEnviar"></param>
         /// <returns>Boolean</returns>
-        private Boolean EnviarCorreoDeVerificacion(CuentaModel cuentaAVerificar)
+        private Boolean EnviarCorreoDeVerificacion(CuentaModel CuentaAEnviar)
         {
-            String contenido = ClienteCorreo.GenerarContenidoVerificacion(cuentaAVerificar.codigoVerificacion);
-            String asunto = "Codigo de verificación del correo electronico";
-            return clienteCorreo.EnviarCorreoHtml(cuentaAVerificar.informacionDeUsuario.correo, asunto, contenido);
+            String Contenido = ClienteCorreo.GenerarContenidoVerificacion(CuentaAEnviar.CodigoVerificacion);
+            String Asunto = "Codigo de verificación del correo electronico";
+            return ClienteCorreo.EnviarCorreoHtml(CuentaAEnviar.InformacionDeUsuario.Correo, Asunto, Contenido);
         }
 
 

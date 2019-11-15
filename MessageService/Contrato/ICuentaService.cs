@@ -9,9 +9,9 @@ namespace CuentaService.Contrato
     public interface ICuentaService
     {
         [OperationContract]
-        EnumEstadoRegistro CheckIn(CuentaModel newUser);
+        EnumEstadoRegistro Registrarse(CuentaModel CuentaNueva);
 
         [OperationContract]
-        EnumEstadoVerificarCuenta VerifyAccount(String code, CuentaModel cuenta);
+        EnumEstadoVerificarCuenta VerificarCuenta(String CodigoDeVerificacion, CuentaModel CuentaAVerificar);
     }
 }

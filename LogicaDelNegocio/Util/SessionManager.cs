@@ -39,7 +39,7 @@ namespace LogicaDelNegocio.Util
         {
             foreach(CuentaModel cuentaLogeada in cuentasLogeadas.Keys)
             {
-                if(cuentaLogeada.nombreUsuario == cuenta.nombreUsuario)
+                if(cuentaLogeada.NombreUsuario == cuenta.NombreUsuario)
                 {
                     return false;
                 }
@@ -59,7 +59,7 @@ namespace LogicaDelNegocio.Util
             CuentaModel cuentaActual = null;
             foreach(CuentaModel cuentaEnElDiccionario in cuentasLogeadas.Keys)
             {
-                if(cuentaEnElDiccionario.nombreUsuario == cuenta.nombreUsuario)
+                if(cuentaEnElDiccionario.NombreUsuario == cuenta.NombreUsuario)
                 {
                     cuentaActual = cuentaEnElDiccionario;
                 }
@@ -72,8 +72,8 @@ namespace LogicaDelNegocio.Util
                     hiloDeSeguimientoDelCliente.Abort();
                 }
                 cuentasLogeadas.Remove(cuentaActual);
-                UsuarioDesconectado?.Invoke(cuenta);
-                Debug.WriteLine("Se ha quitado el cleinte {0} de la sesion", cuenta.nombreUsuario);
+                UsuarioDesconectado?.Invoke(cuentaActual);
+                Debug.WriteLine("Se ha quitado el cleinte {0} de la sesion", cuenta.NombreUsuario);
             }
         }
 
@@ -87,7 +87,7 @@ namespace LogicaDelNegocio.Util
         {
             foreach(CuentaModel cuentaLogeada in cuentasLogeadas.Keys)
             {
-                if(cuentaLogeada.nombreUsuario == cuenta.nombreUsuario)
+                if(cuentaLogeada.NombreUsuario == cuenta.NombreUsuario)
                 {
                     return true;
                 }

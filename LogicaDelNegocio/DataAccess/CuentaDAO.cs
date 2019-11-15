@@ -19,67 +19,61 @@ namespace LogicaDelNegocio.DataAccess
         /// <returns>CuentaModel</returns>
         public CuentaModel Registrarse(CuentaModel cuentaNueva)
         {
-            CuentaModel cuentaGuardada = null;
+            CuentaModel CuentaGuardada = null;
             try
             {
-                using (PersistenciaContainer persistencia = new PersistenciaContainer())
+                using (PersistenciaContainer Persistencia = new PersistenciaContainer())
                 {
-                    int usuariosRepetidos = ContarNombreDeUsuariosRepetidos(cuentaNueva.nombreUsuario);
-                    if (usuariosRepetidos == 0)
+                    int UsuariosRepetidos = ContarNombreDeUsuariosRepetidos(cuentaNueva.NombreUsuario);
+                    if (UsuariosRepetidos == 0)
                     {
-                        Cuenta cuentaAGuardar = CrearCuentaAGuadar(cuentaNueva);
-                        cuentaAGuardar.Usuario1 = ConvertirAUsuario(cuentaNueva.informacionDeUsuario);
-                        cuentaAGuardar.Usuario1.Avance = new Avance();
-                        persistencia.CuentaSet.Add(cuentaAGuardar);
-                        persistencia.SaveChanges();
-                        cuentaGuardada =  ConvertirACuentaModel(cuentaAGuardar);
-                        cuentaGuardada.informacionDeUsuario = ConvertirAUsuarioModel(cuentaAGuardar.Usuario1);
+                        Cuenta CuentaAGuardar = CrearCuentaAGuadar(cuentaNueva);
+                        CuentaAGuardar.Usuario1 = ConvertirAUsuario(cuentaNueva.InformacionDeUsuario);
+                        CuentaAGuardar.Usuario1.Avance = new Avance();
+                        Persistencia.CuentaSet.Add(CuentaAGuardar);
+                        Persistencia.SaveChanges();
+                        CuentaGuardada =  ConvertirACuentaModel(CuentaAGuardar);
+                        CuentaGuardada.InformacionDeUsuario = ConvertirAUsuarioModel(CuentaAGuardar.Usuario1);
                     }
                 }
             }catch(EntityException)
             {
                 throw;
             }
-            return cuentaGuardada;
+            return CuentaGuardada;
         }
 
         /// <summary>
         /// Verifica si las credenciales ingresadas son validas para la cuenta ingresada
         /// </summary>
-        /// <param name="cuenta">CuentaModel</param>
+        /// <param name="Cuenta">CuentaModel</param>
         /// <returns>1 si las credenciales son validas, 0 si no, -1 si la cuenta no esta verificada</returns>
-        public int IniciarSesion(CuentaModel cuenta)
+        public int IniciarSesion(CuentaModel Cuenta)
         {
             try
             {
-                using (PersistenciaContainer persistencia = new PersistenciaContainer())
+                using (PersistenciaContainer Persistencia = new PersistenciaContainer())
                 {
-                    int loginValido = 0;
-                    cuenta.contrasena = Encriptador.ComputeSha256Hash(cuenta.contrasena);
-                    Debug.WriteLine(cuenta.contrasena);
-                    
-
-                    int cuentaExistente = persistencia.CuentaSet.Where
-                        (cuentaEnDB => cuentaEnDB.Usuario == cuenta.nombreUsuario
-                        && cuentaEnDB.Password == cuenta.contrasena).Count();
-                    //Cuenta cuentaRecuperada = persistencia.CuentaSet.Where(cuenta => cuenta.Usuario == cuentaLogIn.nombreUsuario).FirstOrDefault();
-                    //Debug.WriteLine(cuentaRecuperada.Password);
-
-                    if (cuentaExistente == 1)
+                    int LoginValido = 0;
+                    Cuenta.Contrasena = Encriptador.ComputeSha256Hash(Cuenta.Contrasena);
+                    int CuentaExistente = Persistencia.CuentaSet.Where
+                        (cuentaEnDB => cuentaEnDB.Usuario == Cuenta.NombreUsuario
+                        && cuentaEnDB.Password == Cuenta.Contrasena).Count();
+                    if (CuentaExistente == 1)
                     {
-                        if (persistencia.CuentaSet.Where(cuentaEnDB => cuentaEnDB.Usuario == cuenta.nombreUsuario
-                        && cuentaEnDB.Password == cuenta.contrasena && cuentaEnDB.Valida).Count() == 1)
+                        if (Persistencia.CuentaSet.Where(cuentaEnDB => cuentaEnDB.Usuario == Cuenta.NombreUsuario
+                        && cuentaEnDB.Password == Cuenta.Contrasena && cuentaEnDB.Valida).Count() == 1)
                         {
-                            loginValido = 1;
+                            LoginValido = 1;
                         }
                         else
                         {
-                            loginValido = -1;
+                            LoginValido = -1;
                         }
                     }
-                    return loginValido;
+                    return LoginValido;
                 }
-            }catch(EntityException )
+            }catch(EntityException)
             {
                throw;
             }
@@ -89,20 +83,20 @@ namespace LogicaDelNegocio.DataAccess
         /// <summary>
         /// Cambia el estado de la cuenta de no verificada a verificada
         /// </summary>
-        /// <param name="cuenta"></param>
+        /// <param name="Cuenta"></param>
         /// <returns>Boolean</returns>
-        public Boolean VerificarCuenta(CuentaModel cuenta)
+        public Boolean VerificarCuenta(CuentaModel Cuenta)
         {
             try
             {
-                using (PersistenciaContainer persistencia = new PersistenciaContainer())
+                using (PersistenciaContainer Persistencia = new PersistenciaContainer())
                 {
-                    Cuenta cuentaAVerificar = persistencia.CuentaSet.Where(cuentaRecuperada =>
-                    cuentaRecuperada.Usuario == cuenta.nombreUsuario).FirstOrDefault();
-                    if (cuentaAVerificar != null)
+                    Cuenta CuentaAVerificar = Persistencia.CuentaSet.Where(cuentaRecuperada =>
+                    cuentaRecuperada.Usuario == Cuenta.NombreUsuario).FirstOrDefault();
+                    if (CuentaAVerificar != null)
                     {
-                        cuentaAVerificar.Valida = true;
-                        persistencia.SaveChanges();
+                        CuentaAVerificar.Valida = true;
+                        Persistencia.SaveChanges();
                         return true;
                     }
                     else
@@ -122,16 +116,16 @@ namespace LogicaDelNegocio.DataAccess
         /// <summary>
         /// Cuenta el numero de Cuentas que tienen el mismo nombre de usuario
         /// </summary>
-        /// <param name="nombreUsuario">String</param>
+        /// <param name="NombreUsuario">String</param>
         /// <returns>La canitdad de usuarios repetidos</returns>
-        private int ContarNombreDeUsuariosRepetidos(String nombreUsuario)
+        private int ContarNombreDeUsuariosRepetidos(String NombreUsuario)
         {
             try
             {
-                using (PersistenciaContainer persistencia = new PersistenciaContainer())
+                using (PersistenciaContainer Persistencia = new PersistenciaContainer())
                 {
-                    return persistencia.CuentaSet.Where
-                        (cuenta => cuenta.Usuario == nombreUsuario).Count();
+                    return Persistencia.CuentaSet.Where
+                        (cuenta => cuenta.Usuario == NombreUsuario).Count();
                 }
             }
             catch (EntityException)
@@ -145,14 +139,14 @@ namespace LogicaDelNegocio.DataAccess
         /// Crea una cuenta a partir de un CuentaModel agregando los datos necesarios para 
         /// registrarla en la base de datos
         /// </summary>
-        /// <param name="cuentaAConvertir">CuentaModel</param>
+        /// <param name="CuentaAConvertir">CuentaModel</param>
         /// <returns>Cuenta</returns>
-        private Cuenta CrearCuentaAGuadar(CuentaModel cuentaAConvertir)
+        private Cuenta CrearCuentaAGuadar(CuentaModel CuentaAConvertir)
         {
             return new Cuenta()
             {
-                Usuario = cuentaAConvertir.nombreUsuario,
-                Password = Encriptador.ComputeSha256Hash(cuentaAConvertir.contrasena),
+                Usuario = CuentaAConvertir.NombreUsuario,
+                Password = Encriptador.ComputeSha256Hash(CuentaAConvertir.Contrasena),
                 CodigoVerificacion = GeneradorCodigo.GenerarCodigoActivacion(),
                 Valida = false
             };
@@ -161,119 +155,119 @@ namespace LogicaDelNegocio.DataAccess
         /// <summary>
         /// Convierte un objeto CuentaModel a Cuenta
         /// </summary>
-        /// <param name="cuentaAConvertir">CuentaModel</param>
+        /// <param name="CuentaAConvertir">CuentaModel</param>
         /// <returns>Cuenta</returns>
-        private Cuenta ConvertirACuenta(CuentaModel cuentaAConvertir)
+        private Cuenta ConvertirACuenta(CuentaModel CuentaAConvertir)
         {
             return new Cuenta()
             {
-                Usuario = cuentaAConvertir.nombreUsuario,
-                Password = cuentaAConvertir.contrasena,
-                Valida = cuentaAConvertir.verificado
+                Usuario = CuentaAConvertir.NombreUsuario,
+                Password = CuentaAConvertir.Contrasena,
+                Valida = CuentaAConvertir.Verificado
             };
         }
 
         /// <summary>
         /// Convierte un objeto UsuarioModel a Usuario
         /// </summary>
-        /// <param name="usuarioAConvertir">UsuarioModel</param>
+        /// <param name="UsuarioAConvertir">UsuarioModel</param>
         /// <returns>Usuario</returns>
-        private Usuario ConvertirAUsuario(UsuarioModel usuarioAConvertir)
+        private Usuario ConvertirAUsuario(UsuarioModel UsuarioAConvertir)
         {
             return new Usuario()
             {
-                CorreoElectronico = usuarioAConvertir.correo,
-                Edad = usuarioAConvertir.edad
+                CorreoElectronico = UsuarioAConvertir.Correo,
+                Edad = UsuarioAConvertir.Edad
             };
         }
 
         /// <summary>
         /// Convierte un objeto Cuenta a CuentaModel
         /// </summary>
-        /// <param name="cuentaAConvertir">Cuenta</param>
+        /// <param name="CuentaAConvertir">Cuenta</param>
         /// <returns>CuentaModel</returns>
-        private CuentaModel ConvertirACuentaModel(Cuenta cuentaAConvertir)
+        private CuentaModel ConvertirACuentaModel(Cuenta CuentaAConvertir)
         {
             return new CuentaModel()
             {
-                nombreUsuario = cuentaAConvertir.Usuario,
-                contrasena = cuentaAConvertir.Password,
-                verificado = cuentaAConvertir.Valida,
-                codigoVerificacion = cuentaAConvertir.CodigoVerificacion
+                NombreUsuario = CuentaAConvertir.Usuario,
+                Contrasena = CuentaAConvertir.Password,
+                Verificado = CuentaAConvertir.Valida,
+                CodigoVerificacion = CuentaAConvertir.CodigoVerificacion
             };
         }
 
         /// <summary>
         /// Convierte un objeto Usuario a UsuarioModel
         /// </summary>
-        /// <param name="usuarioAConvertir">Usuario</param>
+        /// <param name="UsuarioAConvertir">Usuario</param>
         /// <returns>UsuarioModel</returns>
-        private UsuarioModel ConvertirAUsuarioModel(Usuario usuarioAConvertir)
+        private UsuarioModel ConvertirAUsuarioModel(Usuario UsuarioAConvertir)
         {
             return new UsuarioModel()
             {
-                correo = usuarioAConvertir.CorreoElectronico,
-                edad = Convert.ToString(usuarioAConvertir.Edad)
+                Correo = UsuarioAConvertir.CorreoElectronico,
+                Edad = Convert.ToString(UsuarioAConvertir.Edad)
             };
         }
 
         /// <summary>
         /// Convierte un objeto Avance a AvanceModel
         /// </summary>
-        /// <param name="avaneAConvertir">AvenceSet</param>
+        /// <param name="AvaneAConvertir">AvenceSet</param>
         /// <returns>AvanceModel</returns>
-        private AvanceModel ConvertirAAvanceModel(Avance avaneAConvertir)
+        private AvanceModel ConvertirAAvanceModel(Avance AvaneAConvertir)
         {
             return new AvanceModel()
             {
-                mejorPuntuacion = avaneAConvertir.MejorPuntuacion,
-                uvCoins = avaneAConvertir.UvCoins
+                MejorPuntuacion = AvaneAConvertir.MejorPuntuacion,
+                UvCoins = AvaneAConvertir.UvCoins
             };
         }
 
         /// <summary>
         /// Convierte un objeto PersonajeCorredor a PersonajeCorredorModel
         /// </summary>
-        /// <param name="personajeCorredorAConvertir">PersonajeCorredor</param>
+        /// <param name="PersonajeCorredorAConvertir">PersonajeCorredor</param>
         /// <returns>PersonajeCorredorModel</returns>
-        private PersonajeCorredorModel ConvertirAPersonaje(PersonajeCorredor personajeCorredorAConvertir)
+        private PersonajeCorredorModel ConvertirAPersonaje(PersonajeCorredor PersonajeCorredorAConvertir)
         {
             return new PersonajeCorredorModel()
             {
-                nombre = personajeCorredorAConvertir.Nombre,
-                poder = personajeCorredorAConvertir.Poder,
-                precio = personajeCorredorAConvertir.Precio
+                Nombre = PersonajeCorredorAConvertir.Nombre,
+                Poder = PersonajeCorredorAConvertir.Poder,
+                Precio = PersonajeCorredorAConvertir.Precio
             };
         }
 
         /// <summary>
         /// Recupera la informacion completa de una cuenta en la base de datos
         /// </summary>
-        /// <param name="cuentaARecuperar">String</param>
+        /// <param name="CuentaARecuperar">String</param>
         /// <returns>CuentaModel o Null si la cuenta no existe</returns>
-        public CuentaModel RecuperarCuenta(CuentaModel cuentaARecuperar)
+        public CuentaModel RecuperarCuenta(CuentaModel CuentaARecuperar)
         {
             try
             {
-                using(PersistenciaContainer persistencia = new PersistenciaContainer())
+                using(PersistenciaContainer Persistencia = new PersistenciaContainer())
                 {
-                    Cuenta cuentaRecuperada = persistencia.CuentaSet.Where
-                        (cuenta => cuenta.Usuario == cuentaARecuperar.nombreUsuario).FirstOrDefault();
-                    if(cuentaRecuperada != null)
+                    Cuenta CuentaRecuperada = Persistencia.CuentaSet.Where
+                        (cuenta => cuenta.Usuario == CuentaARecuperar.NombreUsuario).FirstOrDefault();
+                    if(CuentaRecuperada != null)
                     {
-                        CuentaModel cuenta = ConvertirACuentaModel(cuentaRecuperada);
-                        UsuarioModel usuario = ConvertirAUsuarioModel(cuentaRecuperada.Usuario1);
-                        AvanceModel avance = ConvertirAAvanceModel(cuentaRecuperada.Usuario1.Avance);
-                        List<PersonajeCorredorModel> personajesAdquiridos = new List<PersonajeCorredorModel>();
-                        foreach(PersonajeCorredor personaje in 
-                            cuentaRecuperada.Usuario1.Avance.PersonajeCorredor)
+                        CuentaModel Cuenta = ConvertirACuentaModel(CuentaRecuperada);
+                        UsuarioModel Usuario = ConvertirAUsuarioModel(CuentaRecuperada.Usuario1);
+                        AvanceModel Avance = ConvertirAAvanceModel(CuentaRecuperada.Usuario1.Avance);
+                        List<PersonajeCorredorModel> PersonajesAdquiridos = new List<PersonajeCorredorModel>();
+                        foreach(PersonajeCorredor Personaje in 
+                            CuentaRecuperada.Usuario1.Avance.PersonajeCorredor)
                         {
-                            personajesAdquiridos.Add(ConvertirAPersonaje(personaje));
+                            PersonajesAdquiridos.Add(ConvertirAPersonaje(Personaje));
                         }
-                        avance.corredoresAdquiridos = personajesAdquiridos;
-                        usuario.avanceDeUsuario = avance;
-                        cuenta.informacionDeUsuario = usuario;
-                        return cuenta;
+                        Avance.CorredoresAdquiridos = PersonajesAdquiridos;
+                        Usuario.AvanceDeUsuario = Avance;
+                        Cuenta.InformacionDeUsuario = Usuario;
+                        return Cuenta;
                     }
                     return null;
                 }

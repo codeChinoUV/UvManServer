@@ -15,11 +15,9 @@ namespace SessionService.Contrato
     public interface ISessionService
     {
         [OperationContract(IsInitiating = true)]
-        EnumEstadoInicioSesion IniciarSesion(CuentaModel cuenta);
+        EnumEstadoInicioSesion IniciarSesion(CuentaModel Cuenta);
 
         [OperationContract(IsTerminating = true)]
-        void CerrarSesion(CuentaModel cuenta);
-        
-        
+        void CerrarSesion(CuentaModel Cuenta);
     }
 }

@@ -5,26 +5,26 @@ using System.ServiceModel;
 using GameChatService.Dominio;
 using LogicaDelNegocio.Modelo;
 
-namespace GameChatService
+namespace GameChatService.Contrato
 {
 
     [ServiceContract(CallbackContract = typeof(IChatServiceCallback), SessionMode = SessionMode.Required)]
     public interface IChatService
     {
         [OperationContract(IsInitiating = true)]
-        bool Conectar(CuentaModel cuenta);
+        bool Conectar(CuentaModel Cuenta);
 
         [OperationContract]
         List<CuentaModel> ObtenerCuentasConectadas();
 
         [OperationContract(IsOneWay = true)]
-        void EnviarMensaje(Message mensaje);
+        void EnviarMensaje(Message Mensaje);
 
         [OperationContract(IsOneWay = true)]
-        void EstaEscribiendo(String cuenta);
+        void EstaEscribiendo(String Cuenta);
 
         [OperationContract(IsOneWay = true, IsTerminating = true)]
-        void Desconectar(CuentaModel cuenta);
+        void Desconectar(CuentaModel Cuenta);
     }
 
     

@@ -9,7 +9,7 @@
     <Grid>
         <Label Content="Direccion IP:" HorizontalAlignment="Left" Margin="19,46,0,0" VerticalAlignment="Top"/>
         <Label x:Name="lEstadoServicioCuenta" Content="Estado" HorizontalAlignment="Left" Margin="91,80,0,0" VerticalAlignment="Top"/>
-        <TextBlock x:Name="lDireccionIpServicioCuenta" HorizontalAlignment="Left" Margin="107,49,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="21" Width="320" IsEnabled="False"/>
+        <TextBlock x:Name="DireccionIpServicioCuenta" HorizontalAlignment="Left" Margin="107,49,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="21" Width="320" IsEnabled="False"/>
         <Button x:Name="bIniciarServicioCuenta" Content="Iniciar" HorizontalAlignment="Left" Margin="376,126,0,0" VerticalAlignment="Top" Width="74" Click="BIniciarServicioCuenta_Click"/>
         <Button x:Name="bDetenerServicioCuenta" Content="Detener" HorizontalAlignment="Left" Margin="19,121,0,0" VerticalAlignment="Top" Width="75" Click="BDetenerServicioCuenta_Click"/>
         <Label x:Name="label1" Content="Estado:" HorizontalAlignment="Left" Margin="19,80,0,0" VerticalAlignment="Top"/>

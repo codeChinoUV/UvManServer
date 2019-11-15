@@ -6,13 +6,13 @@ namespace LogicaDelNegocio.DataAccess.Interfaces
 {
     public interface ICuentaDAO
     {
-        CuentaModel Registrarse(CuentaModel cuentaNueva);
+        CuentaModel Registrarse(CuentaModel CuentaNueva);
 
-        int IniciarSesion(CuentaModel cuenta);
+        int IniciarSesion(CuentaModel Cuenta);
 
-        Boolean VerificarCuenta(CuentaModel cuenta);
+        Boolean VerificarCuenta(CuentaModel Cuenta);
 
-        CuentaModel RecuperarCuenta(CuentaModel cuentaARecuperar);
+        CuentaModel RecuperarCuenta(CuentaModel CuentaARecuperar);
 
     }
 }

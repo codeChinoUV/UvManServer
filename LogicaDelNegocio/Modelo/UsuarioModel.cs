@@ -11,11 +11,11 @@ namespace LogicaDelNegocio.Modelo
     public class UsuarioModel
     {
         [DataMember]
-        public String correo { get; set; }
+        public String Correo { get; set; }
         [DataMember]
-        public String edad { get; set; }
+        public String Edad { get; set; }
         [DataMember]
-        public AvanceModel avanceDeUsuario { get; set; }
+        public AvanceModel AvanceDeUsuario { get; set; }
 
     }
 }

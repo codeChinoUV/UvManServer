@@ -11,11 +11,11 @@ namespace LogicaDelNegocio.Modelo
     public class AvanceModel
     {
         [DataMember]
-        public int uvCoins { get; set; }
+        public int UvCoins { get; set; }
         [DataMember]
-        public int mejorPuntuacion { get; set; }
+        public int MejorPuntuacion { get; set; }
         [DataMember]
-        public List<PersonajeCorredorModel> corredoresAdquiridos { get; set; }
+        public List<PersonajeCorredorModel> CorredoresAdquiridos { get; set; }
 
     }
 }

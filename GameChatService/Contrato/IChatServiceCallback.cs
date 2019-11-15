@@ -9,18 +9,18 @@ namespace GameChatService.Contrato
     public interface IChatServiceCallback
     {
         [OperationContract(IsOneWay = true)]
-        void RefrescarCuentasConectadas(List<CuentaModel> cuentasConectadas);
+        void RefrescarCuentasConectadas(List<CuentaModel> CuentasConectadas);
 
         [OperationContract(IsOneWay = true)]
-        void RecibirMensaje(Message mensaje);
+        void RecibirMensaje(Message Mensaje);
 
         [OperationContract(IsOneWay = true)]
-        void EstaEscribiendoCallback(String cuenta);
+        void EstaEscribiendoCallback(String Cuenta);
 
         [OperationContract(IsOneWay = true)]
-        void Unirse(CuentaModel cuenta);
+        void Unirse(CuentaModel Cuenta);
 
         [OperationContract(IsOneWay = true)]
-        void Abandonar(CuentaModel cuenta);
+        void Abandonar(CuentaModel Cuenta);
     }
 }
