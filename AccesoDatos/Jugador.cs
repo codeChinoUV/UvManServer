@@ -12,20 +12,23 @@ namespace AccesoDatos
     using System;
     using System.Collections.Generic;
     
-    public partial class Avance
+    public partial class Jugador
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Avance()
+        public Jugador()
         {
-            this.PersonajeCorredor = new HashSet<PersonajeCorredor>();
+            this.CorredoresAdquiridos = new HashSet<CorredorAdquirido>();
+            this.PerseguidorAdquirido = new HashSet<PerseguidorAdquirido>();
         }
     
         public int Id { get; set; }
+        public int MejorPuntacion { get; set; }
         public int UvCoins { get; set; }
-        public int MejorPuntuacion { get; set; }
     
-        public virtual Usuario Usuario { get; set; }
+        public virtual Cuenta Cuenta { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<PersonajeCorredor> PersonajeCorredor { get; set; }
+        public virtual ICollection<CorredorAdquirido> CorredoresAdquiridos { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<PerseguidorAdquirido> PerseguidorAdquirido { get; set; }
     }
 }

@@ -26,8 +26,8 @@ namespace AccesoDatos
         }
     
         public virtual DbSet<Cuenta> CuentaSet { get; set; }
-        public virtual DbSet<Usuario> UsuarioSet { get; set; }
-        public virtual DbSet<Avance> AvanceSet { get; set; }
-        public virtual DbSet<PersonajeCorredor> PersonajeCorredorSet { get; set; }
+        public virtual DbSet<Jugador> JugadorSet { get; set; }
+        public virtual DbSet<CorredorAdquirido> CorredorAdquiridoSet { get; set; }
+        public virtual DbSet<PerseguidorAdquirido> PerseguidorAdquiridoSet { get; set; }
     }
 }

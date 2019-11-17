@@ -28,12 +28,11 @@ namespace LogicaDelNegocio.DataAccess
                     if (UsuariosRepetidos == 0)
                     {
                         Cuenta CuentaAGuardar = CrearCuentaAGuadar(cuentaNueva);
-                        CuentaAGuardar.Usuario1 = ConvertirAUsuario(cuentaNueva.InformacionDeUsuario);
-                        CuentaAGuardar.Usuario1.Avance = new Avance();
+                        CuentaAGuardar.Usuario1 = ConvertirAUsuario(cuentaNueva.Jugador);
                         Persistencia.CuentaSet.Add(CuentaAGuardar);
                         Persistencia.SaveChanges();
                         CuentaGuardada =  ConvertirACuentaModel(CuentaAGuardar);
-                        CuentaGuardada.InformacionDeUsuario = ConvertirAUsuarioModel(CuentaAGuardar.Usuario1);
+                        CuentaGuardada.Jugador = ConvertirAUsuarioModel(CuentaAGuardar.Usuario1);
                     }
                 }
             }catch(EntityException)
@@ -172,12 +171,12 @@ namespace LogicaDelNegocio.DataAccess
         /// </summary>
         /// <param name="UsuarioAConvertir">UsuarioModel</param>
         /// <returns>Usuario</returns>
-        private Usuario ConvertirAUsuario(UsuarioModel UsuarioAConvertir)
+        private Jugador ConvertirAUsuario(JugadorModel UsuarioAConvertir)
         {
-            return new Usuario()
+            return new Jugador()
             {
-                CorreoElectronico = UsuarioAConvertir.Correo,
-                Edad = UsuarioAConvertir.Edad
+                MejorPuntacion = 0,
+                UvCoins = 0
             };
         }
 
@@ -193,50 +192,80 @@ namespace LogicaDelNegocio.DataAccess
                 NombreUsuario = CuentaAConvertir.Usuario,
                 Contrasena = CuentaAConvertir.Password,
                 Verificado = CuentaAConvertir.Valida,
-                CodigoVerificacion = CuentaAConvertir.CodigoVerificacion
+                CodigoVerificacion = CuentaAConvertir.CodigoVerificacion,
+                CorreoElectronico = CuentaAConvertir.CorreoElectronico
             };
         }
 
         /// <summary>
-        /// Convierte un objeto Usuario a UsuarioModel
+        /// Convierte un objeto Jugador a JugadorModel
         /// </summary>
-        /// <param name="UsuarioAConvertir">Usuario</param>
-        /// <returns>UsuarioModel</returns>
-        private UsuarioModel ConvertirAUsuarioModel(Usuario UsuarioAConvertir)
+        /// <param name="UsuarioAConvertir">UsuarioAConvertir</param>
+        /// <returns>JugadorModel</returns>
+        private JugadorModel ConvertirAUsuarioModel(Jugador UsuarioAConvertir)
         {
-            return new UsuarioModel()
+            return new JugadorModel()
             {
-                Correo = UsuarioAConvertir.CorreoElectronico,
-                Edad = Convert.ToString(UsuarioAConvertir.Edad)
+                MejorPuntacion = UsuarioAConvertir.MejorPuntacion,
+                UvCoins = UsuarioAConvertir.UvCoins
             };
         }
 
         /// <summary>
-        /// Convierte un objeto Avance a AvanceModel
+        /// Convierte un objeto CorredorAdquiridoModel a CorredorAdquirido
         /// </summary>
-        /// <param name="AvaneAConvertir">AvenceSet</param>
-        /// <returns>AvanceModel</returns>
-        private AvanceModel ConvertirAAvanceModel(Avance AvaneAConvertir)
+        /// <param name="PersonajeCorredorAConvertir">PersonajeCorredorAConvertir</param>
+        /// <returns>CorredorAdquirido</returns>
+        private CorredorAdquirido ConvertirCorredorAdquirido(CorredorAdquiridoModel PersonajeCorredorAConvertir)
         {
-            return new AvanceModel()
-            {
-                MejorPuntuacion = AvaneAConvertir.MejorPuntuacion,
-                UvCoins = AvaneAConvertir.UvCoins
-            };
-        }
-
-        /// <summary>
-        /// Convierte un objeto PersonajeCorredor a PersonajeCorredorModel
-        /// </summary>
-        /// <param name="PersonajeCorredorAConvertir">PersonajeCorredor</param>
-        /// <returns>PersonajeCorredorModel</returns>
-        private PersonajeCorredorModel ConvertirAPersonaje(PersonajeCorredor PersonajeCorredorAConvertir)
-        {
-            return new PersonajeCorredorModel()
+            return new CorredorAdquirido()
             {
                 Nombre = PersonajeCorredorAConvertir.Nombre,
                 Poder = PersonajeCorredorAConvertir.Poder,
                 Precio = PersonajeCorredorAConvertir.Precio
+            };
+        }
+
+        /// <summary>
+        /// Convierte un objeto CorredorAdquirido a CorredorAdquiridoModel
+        /// </summary>
+        /// <param name="CorredorAdquirdoAConvertir">CorredorAdquirdoAConvertir</param>
+        /// <returns>CorredorAdquiridoModel</returns>
+        private CorredorAdquiridoModel ConvertirCorredorAdquiridoModel(CorredorAdquirido CorredorAdquirdoAConvertir)
+        {
+            return new CorredorAdquiridoModel()
+            {
+                Nombre = CorredorAdquirdoAConvertir.Nombre,
+                Poder = CorredorAdquirdoAConvertir.Poder,
+                Precio = CorredorAdquirdoAConvertir.Precio
+            };
+        }
+
+        /// <summary>
+        /// Convierte un objeto PerseguidorAdquirido a SeguidorAdquiridoModel
+        /// </summary>
+        /// <param name="SeguidorAdquiridoAConvertir">CorredorAdquirido</param>
+        /// <returns>CorredorAdquiridoModel</returns>
+        private SeguidorAdquiridoModel ConvertirSeguidorAdquiridoModel(PerseguidorAdquirido SeguidorAdquiridoAConvertir)
+        {
+            return new SeguidorAdquiridoModel()
+            {
+                Nombre = SeguidorAdquiridoAConvertir.Nombre,
+                Precio = SeguidorAdquiridoAConvertir.Precio
+            };
+        }
+
+        /// <summary>
+        /// Convierte un objeto SeguidorAdquiridoModel a SeguirAdquirido
+        /// </summary>
+        /// <param name="SeguidorAdquirido">SeguidorAdquirido</param>
+        /// <returns>PerseguidorAdquirido</returns>
+        private PerseguidorAdquirido ConvertirSeguidorAdquirido(SeguidorAdquiridoModel SeguidorAdquirido)
+        {
+            return new PerseguidorAdquirido()
+            {
+                Nombre = SeguidorAdquirido.Nombre,
+                Precio = SeguidorAdquirido.Precio
             };
         }
 
@@ -256,17 +285,20 @@ namespace LogicaDelNegocio.DataAccess
                     if(CuentaRecuperada != null)
                     {
                         CuentaModel Cuenta = ConvertirACuentaModel(CuentaRecuperada);
-                        UsuarioModel Usuario = ConvertirAUsuarioModel(CuentaRecuperada.Usuario1);
-                        AvanceModel Avance = ConvertirAAvanceModel(CuentaRecuperada.Usuario1.Avance);
-                        List<PersonajeCorredorModel> PersonajesAdquiridos = new List<PersonajeCorredorModel>();
-                        foreach(PersonajeCorredor Personaje in 
-                            CuentaRecuperada.Usuario1.Avance.PersonajeCorredor)
+                        JugadorModel Jugador = ConvertirAUsuarioModel(CuentaRecuperada.Usuario1);
+                        List<CorredorAdquiridoModel> CorredoresAdquiridos = new List<CorredorAdquiridoModel>();
+                        List<SeguidorAdquiridoModel> SeguidoresAdquiridos = new List<SeguidorAdquiridoModel>();
+                        foreach(CorredorAdquirido Corredor in CuentaRecuperada.Usuario1.CorredoresAdquiridos)
                         {
-                            PersonajesAdquiridos.Add(ConvertirAPersonaje(Personaje));
+                            CorredoresAdquiridos.Add(ConvertirCorredorAdquiridoModel(Corredor));
                         }
-                        Avance.CorredoresAdquiridos = PersonajesAdquiridos;
-                        Usuario.AvanceDeUsuario = Avance;
-                        Cuenta.InformacionDeUsuario = Usuario;
+                        foreach(PerseguidorAdquirido Perseguidor in CuentaRecuperada.Usuario1.PerseguidorAdquirido)
+                        {
+                            SeguidoresAdquiridos.Add(ConvertirSeguidorAdquiridoModel(Perseguidor));
+                        }
+                        Jugador.CorredoresAdquiridos = CorredoresAdquiridos;
+                        Jugador.SeguidoresAdquiridos = SeguidoresAdquiridos;
+                        Cuenta.Jugador = Jugador;
                         return Cuenta;
                     }
                     return null;

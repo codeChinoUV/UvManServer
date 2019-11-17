@@ -12,14 +12,13 @@ namespace AccesoDatos
     using System;
     using System.Collections.Generic;
     
-    public partial class PersonajeCorredor
+    public partial class PerseguidorAdquirido
     {
         public int Id { get; set; }
         public string Nombre { get; set; }
         public int Precio { get; set; }
-        public string Poder { get; set; }
-        public int AvanceId { get; set; }
+        public int JugadorId { get; set; }
     
-        public virtual Avance Avance { get; set; }
+        public virtual Jugador Jugador { get; set; }
     }
 }

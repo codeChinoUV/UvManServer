@@ -1,5 +1,4 @@
-﻿using GameChatService.Contrato;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ServiceModel;
 using GameChatService.Dominio;

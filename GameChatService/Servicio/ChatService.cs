@@ -1,4 +1,5 @@
-﻿using GameChatService.Contrato;
+﻿//using GameService.Dominio;
+using GameChatService.Contrato;
 using GameChatService.Dominio;
 using System;
 using System.Collections.Generic;
@@ -7,17 +8,19 @@ using System.ServiceModel;
 using LogicaDelNegocio.Modelo;
 using LogicaDelNegocio.Util;
 
+
 namespace GameChatService.Servicio
 {
+
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single,
     ConcurrencyMode = ConcurrencyMode.Multiple,
     UseSynchronizationContext = false)]
-
     public class ChatService:IChatService
     {
         Dictionary<CuentaModel, IChatServiceCallback> CuentasConetadas = new Dictionary<CuentaModel, IChatServiceCallback>();
         readonly List<CuentaModel> Cuentas = new List<CuentaModel>();
         readonly Object SincronizarObjeto = new object();
+        //SalaManager ManejadorDeSalas = SalaManager.GetSalaManager();
 
         public IChatServiceCallback ActualCallback {
             get {
@@ -107,12 +110,20 @@ namespace GameChatService.Servicio
         /// <param name="Mensaje">Message</param>
         public void EnviarMensaje(Message Mensaje)
         {
+            //List<CuentaModel> CuentasEnSala = ManejadorDeSalas.RecuperarCuentasDeSalaDeJugador(Mensaje.Remitente);
             lock (SincronizarObjeto)
             {
-                foreach (IChatServiceCallback Callback in CuentasConetadas.Values)
-                {
-                    Callback.RecibirMensaje(Mensaje);
-                }
+                //foreach (CuentaModel CuentaEnSala in CuentasEnSala)
+                //{
+                    foreach(CuentaModel CuentaClave in CuentasConetadas.Keys)
+                    {
+                        //if(CuentaEnSala.NombreUsuario == CuentaClave.NombreUsuario)
+                        //{
+                            IChatServiceCallback callback = CuentasConetadas[CuentaClave];
+                            callback.RecibirMensaje(Mensaje);
+                        //}
+                    }
+                //}
             }
         }
 
@@ -139,23 +150,30 @@ namespace GameChatService.Servicio
         private Boolean NotificarClientesNuevoConectado(CuentaModel Cuenta)
         {
             SessionManager ManejadorDeSesiones = SessionManager.GetSessionManager();
-            foreach (CuentaModel CuentaClave in CuentasConetadas.Keys)
-            {
-                if (ManejadorDeSesiones.VerificarCuentaLogeada(CuentaClave))
+            //List<CuentaModel> CuentasDeSalaDeJugador = ManejadorDeSalas.RecuperarCuentasDeSalaDeJugador(Cuenta);
+            //foreach(CuentaModel cuentaDeSala in CuentasDeSalaDeJugador)
+            //{
+                foreach (CuentaModel CuentaClave in CuentasConetadas.Keys)
                 {
-                    IChatServiceCallback Callback = CuentasConetadas[CuentaClave];
-                    try
-                    {
-                        Callback.RefrescarCuentasConectadas(Cuentas);
-                        Callback.Unirse(Cuenta);
-                    }
-                    catch (Exception)
-                    {
-                        CuentasConetadas.Remove(Cuenta);
-                        return false;
-                    }
+                    //if(CuentaClave.NombreUsuario == cuentaDeSala.NombreUsuario)
+                    //{
+                        if (ManejadorDeSesiones.VerificarCuentaLogeada(CuentaClave))
+                        {
+                            IChatServiceCallback Callback = CuentasConetadas[CuentaClave];
+                            try
+                            {
+                                Callback.RefrescarCuentasConectadas(Cuentas);
+                                Callback.Unirse(Cuenta);
+                            }
+                            catch (Exception)
+                            {
+                                CuentasConetadas.Remove(Cuenta);
+                                return false;
+                            }
+                        }
+                    //}
                 }
-            }
+            //}
             return true;
         }
 
@@ -187,5 +205,6 @@ namespace GameChatService.Servicio
             }
             return null;
         }
+        //Solo se modifico para que resivieran solo en sus salas el enviar mesaje y el conectarse
     }
 }

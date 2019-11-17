@@ -7,20 +7,20 @@
     <Schema Namespace="Persistencia.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2012" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
   <EntityContainer Name="PersistenciaStoreContainer">
     <EntitySet Name="CuentaSet" EntityType="Persistencia.Store.CuentaSet" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="UsuarioSet" EntityType="Persistencia.Store.UsuarioSet" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="AvanceSet" EntityType="Persistencia.Store.AvanceSet" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="PersonajeCorredorSet" EntityType="Persistencia.Store.PersonajeCorredorSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="JugadorSet" EntityType="Persistencia.Store.JugadorSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="CorredorAdquiridoSet" EntityType="Persistencia.Store.CorredorAdquiridoSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="PerseguidorAdquiridoSet" EntityType="Persistencia.Store.PerseguidorAdquiridoSet" store:Type="Tables" Schema="dbo" />
     <AssociationSet Name="CuentaUsuario" Association="Persistencia.Store.CuentaUsuario">
       <End Role="Cuenta" EntitySet="CuentaSet" />
-      <End Role="Usuario" EntitySet="UsuarioSet" />
+      <End Role="Usuario" EntitySet="JugadorSet" />
     </AssociationSet>
-    <AssociationSet Name="UsuarioAvance" Association="Persistencia.Store.UsuarioAvance">
-      <End Role="Usuario" EntitySet="UsuarioSet" />
-      <End Role="Avance" EntitySet="AvanceSet" />
+    <AssociationSet Name="JugadorCorredoresAdquiridos" Association="Persistencia.Store.JugadorCorredoresAdquiridos">
+      <End Role="Jugador" EntitySet="JugadorSet" />
+      <End Role="CorredoresAdquiridos" EntitySet="CorredorAdquiridoSet" />
     </AssociationSet>
-    <AssociationSet Name="AvancePersonajeCorredor" Association="Persistencia.Store.AvancePersonajeCorredor">
-      <End Role="Avance" EntitySet="AvanceSet" />
-      <End Role="PersonajeCorredor" EntitySet="PersonajeCorredorSet" />
+    <AssociationSet Name="JugadorPerseguidorAdquirido" Association="Persistencia.Store.JugadorPerseguidorAdquirido">
+      <End Role="Jugador" EntitySet="JugadorSet" />
+      <End Role="PerseguidorAdquirido" EntitySet="PerseguidorAdquiridoSet" />
     </AssociationSet>
   </EntityContainer>
   <EntityType Name="CuentaSet">
@@ -31,26 +31,18 @@
     <Property Name="Password" Type="nvarchar(max)" Nullable="false" />
     <Property Name="CodigoVerificacion" Type="nvarchar" Nullable="false" MaxLength="10" />
     <Property Name="Valida" Type="bit" Nullable="false" />
+    <Property Name="CorreoElectronico" Type="nvarchar(max)" Nullable="false" />
     <Property Name="Usuario1_Id" Type="int" Nullable="false" />
   </EntityType>
-  <EntityType Name="UsuarioSet">
+  <EntityType Name="JugadorSet">
     <Key>
       <PropertyRef Name="Id" />
     </Key>
     <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="Edad" Type="nvarchar" Nullable="false" MaxLength="3" />
-    <Property Name="CorreoElectronico" Type="nvarchar(max)" Nullable="false" />
-    <Property Name="Avance_Id" Type="int" Nullable="false" />
-  </EntityType>
-  <EntityType Name="AvanceSet">
-    <Key>
-      <PropertyRef Name="Id" />
-    </Key>
-    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="MejorPuntacion" Type="int" Nullable="false" />
     <Property Name="UvCoins" Type="int" Nullable="false" />
-    <Property Name="MejorPuntuacion" Type="int" Nullable="false" />
   </EntityType>
-  <EntityType Name="PersonajeCorredorSet">
+  <EntityType Name="CorredorAdquiridoSet">
     <Key>
       <PropertyRef Name="Id" />
     </Key>
@@ -58,11 +50,20 @@
     <Property Name="Nombre" Type="nvarchar" Nullable="false" MaxLength="50" />
     <Property Name="Precio" Type="int" Nullable="false" />
     <Property Name="Poder" Type="nvarchar" Nullable="false" MaxLength="50" />
-    <Property Name="AvanceId" Type="int" Nullable="false" />
+    <Property Name="JugadorId" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="PerseguidorAdquiridoSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Nombre" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Precio" Type="int" Nullable="false" />
+    <Property Name="JugadorId" Type="int" Nullable="false" />
   </EntityType>
   <Association Name="CuentaUsuario">
     <End Role="Cuenta" Type="Persistencia.Store.CuentaSet" Multiplicity="*" />
-    <End Role="Usuario" Type="Persistencia.Store.UsuarioSet" Multiplicity="1" />
+    <End Role="Usuario" Type="Persistencia.Store.JugadorSet" Multiplicity="1" />
     <ReferentialConstraint>
       <Principal Role="Usuario">
         <PropertyRef Name="Id" />
@@ -72,27 +73,27 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
-  <Association Name="UsuarioAvance">
-    <End Role="Usuario" Type="Persistencia.Store.UsuarioSet" Multiplicity="*" />
-    <End Role="Avance" Type="Persistencia.Store.AvanceSet" Multiplicity="1" />
+  <Association Name="JugadorCorredoresAdquiridos">
+    <End Role="Jugador" Type="Persistencia.Store.JugadorSet" Multiplicity="1" />
+    <End Role="CorredoresAdquiridos" Type="Persistencia.Store.CorredorAdquiridoSet" Multiplicity="*" />
     <ReferentialConstraint>
-      <Principal Role="Avance">
+      <Principal Role="Jugador">
         <PropertyRef Name="Id" />
       </Principal>
-      <Dependent Role="Usuario">
-        <PropertyRef Name="Avance_Id" />
+      <Dependent Role="CorredoresAdquiridos">
+        <PropertyRef Name="JugadorId" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
-  <Association Name="AvancePersonajeCorredor">
-    <End Role="Avance" Type="Persistencia.Store.AvanceSet" Multiplicity="1" />
-    <End Role="PersonajeCorredor" Type="Persistencia.Store.PersonajeCorredorSet" Multiplicity="*" />
+  <Association Name="JugadorPerseguidorAdquirido">
+    <End Role="Jugador" Type="Persistencia.Store.JugadorSet" Multiplicity="1" />
+    <End Role="PerseguidorAdquirido" Type="Persistencia.Store.PerseguidorAdquiridoSet" Multiplicity="*" />
     <ReferentialConstraint>
-      <Principal Role="Avance">
+      <Principal Role="Jugador">
         <PropertyRef Name="Id" />
       </Principal>
-      <Dependent Role="PersonajeCorredor">
-        <PropertyRef Name="AvanceId" />
+      <Dependent Role="PerseguidorAdquirido">
+        <PropertyRef Name="JugadorId" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -102,20 +103,20 @@
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" Namespace="Persistencia" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" annotation:UseStrongSpatialTypes="false">
         <EntityContainer Name="PersistenciaContainer" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="CuentaSet" EntityType="Persistencia.Cuenta" />
-          <EntitySet Name="UsuarioSet" EntityType="Persistencia.Usuario" />
-          <EntitySet Name="AvanceSet" EntityType="Persistencia.Avance" />
-          <EntitySet Name="PersonajeCorredorSet" EntityType="Persistencia.PersonajeCorredor" />
+          <EntitySet Name="JugadorSet" EntityType="Persistencia.Jugador" />
+          <EntitySet Name="CorredorAdquiridoSet" EntityType="Persistencia.CorredorAdquirido" />
           <AssociationSet Name="CuentaUsuario" Association="Persistencia.CuentaUsuario">
             <End Role="Cuenta" EntitySet="CuentaSet" />
-            <End Role="Usuario" EntitySet="UsuarioSet" />
+            <End Role="Usuario" EntitySet="JugadorSet" />
           </AssociationSet>
-          <AssociationSet Name="UsuarioAvance" Association="Persistencia.UsuarioAvance">
-            <End Role="Usuario" EntitySet="UsuarioSet" />
-            <End Role="Avance" EntitySet="AvanceSet" />
+          <AssociationSet Name="JugadorCorredoresAdquiridos" Association="Persistencia.JugadorCorredoresAdquiridos">
+            <End Role="Jugador" EntitySet="JugadorSet" />
+            <End Role="CorredoresAdquiridos" EntitySet="CorredorAdquiridoSet" />
           </AssociationSet>
-          <AssociationSet Name="AvancePersonajeCorredor" Association="Persistencia.AvancePersonajeCorredor">
-            <End Role="Avance" EntitySet="AvanceSet" />
-            <End Role="PersonajeCorredor" EntitySet="PersonajeCorredorSet" />
+          <EntitySet Name="PerseguidorAdquiridoSet" EntityType="Persistencia.PerseguidorAdquirido" />
+          <AssociationSet Name="JugadorPerseguidorAdquirido" Association="Persistencia.JugadorPerseguidorAdquirido">
+            <End Role="Jugador" EntitySet="JugadorSet" />
+            <End Role="PerseguidorAdquirido" EntitySet="PerseguidorAdquiridoSet" />
           </AssociationSet>
         </EntityContainer>
         <EntityType Name="Cuenta">
@@ -127,28 +128,20 @@
           <Property Name="CodigoVerificacion" Type="String" Nullable="false" MaxLength="10" />
           <Property Name="Valida" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Usuario1" Relationship="Persistencia.CuentaUsuario" FromRole="Cuenta" ToRole="Usuario" />
-        </EntityType>
-        <EntityType Name="Usuario">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Edad" Type="String" Nullable="false" MaxLength="3" />
           <Property Name="CorreoElectronico" Type="String" Nullable="false" />
-          <NavigationProperty Name="Cuenta" Relationship="Persistencia.CuentaUsuario" FromRole="Usuario" ToRole="Cuenta" />
-          <NavigationProperty Name="Avance" Relationship="Persistencia.UsuarioAvance" FromRole="Usuario" ToRole="Avance" />
         </EntityType>
-        <EntityType Name="Avance">
+        <EntityType Name="Jugador">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="Cuenta" Relationship="Persistencia.CuentaUsuario" FromRole="Usuario" ToRole="Cuenta" />
+          <Property Name="MejorPuntacion" Type="Int32" Nullable="false" />
           <Property Name="UvCoins" Type="Int32" Nullable="false" />
-          <Property Name="MejorPuntuacion" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Usuario" Relationship="Persistencia.UsuarioAvance" FromRole="Avance" ToRole="Usuario" />
-          <NavigationProperty Name="PersonajeCorredor" Relationship="Persistencia.AvancePersonajeCorredor" FromRole="Avance" ToRole="PersonajeCorredor" />
+          <NavigationProperty Name="CorredoresAdquiridos" Relationship="Persistencia.JugadorCorredoresAdquiridos" FromRole="Jugador" ToRole="CorredoresAdquiridos" />
+          <NavigationProperty Name="PerseguidorAdquirido" Relationship="Persistencia.JugadorPerseguidorAdquirido" FromRole="Jugador" ToRole="PerseguidorAdquirido" />
         </EntityType>
-        <EntityType Name="PersonajeCorredor">
+        <EntityType Name="CorredorAdquirido">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
@@ -156,26 +149,44 @@
           <Property Name="Nombre" Type="String" Nullable="false" MaxLength="50" />
           <Property Name="Precio" Type="Int32" Nullable="false" />
           <Property Name="Poder" Type="String" Nullable="false" MaxLength="50" />
-          <NavigationProperty Name="Avance" Relationship="Persistencia.AvancePersonajeCorredor" FromRole="PersonajeCorredor" ToRole="Avance" />
-          <Property Name="AvanceId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Jugador" Relationship="Persistencia.JugadorCorredoresAdquiridos" FromRole="CorredoresAdquiridos" ToRole="Jugador" />
+          <Property Name="JugadorId" Type="Int32" Nullable="false" />
         </EntityType>
         <Association Name="CuentaUsuario">
           <End Type="Persistencia.Cuenta" Role="Cuenta" Multiplicity="1" />
-          <End Type="Persistencia.Usuario" Role="Usuario" Multiplicity="1" />
+          <End Type="Persistencia.Jugador" Role="Usuario" Multiplicity="1" />
         </Association>
-        <Association Name="UsuarioAvance">
-          <End Type="Persistencia.Usuario" Role="Usuario" Multiplicity="1" />
-          <End Type="Persistencia.Avance" Role="Avance" Multiplicity="1" />
-        </Association>
-        <Association Name="AvancePersonajeCorredor">
-          <End Type="Persistencia.Avance" Role="Avance" Multiplicity="1" />
-          <End Type="Persistencia.PersonajeCorredor" Role="PersonajeCorredor" Multiplicity="*" />
+        <Association Name="JugadorCorredoresAdquiridos">
+          <End Type="Persistencia.Jugador" Role="Jugador" Multiplicity="1" />
+          <End Type="Persistencia.CorredorAdquirido" Role="CorredoresAdquiridos" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Avance">
+            <Principal Role="Jugador">
               <PropertyRef Name="Id" />
             </Principal>
-            <Dependent Role="PersonajeCorredor">
-              <PropertyRef Name="AvanceId" />
+            <Dependent Role="CorredoresAdquiridos">
+              <PropertyRef Name="JugadorId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="PerseguidorAdquirido">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" Nullable="false" />
+          <Property Name="Precio" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Jugador" Relationship="Persistencia.JugadorPerseguidorAdquirido" FromRole="PerseguidorAdquirido" ToRole="Jugador" />
+          <Property Name="JugadorId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <Association Name="JugadorPerseguidorAdquirido">
+          <End Type="Persistencia.Jugador" Role="Jugador" Multiplicity="1" />
+          <End Type="Persistencia.PerseguidorAdquirido" Role="PerseguidorAdquirido" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Jugador">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="PerseguidorAdquirido">
+              <PropertyRef Name="JugadorId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -192,35 +203,37 @@
           <ScalarProperty Name="Password" ColumnName="Password" />
           <ScalarProperty Name="CodigoVerificacion" ColumnName="CodigoVerificacion" />
           <ScalarProperty Name="Valida" ColumnName="Valida" />
-        </MappingFragment>
-      </EntityTypeMapping>
-    </EntitySetMapping>
-    <EntitySetMapping Name="UsuarioSet">
-      <EntityTypeMapping TypeName="IsTypeOf(Persistencia.Usuario)">
-        <MappingFragment StoreEntitySet="UsuarioSet">
-          <ScalarProperty Name="Id" ColumnName="Id" />
-          <ScalarProperty Name="Edad" ColumnName="Edad" />
           <ScalarProperty Name="CorreoElectronico" ColumnName="CorreoElectronico" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
-    <EntitySetMapping Name="AvanceSet">
-      <EntityTypeMapping TypeName="IsTypeOf(Persistencia.Avance)">
-        <MappingFragment StoreEntitySet="AvanceSet">
+    <EntitySetMapping Name="JugadorSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Persistencia.Jugador)">
+        <MappingFragment StoreEntitySet="JugadorSet">
           <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="MejorPuntacion" ColumnName="MejorPuntacion" />
           <ScalarProperty Name="UvCoins" ColumnName="UvCoins" />
-          <ScalarProperty Name="MejorPuntuacion" ColumnName="MejorPuntuacion" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
-    <EntitySetMapping Name="PersonajeCorredorSet">
-      <EntityTypeMapping TypeName="IsTypeOf(Persistencia.PersonajeCorredor)">
-        <MappingFragment StoreEntitySet="PersonajeCorredorSet">
+    <EntitySetMapping Name="CorredorAdquiridoSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Persistencia.CorredorAdquirido)">
+        <MappingFragment StoreEntitySet="CorredorAdquiridoSet">
           <ScalarProperty Name="Id" ColumnName="Id" />
           <ScalarProperty Name="Nombre" ColumnName="Nombre" />
           <ScalarProperty Name="Precio" ColumnName="Precio" />
           <ScalarProperty Name="Poder" ColumnName="Poder" />
-          <ScalarProperty Name="AvanceId" ColumnName="AvanceId" />
+          <ScalarProperty Name="JugadorId" ColumnName="JugadorId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="PerseguidorAdquiridoSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Persistencia.PerseguidorAdquirido)">
+        <MappingFragment StoreEntitySet="PerseguidorAdquiridoSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+          <ScalarProperty Name="Precio" ColumnName="Precio" />
+          <ScalarProperty Name="JugadorId" ColumnName="JugadorId" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
@@ -230,14 +243,6 @@
       </EndProperty>
       <EndProperty Name="Cuenta">
         <ScalarProperty Name="Usuario" ColumnName="Usuario" />
-      </EndProperty>
-    </AssociationSetMapping>
-    <AssociationSetMapping Name="UsuarioAvance" TypeName="Persistencia.UsuarioAvance" StoreEntitySet="UsuarioSet">
-      <EndProperty Name="Avance">
-        <ScalarProperty Name="Id" ColumnName="Avance_Id" />
-      </EndProperty>
-      <EndProperty Name="Usuario">
-        <ScalarProperty Name="Id" ColumnName="Id" />
       </EndProperty>
     </AssociationSetMapping>
   </EntityContainerMapping>

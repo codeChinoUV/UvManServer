@@ -18,7 +18,8 @@ namespace AccesoDatos
         public string Password { get; set; }
         public string CodigoVerificacion { get; set; }
         public bool Valida { get; set; }
+        public string CorreoElectronico { get; set; }
     
-        public virtual Usuario Usuario1 { get; set; }
+        public virtual Jugador Usuario1 { get; set; }
     }
 }

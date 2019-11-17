@@ -16,11 +16,13 @@ namespace LogicaDelNegocio.Modelo
         [DataMember]
         public String Contrasena { get; set; }
         [DataMember]
-        public UsuarioModel InformacionDeUsuario { get; set; }
+        public JugadorModel Jugador { get; set; }
         [DataMember]
         public Boolean Verificado { get; set; }
         [DataMember]
         public String CodigoVerificacion { get; set; }
+        [DataMember]
+        public String CorreoElectronico { get; set; }
         
         /// <summary>
         /// Verifica si el codigo de verificacion mandado como parametro coincide con el de la cuenta

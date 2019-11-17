@@ -86,7 +86,7 @@ namespace CuentaService.Servicio
         {
             String Contenido = ClienteCorreo.GenerarContenidoVerificacion(CuentaAEnviar.CodigoVerificacion);
             String Asunto = "Codigo de verificación del correo electronico";
-            return ClienteCorreo.EnviarCorreoHtml(CuentaAEnviar.InformacionDeUsuario.Correo, Asunto, Contenido);
+            return ClienteCorreo.EnviarCorreoHtml(CuentaAEnviar.CorreoElectronico, Asunto, Contenido);
         }
 
 

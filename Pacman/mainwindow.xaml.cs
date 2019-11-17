@@ -29,6 +29,7 @@ namespace Pacman
         private ServiceHost CuentaHost;
         private ServiceHost ChatHost;
         private ServiceHost SesionHost;
+        private ServiceHost JuegoHost;
         private String DireccionIP;
         private SessionManager ManejadorDesesiones = SessionManager.GetSessionManager();
 
@@ -146,6 +147,29 @@ namespace Pacman
             }
         }
 
+        private void BIniciarServicioDelJuego_Click(object sender, RoutedEventArgs e)
+        {
+            bIniciarServicioDelJuego.IsEnabled = false;
+            JuegoHost = new ServiceHost(typeof(GameService.Service1));
+            try
+            {
+                JuegoHost.Closed += hostSesionOnClosed;
+                JuegoHost.Open();
+            }
+            catch (Exception excepcionDelServicio)
+            {
+                lEstadoServicioDeJuego.Content = excepcionDelServicio.Message;
+            }
+            finally
+            {
+                if (JuegoHost.State == CommunicationState.Opened)
+                {
+                    lEstadoServicioDeJuego.Content = "Activo";
+                    bDetenerServicioDelJuego.IsEnabled = true;
+                }
+            }
+        }
+
         private void BDetenerServicioChat_Click(object sender, RoutedEventArgs e)
         {
             if (ChatHost != null )
@@ -247,5 +271,6 @@ namespace Pacman
             lEstadoServicioSesion.Content += "Servicio cerrado";
         }
 
+        
     }
 }

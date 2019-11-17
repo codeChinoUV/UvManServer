@@ -12,13 +12,14 @@ namespace AccesoDatos
     using System;
     using System.Collections.Generic;
     
-    public partial class Usuario
+    public partial class CorredorAdquirido
     {
         public int Id { get; set; }
-        public string Edad { get; set; }
-        public string CorreoElectronico { get; set; }
+        public string Nombre { get; set; }
+        public int Precio { get; set; }
+        public string Poder { get; set; }
+        public int JugadorId { get; set; }
     
-        public virtual Cuenta Cuenta { get; set; }
-        public virtual Avance Avance { get; set; }
+        public virtual Jugador Jugador { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server 2005, 2008, 2012 and Azure
 -- --------------------------------------------------
--- Date Created: 10/07/2019 21:41:24
+-- Date Created: 11/15/2019 23:30:35
 -- Generated from EDMX file: C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\AccesoDatos\Persistencia.edmx
 -- --------------------------------------------------
 
@@ -20,11 +20,11 @@ GO
 IF OBJECT_ID(N'[dbo].[FK_CuentaUsuario]', 'F') IS NOT NULL
     ALTER TABLE [dbo].[CuentaSet] DROP CONSTRAINT [FK_CuentaUsuario];
 GO
-IF OBJECT_ID(N'[dbo].[FK_UsuarioAvance]', 'F') IS NOT NULL
-    ALTER TABLE [dbo].[UsuarioSet] DROP CONSTRAINT [FK_UsuarioAvance];
+IF OBJECT_ID(N'[dbo].[FK_JugadorCorredoresAdquiridos]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[CorredorAdquiridoSet] DROP CONSTRAINT [FK_JugadorCorredoresAdquiridos];
 GO
-IF OBJECT_ID(N'[dbo].[FK_AvancePersonajeCorredor]', 'F') IS NOT NULL
-    ALTER TABLE [dbo].[PersonajeCorredorSet] DROP CONSTRAINT [FK_AvancePersonajeCorredor];
+IF OBJECT_ID(N'[dbo].[FK_JugadorPerseguidorAdquirido]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[PerseguidorAdquiridoSet] DROP CONSTRAINT [FK_JugadorPerseguidorAdquirido];
 GO
 
 -- --------------------------------------------------
@@ -34,14 +34,14 @@ GO
 IF OBJECT_ID(N'[dbo].[CuentaSet]', 'U') IS NOT NULL
     DROP TABLE [dbo].[CuentaSet];
 GO
-IF OBJECT_ID(N'[dbo].[UsuarioSet]', 'U') IS NOT NULL
-    DROP TABLE [dbo].[UsuarioSet];
+IF OBJECT_ID(N'[dbo].[JugadorSet]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[JugadorSet];
 GO
-IF OBJECT_ID(N'[dbo].[AvanceSet]', 'U') IS NOT NULL
-    DROP TABLE [dbo].[AvanceSet];
+IF OBJECT_ID(N'[dbo].[CorredorAdquiridoSet]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[CorredorAdquiridoSet];
 GO
-IF OBJECT_ID(N'[dbo].[PersonajeCorredorSet]', 'U') IS NOT NULL
-    DROP TABLE [dbo].[PersonajeCorredorSet];
+IF OBJECT_ID(N'[dbo].[PerseguidorAdquiridoSet]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[PerseguidorAdquiridoSet];
 GO
 
 -- --------------------------------------------------
@@ -54,34 +54,35 @@ CREATE TABLE [dbo].[CuentaSet] (
     [Password] nvarchar(max)  NOT NULL,
     [CodigoVerificacion] nvarchar(10)  NOT NULL,
     [Valida] bit  NOT NULL,
+    [CorreoElectronico] nvarchar(max)  NOT NULL,
     [Usuario1_Id] int  NOT NULL
 );
 GO
 
--- Creating table 'UsuarioSet'
-CREATE TABLE [dbo].[UsuarioSet] (
+-- Creating table 'JugadorSet'
+CREATE TABLE [dbo].[JugadorSet] (
     [Id] int IDENTITY(1,1) NOT NULL,
-    [Edad] nvarchar(3)  NOT NULL,
-    [CorreoElectronico] nvarchar(max)  NOT NULL,
-    [Avance_Id] int  NOT NULL
+    [MejorPuntacion] int  NOT NULL,
+    [UvCoins] int  NOT NULL
 );
 GO
 
--- Creating table 'AvanceSet'
-CREATE TABLE [dbo].[AvanceSet] (
-    [Id] int IDENTITY(1,1) NOT NULL,
-    [UvCoins] int  NOT NULL,
-    [MejorPuntuacion] int  NOT NULL
-);
-GO
-
--- Creating table 'PersonajeCorredorSet'
-CREATE TABLE [dbo].[PersonajeCorredorSet] (
+-- Creating table 'CorredorAdquiridoSet'
+CREATE TABLE [dbo].[CorredorAdquiridoSet] (
     [Id] int IDENTITY(1,1) NOT NULL,
     [Nombre] nvarchar(50)  NOT NULL,
     [Precio] int  NOT NULL,
     [Poder] nvarchar(50)  NOT NULL,
-    [AvanceId] int  NOT NULL
+    [JugadorId] int  NOT NULL
+);
+GO
+
+-- Creating table 'PerseguidorAdquiridoSet'
+CREATE TABLE [dbo].[PerseguidorAdquiridoSet] (
+    [Id] int IDENTITY(1,1) NOT NULL,
+    [Nombre] nvarchar(max)  NOT NULL,
+    [Precio] int  NOT NULL,
+    [JugadorId] int  NOT NULL
 );
 GO
 
@@ -95,21 +96,21 @@ ADD CONSTRAINT [PK_CuentaSet]
     PRIMARY KEY CLUSTERED ([Usuario] ASC);
 GO
 
--- Creating primary key on [Id] in table 'UsuarioSet'
-ALTER TABLE [dbo].[UsuarioSet]
-ADD CONSTRAINT [PK_UsuarioSet]
+-- Creating primary key on [Id] in table 'JugadorSet'
+ALTER TABLE [dbo].[JugadorSet]
+ADD CONSTRAINT [PK_JugadorSet]
     PRIMARY KEY CLUSTERED ([Id] ASC);
 GO
 
--- Creating primary key on [Id] in table 'AvanceSet'
-ALTER TABLE [dbo].[AvanceSet]
-ADD CONSTRAINT [PK_AvanceSet]
+-- Creating primary key on [Id] in table 'CorredorAdquiridoSet'
+ALTER TABLE [dbo].[CorredorAdquiridoSet]
+ADD CONSTRAINT [PK_CorredorAdquiridoSet]
     PRIMARY KEY CLUSTERED ([Id] ASC);
 GO
 
--- Creating primary key on [Id] in table 'PersonajeCorredorSet'
-ALTER TABLE [dbo].[PersonajeCorredorSet]
-ADD CONSTRAINT [PK_PersonajeCorredorSet]
+-- Creating primary key on [Id] in table 'PerseguidorAdquiridoSet'
+ALTER TABLE [dbo].[PerseguidorAdquiridoSet]
+ADD CONSTRAINT [PK_PerseguidorAdquiridoSet]
     PRIMARY KEY CLUSTERED ([Id] ASC);
 GO
 
@@ -121,7 +122,7 @@ GO
 ALTER TABLE [dbo].[CuentaSet]
 ADD CONSTRAINT [FK_CuentaUsuario]
     FOREIGN KEY ([Usuario1_Id])
-    REFERENCES [dbo].[UsuarioSet]
+    REFERENCES [dbo].[JugadorSet]
         ([Id])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
 GO
@@ -132,34 +133,34 @@ ON [dbo].[CuentaSet]
     ([Usuario1_Id]);
 GO
 
--- Creating foreign key on [Avance_Id] in table 'UsuarioSet'
-ALTER TABLE [dbo].[UsuarioSet]
-ADD CONSTRAINT [FK_UsuarioAvance]
-    FOREIGN KEY ([Avance_Id])
-    REFERENCES [dbo].[AvanceSet]
+-- Creating foreign key on [JugadorId] in table 'CorredorAdquiridoSet'
+ALTER TABLE [dbo].[CorredorAdquiridoSet]
+ADD CONSTRAINT [FK_JugadorCorredoresAdquiridos]
+    FOREIGN KEY ([JugadorId])
+    REFERENCES [dbo].[JugadorSet]
         ([Id])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
 GO
 
--- Creating non-clustered index for FOREIGN KEY 'FK_UsuarioAvance'
-CREATE INDEX [IX_FK_UsuarioAvance]
-ON [dbo].[UsuarioSet]
-    ([Avance_Id]);
+-- Creating non-clustered index for FOREIGN KEY 'FK_JugadorCorredoresAdquiridos'
+CREATE INDEX [IX_FK_JugadorCorredoresAdquiridos]
+ON [dbo].[CorredorAdquiridoSet]
+    ([JugadorId]);
 GO
 
--- Creating foreign key on [AvanceId] in table 'PersonajeCorredorSet'
-ALTER TABLE [dbo].[PersonajeCorredorSet]
-ADD CONSTRAINT [FK_AvancePersonajeCorredor]
-    FOREIGN KEY ([AvanceId])
-    REFERENCES [dbo].[AvanceSet]
+-- Creating foreign key on [JugadorId] in table 'PerseguidorAdquiridoSet'
+ALTER TABLE [dbo].[PerseguidorAdquiridoSet]
+ADD CONSTRAINT [FK_JugadorPerseguidorAdquirido]
+    FOREIGN KEY ([JugadorId])
+    REFERENCES [dbo].[JugadorSet]
         ([Id])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
 GO
 
--- Creating non-clustered index for FOREIGN KEY 'FK_AvancePersonajeCorredor'
-CREATE INDEX [IX_FK_AvancePersonajeCorredor]
-ON [dbo].[PersonajeCorredorSet]
-    ([AvanceId]);
+-- Creating non-clustered index for FOREIGN KEY 'FK_JugadorPerseguidorAdquirido'
+CREATE INDEX [IX_FK_JugadorPerseguidorAdquirido]
+ON [dbo].[PerseguidorAdquiridoSet]
+    ([JugadorId]);
 GO
 
 -- --------------------------------------------------

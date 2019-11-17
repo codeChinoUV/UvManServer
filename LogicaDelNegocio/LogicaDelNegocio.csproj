@@ -54,10 +54,13 @@
   <ItemGroup>
     <Compile Include="DataAccess\CuentaDAO.cs" />
     <Compile Include="DataAccess\Interfaces\ICuentaDAO.cs" />
-    <Compile Include="Modelo\AvanceModel.cs" />
+    <Compile Include="Modelo\Corredor.cs" />
     <Compile Include="Modelo\CuentaModel.cs" />
-    <Compile Include="Modelo\PersonajeCorredorModel.cs" />
-    <Compile Include="Modelo\UsuarioModel.cs" />
+    <Compile Include="Modelo\PartidaModel.cs" />
+    <Compile Include="Modelo\Seguidor.cs" />
+    <Compile Include="Modelo\CorredorAdquiridoModel.cs" />
+    <Compile Include="Modelo\SeguidorAdquiridoModel.cs" />
+    <Compile Include="Modelo\JugadorModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\SessionManager.cs" />
     <Compile Include="Util\ClienteCorreo.cs" />
