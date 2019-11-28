@@ -6,6 +6,7 @@ using LogicaDelNegocio.Modelo;
 
 namespace GameChatService.Contrato
 {
+    [ServiceContract]
     public interface IChatServiceCallback
     {
         [OperationContract(IsOneWay = true)]

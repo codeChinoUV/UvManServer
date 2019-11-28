@@ -1,14 +1,15 @@
-﻿using GameService.Contrato;
+﻿using System.Collections.Generic;
+using GameService.Contrato;
 using GameService.Dominio;
 using GameService.Dominio.Enum;
 using LogicaDelNegocio.Modelo;
-using LogicaDelNegocio.Util;
-using System;
-using System.Collections.Generic;
 using System.ServiceModel;
 
 namespace GameService.Servicio
 {
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single,
+    ConcurrencyMode = ConcurrencyMode.Multiple,
+    UseSynchronizationContext = false)]
     public class GameService : IGameService
     {
         private object ObjetoDeSincroinzacion = new object();
@@ -20,26 +21,87 @@ namespace GameService.Servicio
             }
         }
 
+        /// <summary>
+        /// Crea una sala personalizada
+        /// </summary>
+        /// <param name="Id">String</param>
+        /// <param name="EsSalaPublica">Boolean</param>
+        /// <param name="Cuenta">CuentaModel</param>
+        /// <returns>EnumEstadoCrearSalaConId</returns>
         public EnumEstadoCrearSalaConId CrearSala(string Id, bool EsSalaPublica, CuentaModel Cuenta)
         {
             return ManejadorDeSala.CrearSala(Id, EsSalaPublica, Cuenta, ActualCallback);
         }
 
-        public EnumEstadoDeUnirseASala UnirseASala(string Id, CuentaModel Cuenta)
+        /// <summary>
+        /// Se une una cuenta a una sala privada
+        /// </summary>
+        /// <param name="Id">Stirng</param>
+        /// <param name="Cuenta">CuentaModel</param>
+        /// <returns>EnumEstadoDeUnirseASala</returns>
+        public EnumEstadoDeUnirseASala UnirseASalaPrivada(string Id, CuentaModel Cuenta)
         {
             return ManejadorDeSala.UnirseASalaConId(Id, Cuenta, ActualCallback);
         }
 
+        /// <summary>
+        /// Se une una cuenta a una sala disponible
+        /// </summary>
+        /// <param name="Cuenta">CuentaModel</param>
+        /// <returns>Boolean</returns>
         public bool UnirseASala(CuentaModel Cuenta)
         {
             return ManejadorDeSala.UnisrseASalaDisponible(Cuenta, ActualCallback);
         }
 
+        /// <summary>
+        /// Verifica si un usuario se encuentra en una sala
+        /// </summary>
+        /// <param name="Cuenta">CuentaModel</param>
+        /// <returns>Boolean</returns>
         public bool VerificarSiEstoyEnSala(CuentaModel Cuenta)
         {
             return ManejadorDeSala.VerificarSiEstoyEnSala(Cuenta);
         }
 
-        
+        /// <summary>
+        /// Regresa las cuentas en las que se encuentra en la sala de la Cuenta
+        /// </summary>
+        /// <param name="Cuenta"></param>
+        /// <returns>List</returns>
+        public List<CuentaModel> ObtenerCuentasEnMiSala(CuentaModel Cuenta)
+        {
+            return ManejadorDeSala.RecuperarCuentasDeSalaDeJugador(Cuenta);
+        }
+
+        /// <summary>
+        /// Regresa el Id de la sala en donde se encuentra la Cuenta
+        /// </summary>
+        /// <param name="Cuenta">CuentaModel</param>
+        /// <returns>String</returns>
+        public string RecuperarIdDeMiSala(CuentaModel Cuenta)
+        {
+            Sala MiSala = ManejadorDeSala.RecuperarSalaDeCuenta(Cuenta);
+            if(MiSala != null)
+            {
+                return MiSala.Id;
+            }
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Regresa si la sala de la Cuenta es publica
+        /// </summary>
+        /// <param name="Cuenta">CuentaModel</param>
+        /// <returns>Boolean</returns>
+        public bool MiSalaEsPublica(CuentaModel Cuenta)
+        {
+            Sala MiSala = ManejadorDeSala.RecuperarSalaDeCuenta(Cuenta);
+            if (MiSala != null)
+            {
+                return MiSala.EsSalaPublica;
+            }
+            return false;
+        }
     }
 }

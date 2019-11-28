@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using GameService.Dominio.Enum;
 
 namespace LogicaDelNegocio.Modelo
 {
@@ -20,5 +21,6 @@ namespace LogicaDelNegocio.Modelo
         [DataMember]
         public List<SeguidorAdquiridoModel> SeguidoresAdquiridos { get; set; }
         
+        public EnumTipoDeJugador RolDelJugador { get; set; }
     }
 }

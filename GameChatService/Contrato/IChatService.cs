@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ServiceModel;
 using GameChatService.Dominio;
 using LogicaDelNegocio.Modelo;
@@ -20,7 +19,7 @@ namespace GameChatService.Contrato
         void EnviarMensaje(Message Mensaje);
 
         [OperationContract(IsOneWay = true)]
-        void EstaEscribiendo(String Cuenta);
+        void EstaEscribiendo(CuentaModel Cuenta);
 
         [OperationContract(IsOneWay = true, IsTerminating = true)]
         void Desconectar(CuentaModel Cuenta);

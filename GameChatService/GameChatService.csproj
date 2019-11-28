@@ -51,6 +51,10 @@
     <Compile Include="Servicio\ChatService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GameService\GameService.csproj">
+      <Project>{2b9bdfc4-f91f-47b9-b4f1-a378bb96f91b}</Project>
+      <Name>GameService</Name>
+    </ProjectReference>
     <ProjectReference Include="..\LogicaDelNegocio\LogicaDelNegocio.csproj">
       <Project>{2a05c103-70cc-4289-ab3a-297e467df17b}</Project>
       <Name>LogicaDelNegocio</Name>

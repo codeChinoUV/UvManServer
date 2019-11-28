@@ -150,7 +150,7 @@ namespace Pacman
         private void BIniciarServicioDelJuego_Click(object sender, RoutedEventArgs e)
         {
             bIniciarServicioDelJuego.IsEnabled = false;
-            JuegoHost = new ServiceHost(typeof(GameService.Service1));
+            JuegoHost = new ServiceHost(typeof(GameService.Servicio.GameService));
             try
             {
                 JuegoHost.Closed += hostSesionOnClosed;

@@ -1,12 +1,12 @@
-﻿//using GameService.Dominio;
-using GameChatService.Contrato;
-using GameChatService.Dominio;
+﻿using GameChatService.Contrato;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.ServiceModel;
+using GameService.Dominio;
 using LogicaDelNegocio.Modelo;
 using LogicaDelNegocio.Util;
+using Message = GameChatService.Dominio.Message;
 
 
 namespace GameChatService.Servicio
@@ -20,7 +20,8 @@ namespace GameChatService.Servicio
         Dictionary<CuentaModel, IChatServiceCallback> CuentasConetadas = new Dictionary<CuentaModel, IChatServiceCallback>();
         readonly List<CuentaModel> Cuentas = new List<CuentaModel>();
         readonly Object SincronizarObjeto = new object();
-        //SalaManager ManejadorDeSalas = SalaManager.GetSalaManager();
+        SalaManager ManejadorDeSalas = SalaManager.GetSalaManager();
+        
 
         public IChatServiceCallback ActualCallback {
             get {
@@ -36,13 +37,17 @@ namespace GameChatService.Servicio
         /// <returns>Boolean</returns>
         private bool ExisteCuenta(String Nombre)
         {
-            foreach (CuentaModel Cuenta in CuentasConetadas.Keys)
+            lock (SincronizarObjeto)
             {
-                if (Cuenta.NombreUsuario == Nombre)
+                foreach (CuentaModel Cuenta in CuentasConetadas.Keys)
                 {
-                    return true;
+                    if (Cuenta.NombreUsuario == Nombre)
+                    {
+                        return true;
+                    }
                 }
             }
+
             return false;
         }
 
@@ -58,16 +63,19 @@ namespace GameChatService.Servicio
             if (ActualCallback != null)
             {
                 ManejadorDeSesiones.UsuarioDesconectado += CerroSesionGlobal;
-                if (!CuentasConetadas.ContainsValue(ActualCallback) && !ExisteCuenta(Cuenta.NombreUsuario) && 
-                    ManejadorDeSesiones.VerificarCuentaLogeada(Cuenta))
+                lock (SincronizarObjeto)
                 {
-                    lock (SincronizarObjeto)
+                    if (!CuentasConetadas.ContainsValue(ActualCallback) && !ExisteCuenta(Cuenta.NombreUsuario) && 
+                        ManejadorDeSesiones.VerificarCuentaLogeada(Cuenta))
                     {
-                        NotificarClientesNuevoConectado(Cuenta);
+                        lock (SincronizarObjeto)
+                        {
+                            NotificarClientesNuevoConectado(Cuenta);
+                            CuentasConetadas.Add(Cuenta, ActualCallback);
+                        }
+                        Cuentas.Add(Cuenta);
+                        return true;
                     }
-                    CuentasConetadas.Add(Cuenta, ActualCallback);
-                    Cuentas.Add(Cuenta);
-                    return true;
                 }
             }
             return false;
@@ -88,18 +96,26 @@ namespace GameChatService.Servicio
         /// <param name="Cuenta">Cuenta</param>
         public void Desconectar(CuentaModel Cuenta)
         {
-            CuentaModel CuentaClave = ObtenerCuentaEnElDiccionario(Cuenta);
+            CuentaModel CuentaCompleta = ObtenerCuentaEnElDiccionario(Cuenta);
             lock (SincronizarObjeto)
             {
-                if(CuentaClave != null)
+                List<CuentaModel> CuentasDeLaSala = ManejadorDeSalas.RecuperarCuentasDeSalaDeJugador((Cuenta));
+                foreach (CuentaModel CuentaClave in CuentasConetadas.Keys)
                 {
-                    CuentasConetadas.Remove(CuentaClave);
-                    Cuentas.Remove(CuentaClave);
+                    foreach (CuentaModel CuentaEnSala in CuentasDeLaSala)
+                    {
+                        if (CuentaClave.NombreUsuario == CuentaEnSala.NombreUsuario)
+                        {
+                            IChatServiceCallback Callback = CuentasConetadas[CuentaClave];
+                            Callback.RefrescarCuentasConectadas(Cuentas);
+                            Callback.Abandonar(Cuenta);        
+                        }
+                    }       
                 }
-                foreach (IChatServiceCallback Callback in CuentasConetadas.Values)
+                if (CuentaCompleta != null)
                 {
-                    Callback.RefrescarCuentasConectadas(Cuentas);
-                    Callback.Abandonar(Cuenta);
+                    CuentasConetadas.Remove(CuentaCompleta);
+                    Cuentas.Remove(CuentaCompleta);
                 }
             }
         }
@@ -110,20 +126,23 @@ namespace GameChatService.Servicio
         /// <param name="Mensaje">Message</param>
         public void EnviarMensaje(Message Mensaje)
         {
-            //List<CuentaModel> CuentasEnSala = ManejadorDeSalas.RecuperarCuentasDeSalaDeJugador(Mensaje.Remitente);
+            List<CuentaModel> CuentasEnSala = ManejadorDeSalas.RecuperarCuentasDeSalaDeJugador(Mensaje.Remitente);
+            Debug.WriteLine(CuentasEnSala.Count);
+
             lock (SincronizarObjeto)
             {
-                //foreach (CuentaModel CuentaEnSala in CuentasEnSala)
-                //{
+                foreach (CuentaModel CuentaEnSala in CuentasEnSala)
+                {
                     foreach(CuentaModel CuentaClave in CuentasConetadas.Keys)
                     {
-                        //if(CuentaEnSala.NombreUsuario == CuentaClave.NombreUsuario)
-                        //{
+                        if(CuentaEnSala.NombreUsuario == CuentaClave.NombreUsuario)
+                        {
+                            Debug.WriteLine("Se esta notificando a " + CuentaClave.NombreUsuario);
                             IChatServiceCallback callback = CuentasConetadas[CuentaClave];
                             callback.RecibirMensaje(Mensaje);
-                        //}
+                        }
                     }
-                //}
+                }
             }
         }
 
@@ -131,13 +150,21 @@ namespace GameChatService.Servicio
         /// Notifica a las cuentas que una cuenta esta escribiendo
         /// </summary>
         /// <param name="Cuenta">String</param>
-        public void EstaEscribiendo(String Cuenta)
+        public void EstaEscribiendo(CuentaModel Cuenta)
         {
             lock (SincronizarObjeto)
             {
-                foreach (IChatServiceCallback Callback in CuentasConetadas.Values)
+                List<CuentaModel> CuentasEnLaSala = ManejadorDeSalas.RecuperarCuentasDeSalaDeJugador((Cuenta));
+                foreach (CuentaModel CuentaClave in CuentasConetadas.Keys)
                 {
-                    Callback.EstaEscribiendoCallback(Cuenta);
+                    foreach (CuentaModel CuentaEnSala in CuentasEnLaSala)
+                    {
+                        if (CuentaClave.NombreUsuario == CuentaEnSala.NombreUsuario)
+                        {
+                            IChatServiceCallback Callback = CuentasConetadas[CuentaClave];
+                            Callback.EstaEscribiendoCallback(Cuenta.NombreUsuario);
+                        }
+                    }
                 }
             }
         }
@@ -150,13 +177,13 @@ namespace GameChatService.Servicio
         private Boolean NotificarClientesNuevoConectado(CuentaModel Cuenta)
         {
             SessionManager ManejadorDeSesiones = SessionManager.GetSessionManager();
-            //List<CuentaModel> CuentasDeSalaDeJugador = ManejadorDeSalas.RecuperarCuentasDeSalaDeJugador(Cuenta);
-            //foreach(CuentaModel cuentaDeSala in CuentasDeSalaDeJugador)
-            //{
+            List<CuentaModel> CuentasDeSalaDeJugador = ManejadorDeSalas.RecuperarCuentasDeSalaDeJugador(Cuenta);
+            foreach(CuentaModel cuentaDeSala in CuentasDeSalaDeJugador)
+            {
                 foreach (CuentaModel CuentaClave in CuentasConetadas.Keys)
                 {
-                    //if(CuentaClave.NombreUsuario == cuentaDeSala.NombreUsuario)
-                    //{
+                    if(CuentaClave.NombreUsuario == cuentaDeSala.NombreUsuario)
+                    {
                         if (ManejadorDeSesiones.VerificarCuentaLogeada(CuentaClave))
                         {
                             IChatServiceCallback Callback = CuentasConetadas[CuentaClave];
@@ -171,9 +198,9 @@ namespace GameChatService.Servicio
                                 return false;
                             }
                         }
-                    //}
+                    }
                 }
-            //}
+            }
             return true;
         }
 
@@ -196,13 +223,17 @@ namespace GameChatService.Servicio
         /// <returns>CuentaModel</returns>
         private CuentaModel ObtenerCuentaEnElDiccionario(CuentaModel Parcial)
         {
-            foreach (CuentaModel CuentaClave in CuentasConetadas.Keys)
+            lock (SincronizarObjeto)
             {
-                if (CuentaClave.NombreUsuario == Parcial.NombreUsuario)
+                foreach (CuentaModel CuentaClave in CuentasConetadas.Keys)
                 {
-                    return CuentaClave;
+                    if (CuentaClave.NombreUsuario == Parcial.NombreUsuario)
+                    {
+                        return CuentaClave;
+                    }
                 }
             }
+
             return null;
         }
         //Solo se modifico para que resivieran solo en sus salas el enviar mesaje y el conectarse
