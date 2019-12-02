@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Core;
 using System.Linq;
 using LogicaDelNegocio.DataAccess.Interfaces;
 using LogicaDelNegocio.Modelo;
 using AccesoDatos;
 using LogicaDelNegocio.Util;
-using System.Diagnostics;
 
 namespace LogicaDelNegocio.DataAccess
 {
@@ -20,24 +18,18 @@ namespace LogicaDelNegocio.DataAccess
         public CuentaModel Registrarse(CuentaModel cuentaNueva)
         {
             CuentaModel CuentaGuardada = null;
-            try
+            using (PersistenciaContainer Persistencia = new PersistenciaContainer())
             {
-                using (PersistenciaContainer Persistencia = new PersistenciaContainer())
+                int UsuariosRepetidos = ContarNombreDeUsuariosRepetidos(cuentaNueva.NombreUsuario);
+                if (UsuariosRepetidos == 0)
                 {
-                    int UsuariosRepetidos = ContarNombreDeUsuariosRepetidos(cuentaNueva.NombreUsuario);
-                    if (UsuariosRepetidos == 0)
-                    {
-                        Cuenta CuentaAGuardar = CrearCuentaAGuadar(cuentaNueva);
-                        CuentaAGuardar.Usuario1 = ConvertirAUsuario(cuentaNueva.Jugador);
-                        Persistencia.CuentaSet.Add(CuentaAGuardar);
-                        Persistencia.SaveChanges();
-                        CuentaGuardada =  ConvertirACuentaModel(CuentaAGuardar);
-                        CuentaGuardada.Jugador = ConvertirAUsuarioModel(CuentaAGuardar.Usuario1);
-                    }
+                    Cuenta CuentaAGuardar = CrearCuentaAGuadar(cuentaNueva);
+                    CuentaAGuardar.Usuario1 = ConvertirAUsuario(cuentaNueva.Jugador);
+                    Persistencia.CuentaSet.Add(CuentaAGuardar);
+                    Persistencia.SaveChanges();
+                    CuentaGuardada =  ConvertirACuentaModel(CuentaAGuardar);
+                    CuentaGuardada.Jugador = ConvertirAUsuarioModel(CuentaAGuardar.Usuario1);
                 }
-            }catch(EntityException)
-            {
-                throw;
             }
             return CuentaGuardada;
         }
@@ -49,32 +41,26 @@ namespace LogicaDelNegocio.DataAccess
         /// <returns>1 si las credenciales son validas, 0 si no, -1 si la cuenta no esta verificada</returns>
         public int IniciarSesion(CuentaModel Cuenta)
         {
-            try
+            using (PersistenciaContainer Persistencia = new PersistenciaContainer())
             {
-                using (PersistenciaContainer Persistencia = new PersistenciaContainer())
+                int LoginValido = 0;
+                Cuenta.Contrasena = Encriptador.ComputeSha256Hash(Cuenta.Contrasena);
+                int CuentaExistente = Persistencia.CuentaSet.Where
+                (cuentaEnDB => cuentaEnDB.Usuario == Cuenta.NombreUsuario
+                               && cuentaEnDB.Password == Cuenta.Contrasena).Count();
+                if (CuentaExistente == 1)
                 {
-                    int LoginValido = 0;
-                    Cuenta.Contrasena = Encriptador.ComputeSha256Hash(Cuenta.Contrasena);
-                    int CuentaExistente = Persistencia.CuentaSet.Where
-                        (cuentaEnDB => cuentaEnDB.Usuario == Cuenta.NombreUsuario
-                        && cuentaEnDB.Password == Cuenta.Contrasena).Count();
-                    if (CuentaExistente == 1)
+                    if (Persistencia.CuentaSet.Where(cuentaEnDB => cuentaEnDB.Usuario == Cuenta.NombreUsuario
+                                                                   && cuentaEnDB.Password == Cuenta.Contrasena && cuentaEnDB.Valida).Count() == 1)
                     {
-                        if (Persistencia.CuentaSet.Where(cuentaEnDB => cuentaEnDB.Usuario == Cuenta.NombreUsuario
-                        && cuentaEnDB.Password == Cuenta.Contrasena && cuentaEnDB.Valida).Count() == 1)
-                        {
-                            LoginValido = 1;
-                        }
-                        else
-                        {
-                            LoginValido = -1;
-                        }
+                        LoginValido = 1;
                     }
-                    return LoginValido;
+                    else
+                    {
+                        LoginValido = -1;
+                    }
                 }
-            }catch(EntityException)
-            {
-               throw;
+                return LoginValido;
             }
         }
 
@@ -86,29 +72,18 @@ namespace LogicaDelNegocio.DataAccess
         /// <returns>Boolean</returns>
         public Boolean VerificarCuenta(CuentaModel Cuenta)
         {
-            try
+            using (PersistenciaContainer Persistencia = new PersistenciaContainer())
             {
-                using (PersistenciaContainer Persistencia = new PersistenciaContainer())
-                {
-                    Cuenta CuentaAVerificar = Persistencia.CuentaSet.Where(cuentaRecuperada =>
+                Cuenta CuentaAVerificar = Persistencia.CuentaSet.Where(cuentaRecuperada =>
                     cuentaRecuperada.Usuario == Cuenta.NombreUsuario).FirstOrDefault();
-                    if (CuentaAVerificar != null)
-                    {
-                        CuentaAVerificar.Valida = true;
-                        Persistencia.SaveChanges();
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                if (CuentaAVerificar != null)
+                {
+                    CuentaAVerificar.Valida = true;
+                    Persistencia.SaveChanges();
+                    return true;
                 }
+                return false;
             }
-            catch (EntityException)
-            {
-                throw;
-            }
-            
         }
 
 
@@ -119,19 +94,11 @@ namespace LogicaDelNegocio.DataAccess
         /// <returns>La canitdad de usuarios repetidos</returns>
         private int ContarNombreDeUsuariosRepetidos(String NombreUsuario)
         {
-            try
+            using (PersistenciaContainer Persistencia = new PersistenciaContainer())
             {
-                using (PersistenciaContainer Persistencia = new PersistenciaContainer())
-                {
-                    return Persistencia.CuentaSet.Where
-                        (cuenta => cuenta.Usuario == NombreUsuario).Count();
-                }
+                return Persistencia.CuentaSet.Where
+                    (cuenta => cuenta.Usuario == NombreUsuario).Count();
             }
-            catch (EntityException)
-            {
-                throw;
-            }
-            
         }
 
         /// <summary>
@@ -276,36 +243,30 @@ namespace LogicaDelNegocio.DataAccess
         /// <returns>CuentaModel o Null si la cuenta no existe</returns>
         public CuentaModel RecuperarCuenta(CuentaModel CuentaARecuperar)
         {
-            try
+            using(PersistenciaContainer Persistencia = new PersistenciaContainer())
             {
-                using(PersistenciaContainer Persistencia = new PersistenciaContainer())
+                Cuenta CuentaRecuperada = Persistencia.CuentaSet.Where
+                    (cuenta => cuenta.Usuario == CuentaARecuperar.NombreUsuario).FirstOrDefault();
+                if(CuentaRecuperada != null)
                 {
-                    Cuenta CuentaRecuperada = Persistencia.CuentaSet.Where
-                        (cuenta => cuenta.Usuario == CuentaARecuperar.NombreUsuario).FirstOrDefault();
-                    if(CuentaRecuperada != null)
+                    CuentaModel Cuenta = ConvertirACuentaModel(CuentaRecuperada);
+                    JugadorModel Jugador = ConvertirAUsuarioModel(CuentaRecuperada.Usuario1);
+                    List<CorredorAdquiridoModel> CorredoresAdquiridos = new List<CorredorAdquiridoModel>();
+                    List<SeguidorAdquiridoModel> SeguidoresAdquiridos = new List<SeguidorAdquiridoModel>();
+                    foreach(CorredorAdquirido Corredor in CuentaRecuperada.Usuario1.CorredoresAdquiridos)
                     {
-                        CuentaModel Cuenta = ConvertirACuentaModel(CuentaRecuperada);
-                        JugadorModel Jugador = ConvertirAUsuarioModel(CuentaRecuperada.Usuario1);
-                        List<CorredorAdquiridoModel> CorredoresAdquiridos = new List<CorredorAdquiridoModel>();
-                        List<SeguidorAdquiridoModel> SeguidoresAdquiridos = new List<SeguidorAdquiridoModel>();
-                        foreach(CorredorAdquirido Corredor in CuentaRecuperada.Usuario1.CorredoresAdquiridos)
-                        {
-                            CorredoresAdquiridos.Add(ConvertirCorredorAdquiridoModel(Corredor));
-                        }
-                        foreach(PerseguidorAdquirido Perseguidor in CuentaRecuperada.Usuario1.PerseguidorAdquirido)
-                        {
-                            SeguidoresAdquiridos.Add(ConvertirSeguidorAdquiridoModel(Perseguidor));
-                        }
-                        Jugador.CorredoresAdquiridos = CorredoresAdquiridos;
-                        Jugador.SeguidoresAdquiridos = SeguidoresAdquiridos;
-                        Cuenta.Jugador = Jugador;
-                        return Cuenta;
+                        CorredoresAdquiridos.Add(ConvertirCorredorAdquiridoModel(Corredor));
                     }
-                    return null;
+                    foreach(PerseguidorAdquirido Perseguidor in CuentaRecuperada.Usuario1.PerseguidorAdquirido)
+                    {
+                        SeguidoresAdquiridos.Add(ConvertirSeguidorAdquiridoModel(Perseguidor));
+                    }
+                    Jugador.CorredoresAdquiridos = CorredoresAdquiridos;
+                    Jugador.SeguidoresAdquiridos = SeguidoresAdquiridos;
+                    Cuenta.Jugador = Jugador;
+                    return Cuenta;
                 }
-            }catch(EntityException)
-            {
-                throw;
+                return null;
             }
         }
     }

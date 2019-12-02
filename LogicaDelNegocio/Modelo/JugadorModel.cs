@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
+using AccesoDatos;
 using GameService.Dominio.Enum;
 
 namespace LogicaDelNegocio.Modelo
@@ -20,7 +20,11 @@ namespace LogicaDelNegocio.Modelo
         public List<CorredorAdquiridoModel> CorredoresAdquiridos { get; set; }
         [DataMember]
         public List<SeguidorAdquiridoModel> SeguidoresAdquiridos { get; set; }
-        
+        [DataMember]
         public EnumTipoDeJugador RolDelJugador { get; set; }
+        [DataMember] 
+        public CorredorAdquiridoModel CorredorSeleccionado { get; set; }
+        [DataMember]
+        public PerseguidorAdquirido PerseguidorSeleccionado { get; set; }
     }
 }

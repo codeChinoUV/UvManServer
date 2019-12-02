@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Pacman"
         mc:Ignorable="d"
         ResizeMode="NoResize"
+        Closing="OnClosing"
         Title="Servidor" Height="650" Width="700">
     <Grid>
         <Label Content="Direccion IP:" HorizontalAlignment="Left" Margin="19,46,0,0" VerticalAlignment="Top"/>
@@ -13,31 +13,37 @@
         <TextBlock x:Name="lDireccionIpServicioCuenta" HorizontalAlignment="Left" Margin="107,49,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="21" Width="320" IsEnabled="False"/>
         <Button x:Name="bIniciarServicioCuenta" Content="Iniciar" HorizontalAlignment="Left" Margin="376,126,0,0" VerticalAlignment="Top" Width="74" Click="BIniciarServicioCuenta_Click"/>
         <Button x:Name="bDetenerServicioCuenta" Content="Detener" HorizontalAlignment="Left" Margin="19,121,0,0" VerticalAlignment="Top" Width="75" Click="BDetenerServicioCuenta_Click"/>
-        <Label x:Name="label1" Content="Estado:" HorizontalAlignment="Left" Margin="19,80,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lPEstadoServicioCuenta" Content="Estado:" HorizontalAlignment="Left" Margin="19,80,0,0" VerticalAlignment="Top"/>
         <Separator HorizontalAlignment="Left" Height="15" Margin="0,153,0,0" VerticalAlignment="Top" Width="563"/>
-        <Label x:Name="label2" Content="Servicio de cuentas" HorizontalAlignment="Left" Margin="19,10,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lPServicioCuentas" Content="Servicio de cuentas" HorizontalAlignment="Left" Margin="19,10,0,0" VerticalAlignment="Top"/>
         <Label Content="Direccion IP:" HorizontalAlignment="Left" Margin="19,204,0,0" VerticalAlignment="Top"/>
         <Label x:Name="lEstadoServicioChat" Content="Estado" HorizontalAlignment="Left" Margin="91,238,0,0" VerticalAlignment="Top"/>
         <TextBlock x:Name="lDireccionIpServicioChat" HorizontalAlignment="Left" Margin="107,207,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="21" Width="320" IsEnabled="False"/>
         <Button x:Name="bIniciarServicioChat" Content="Iniciar" HorizontalAlignment="Left" Margin="376,284,0,0" VerticalAlignment="Top" Width="74" Click="BIniciarServicioChat_Click"/>
         <Button x:Name="bDetenerServicioChat" Content="Detener" HorizontalAlignment="Left" Margin="19,279,0,0" VerticalAlignment="Top" Width="75" Click="BDetenerServicioChat_Click"/>
-        <Label x:Name="label1_Copy" Content="Estado:" HorizontalAlignment="Left" Margin="19,238,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="label2_Copy" Content="Servicio de chat" HorizontalAlignment="Left" Margin="19,168,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lPEstadoServicioChat" Content="Estado:" HorizontalAlignment="Left" Margin="19,238,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lPServicioChat" Content="Servicio de chat" HorizontalAlignment="Left" Margin="19,168,0,0" VerticalAlignment="Top"/>
         <Separator HorizontalAlignment="Left" Height="16" Margin="0,465,0,0" VerticalAlignment="Top" Width="563"/>
         <Label Content="Direccion IP:" HorizontalAlignment="Left" Margin="19,365,0,0" VerticalAlignment="Top"/>
         <Label x:Name="lEstadoServicioSesion" Content="Estado" HorizontalAlignment="Left" Margin="91,399,0,0" VerticalAlignment="Top"/>
         <TextBlock x:Name="lDireccionIpServicioSesion" HorizontalAlignment="Left" Margin="107,368,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="21" Width="320" IsEnabled="False"/>
         <Button x:Name="bIniciarServicioSesion" Content="Iniciar" HorizontalAlignment="Left" Margin="376,445,0,0" VerticalAlignment="Top" Width="74" Click="BIniciarServicioSesion_Click" />
         <Button x:Name="bDetenerServicioSesion" Content="Detener" HorizontalAlignment="Left" Margin="19,440,0,0" VerticalAlignment="Top" Width="75" Click="BDetenerServicioSesion_Click" />
-        <Label x:Name="label1_Copy1" Content="Estado:" HorizontalAlignment="Left" Margin="19,399,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="label2_Copy1" Content="Servicio de sesiones" HorizontalAlignment="Left" Margin="19,329,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="label2_Copy2" Content="GameService" HorizontalAlignment="Left" Margin="19,479,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lPEstadoServicioSession" Content="Estado:" HorizontalAlignment="Left" Margin="19,399,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lPServicioSesion" Content="Servicio de sesiones" HorizontalAlignment="Left" Margin="19,329,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lPServicioJuego" Content="GameService" HorizontalAlignment="Left" Margin="19,479,0,0" VerticalAlignment="Top"/>
         <Button x:Name="bIniciarServicioDelJuego" Content="Iniciar" HorizontalAlignment="Left" Margin="376,584,0,0" VerticalAlignment="Top" Width="74" Click="BIniciarServicioDelJuego_Click" />
-        <Button x:Name="bDetenerServicioDelJuego" Content="Detener" HorizontalAlignment="Left" Margin="19,579,0,0" VerticalAlignment="Top" Width="75" />
+        <Button x:Name="bDetenerServicioDelJuego" Content="Detener" HorizontalAlignment="Left" Margin="19,579,0,0" VerticalAlignment="Top" Width="75" Click="BDetenerServicioDelJuego_Click"/>
         <Separator HorizontalAlignment="Left" Height="16" Margin="0,313,0,0" VerticalAlignment="Top" Width="563"/>
         <DataGrid x:Name="DGUsuariosConectados"  HorizontalAlignment="Left" Height="329" Margin="563,0,0,0" VerticalAlignment="Top" Width="129" AutoGenerateColumns="False" CanUserResizeColumns="True">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Usuarios conectados" Binding="{Binding nombreUsuario}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Usuarios conectados" Binding="{Binding NombreUsuario}" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <DataGrid x:Name="DGSalasConectadas" HorizontalAlignment="Left" Height="287" Margin="563,334,0,0" VerticalAlignment="Top" Width="129" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Salas actuales" Binding="{Binding Id}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Cuentas la sala" Binding="{Binding NumeroJugadoresEnSala}" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
         <Label x:Name="label" Content="DireccionIp del servidor" HorizontalAlignment="Left" Margin="206,4,0,0" VerticalAlignment="Top"/>
@@ -46,5 +52,6 @@
         <TextBlock x:Name="lDireccionIpServicioDeJuego" HorizontalAlignment="Left" Margin="107,512,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="21" Width="320" IsEnabled="False"/>
         <Label x:Name="lEstadoServicioDeJuego" Content="Estado" HorizontalAlignment="Left" Margin="91,539,0,0" VerticalAlignment="Top"/>
         <Label x:Name="label1_Copy2" Content="Estado:" HorizontalAlignment="Left" Margin="19,539,0,0" VerticalAlignment="Top"/>
+        
     </Grid>
 </Window>

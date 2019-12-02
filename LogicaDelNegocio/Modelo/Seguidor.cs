@@ -6,6 +6,5 @@ namespace LogicaDelNegocio.Modelo
     {
         public String NoPerseguidor { get; set; }
         public int VidasDisponibles { get; set; }
-        public SeguidorAdquiridoModel SeguidorAUsar { get; set; }
     }
 }

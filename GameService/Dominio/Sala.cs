@@ -2,7 +2,6 @@
 using LogicaDelNegocio.Modelo;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using GameService.Dominio.Enum;
 
 namespace GameService.Dominio
@@ -11,6 +10,7 @@ namespace GameService.Dominio
     {
         private Dictionary<CuentaModel, IGameServiceCallback> CuentasEnLaSala =
             new Dictionary<CuentaModel, IGameServiceCallback>();
+        private Dictionary<CuentaModel, String> DireccionesIpDeCuentas = new Dictionary<CuentaModel, string>();
 
         public String Id { get; set; }
 
@@ -25,10 +25,13 @@ namespace GameService.Dominio
 
         public delegate void NotificacionSalaVacia(Sala sala);
 
-        public Sala(String id, Boolean EsSalaPublica, CuentaModel cuenta, IGameServiceCallback serviceCallback)
+        public Sala(String id, Boolean EsSalaPublica, CuentaModel cuenta, IGameServiceCallback serviceCallback, 
+            String DireccionIpDelCliente)
         {
             Id = id;
+            AsignarTipoDeJugador(cuenta);
             CuentasEnLaSala.Add(cuenta, serviceCallback);
+            DireccionesIpDeCuentas.Add(cuenta, DireccionIpDelCliente);
             this.EsSalaPublica = EsSalaPublica;
         }
 
@@ -44,27 +47,35 @@ namespace GameService.Dominio
         /// <param name="cuenta">CuentaModel</param>
         /// <param name="serviceCallback">IGameServiceCallback</param>
         /// <returns>Boolean</returns>
-        public Boolean UnirseASala(CuentaModel cuenta, IGameServiceCallback serviceCallback)
+        public Boolean UnirseASala(CuentaModel cuenta, IGameServiceCallback serviceCallback, String DireccionIpDelCliente)
         {
             if (NumeroJugadoresEnSala >= 5) return false;
             lock (ObjetoParaSincronizar)
             {
-                Debug.WriteLine("En la sala hay " + CuentasEnLaSala.Count);
+                AsignarTipoDeJugador(cuenta);
                 foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
                 {
-                    callback.NuevoCuentaEnLaSala((cuenta));
+                    callback.NuevoCuentaEnLaSala(cuenta);
                 }
             }
-
             CuentasEnLaSala.Add(cuenta, serviceCallback);
+            DireccionesIpDeCuentas.Add(cuenta, DireccionIpDelCliente);
             if (NumeroJugadoresEnSala != 5) return true;
             {
                 lock (ObjetoParaSincronizar)
                 {
+                    EventoEnJuego eventoEnJuego = new EventoEnJuego();
+                    eventoEnJuego.EventoEnJuegoIniciarPartida();
                     foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
                     {
                         callback.SalaLlena();
                     }
+                    foreach(String direccionIp in DireccionesIpDeCuentas.Values)
+                    {
+                        UdpSender EnviadorDePaquetes = new UdpSender(direccionIp);
+                        EnviadorDePaquetes.EnviarPaquete(eventoEnJuego);
+                    }
+                    
                 }
             }
             return true;
@@ -77,7 +88,7 @@ namespace GameService.Dominio
         {
             lock (ObjetoParaSincronizar)
             {
-                foreach (IGameServiceCallback callback in CuentasEnLaSala.Keys)
+                foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
                 {
                     callback.TerminarPartida();
                 }
@@ -99,7 +110,6 @@ namespace GameService.Dominio
                     EstaEnLaSala = true;
                 }
             }
-
             return EstaEnLaSala;
         }
 
@@ -141,11 +151,27 @@ namespace GameService.Dominio
                     cuentaAEliminar = cuentaEnLaSala;
                 }
             }
-
             CuentasEnLaSala.Remove(cuentaAEliminar);
+            DireccionesIpDeCuentas.Remove(cuentaAEliminar);
             VerificarSiLaSalaEstaVacia();
+            ReasignarTipoDeJugador();
+            NotificarCuentasEnSalaSalidaDeJugador(cuentaAEliminar);
         }
 
+        /// <summary>
+        /// Notifica a las cuentas de la sala que una cuenta ha salido
+        /// </summary>
+        /// <param name="CuentaAEliminar">CuentaModel</param>
+        private void NotificarCuentasEnSalaSalidaDeJugador(CuentaModel CuentaAEliminar)
+        {
+            List<CuentaModel> cuentasEnLaSala = RecuperarCuentasEnLaSala();
+            foreach (IGameServiceCallback canal in CuentasEnLaSala.Values)
+            {
+                canal.CuentaAbandoSala(CuentaAEliminar);
+                canal.RefrescarCuentasEnSala(cuentasEnLaSala);
+            }
+        }
+        
         /// <summary>
         /// Verifica sila sala esta vacia, y si lo esta notifica
         /// </summary>
@@ -178,5 +204,16 @@ namespace GameService.Dominio
                 contadorDeCuentasEnLaSala++;
             }
         }
+
+        public void ReplicarMensajeACuentas(EventoEnJuego eventoEnJuego)
+        {
+            foreach (String DireccionIp in DireccionesIpDeCuentas.Values)
+            {
+                UdpSender EnviadorDePaquetesUDP = new UdpSender(DireccionIp);
+                EnviadorDePaquetesUDP.EnviarPaquete(eventoEnJuego);
+            }
+        }
+
+        
     }
 }

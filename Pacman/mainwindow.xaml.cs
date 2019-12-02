@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ServiceModel;
-using System.ServiceModel.Description;
 using System.Windows;
-using GameChatService;
 using GameChatService.Servicio;
-using CuentaService.Contrato;
-using SessionService.Contrato;
 using System.Net;
 using LogicaDelNegocio.Modelo;
 using LogicaDelNegocio.Util;
 using System.Threading;
+using GameService.Dominio;
+using System.ServiceModel.Channels;
 
 namespace Pacman
 {
@@ -32,14 +30,23 @@ namespace Pacman
         private ServiceHost JuegoHost;
         private String DireccionIP;
         private SessionManager ManejadorDesesiones = SessionManager.GetSessionManager();
+        private SalaManager ManejadorDeSalas = SalaManager.GetSalaManager();
+        private UdpReciver RecibidorPaquetesUDP = new UdpReciver();
+        private Thread HiloDeEscuchaPaquetesUDP;
 
         public List<CuentaModel> cuentasConectadas = new List<CuentaModel>();
-        
+        public List<Sala> SalasActuales = new List<Sala>();
 
-        private void CargarUsuariosConectados()
+        private void CargarUsuariosConectadosEnLaTabla()
         {
             DGUsuariosConectados.ItemsSource = null;
             DGUsuariosConectados.ItemsSource = cuentasConectadas;
+        }
+
+        private void CargarInformacionSalasCreadasEnLaTabla()
+        {
+            DGSalasConectadas.ItemsSource = null;
+            DGSalasConectadas.ItemsSource = SalasActuales;
         }
 
         private void ObtenerDireccionIpLocal()
@@ -69,13 +76,23 @@ namespace Pacman
             ManejadorDesesiones.UsuarioDesconectado += UsuarioDejoSession;
         }
 
+        private void SuscribirseAEscuchaDeServicioDeSala()
+        {
+            ManejadorDeSalas.SalaCreada += SeCreoUnaNuevaSala;
+            ManejadorDeSalas.SalaDestriuda += SeDestruyoUnaSala;
+            ManejadorDeSalas.SeUnioASala += SeUnioCuentaASala;
+            ManejadorDeSalas.DejoSala += DejoCuentaSala;
+        }
+
         public MainWindow()
         {
             InitializeComponent();
             ObtenerDireccionIpLocal();
-            CargarUsuariosConectados();
+            CargarUsuariosConectadosEnLaTabla();
+            CargarInformacionSalasCreadasEnLaTabla();
             MostrarDireccionesDeServicios();
             SuscribirseAEscuchaDeServicioDeSession();
+            SuscribirseAEscuchaDeServicioDeSala();
         }
 
         private void BIniciarServicioCuenta_Click(object sender, RoutedEventArgs e)
@@ -84,7 +101,7 @@ namespace Pacman
             CuentaHost = new ServiceHost(typeof(CuentaService.Servicio.CuentaService));
             try
             {
-                CuentaHost.Closed += hostCuentaOnClosed;
+                CuentaHost.Closed += HostCuentaOnClosed;
                 CuentaHost.Open();
             }
             catch (Exception excepcion)
@@ -107,7 +124,7 @@ namespace Pacman
             bIniciarServicioChat.IsEnabled = false;
             try
             {
-                ChatHost.Closed += hostChatOnClosed;
+                ChatHost.Closed += HostChatOnClosed;
                 ChatHost.Open();
             }
             catch (Exception excepcionDelServicio)
@@ -130,7 +147,7 @@ namespace Pacman
             SesionHost = new ServiceHost(typeof(SessionService.Servicio.SessionService));
             try
             {
-                SesionHost.Closed += hostSesionOnClosed;
+                SesionHost.Closed += HostSesionOnClosed;
                 SesionHost.Open();
             }
             catch (Exception excepcionDelServicio)
@@ -147,14 +164,28 @@ namespace Pacman
             }
         }
 
+        private void InicializarEscuchaDePaquetesUDP()
+        {
+            HiloDeEscuchaPaquetesUDP = new Thread(RecibidorPaquetesUDP.RecibirDatos);
+            //HiloDeEscuchaPaquetesUDP.IsBackground = true;
+            HiloDeEscuchaPaquetesUDP.Start();
+        }
+
+        private void SuscribirseAEventosDeEscuchaDePaquetesUDP()
+        {
+            RecibidorPaquetesUDP.EventoRecibido += ManejadorDeSalas.ReplicarDatosRecibidosASala;
+        }
+
         private void BIniciarServicioDelJuego_Click(object sender, RoutedEventArgs e)
         {
             bIniciarServicioDelJuego.IsEnabled = false;
             JuegoHost = new ServiceHost(typeof(GameService.Servicio.GameService));
             try
             {
-                JuegoHost.Closed += hostSesionOnClosed;
+                JuegoHost.Closed += HostSesionOnClosed;
                 JuegoHost.Open();
+                SuscribirseAEventosDeEscuchaDePaquetesUDP();
+                InicializarEscuchaDePaquetesUDP();
             }
             catch (Exception excepcionDelServicio)
             {
@@ -193,8 +224,6 @@ namespace Pacman
                 }
             }
         }
-
-        
 
         private void BDetenerServicioCuenta_Click(object sender, RoutedEventArgs e)
         {
@@ -243,34 +272,117 @@ namespace Pacman
                 }
             }
         }
+
+        private void BDetenerServicioDelJuego_Click(object sender, RoutedEventArgs args)
+        {
+            if (JuegoHost != null)
+            {
+                try
+                {
+                    JuegoHost.Close();
+                    RecibidorPaquetesUDP.LiberarRecursos();
+                    HiloDeEscuchaPaquetesUDP?.Abort();
+                }
+                catch (Exception ex)
+                {
+                    lEstadoServicioDeJuego.Content = ex.Message;
+                }
+                finally
+                {
+                    if (JuegoHost.State == CommunicationState.Closed)
+                    {
+                        lEstadoServicioDeJuego.Content = "Cerrada";
+                        bIniciarServicioDelJuego.IsEnabled = true;
+                        bDetenerServicioDelJuego.IsEnabled = false;
+                    }
+                }
+            }
+        }
         
         private void UsuarioDejoSession(CuentaModel cuenta)
         {
             cuentasConectadas.Remove(cuenta);
-            Dispatcher.BeginInvoke(new ThreadStart(CargarUsuariosConectados));
+            if (Dispatcher != null)
+            {
+                Dispatcher.BeginInvoke(new ThreadStart(CargarUsuariosConectadosEnLaTabla));
+            }
         }
    
         private void NuevoUsuarioEnSession(CuentaModel cuenta)
         {
             cuentasConectadas.Add(cuenta);
-            Dispatcher.BeginInvoke(new ThreadStart(CargarUsuariosConectados));
+            if (Dispatcher != null)
+            {
+                Dispatcher.BeginInvoke(new ThreadStart(CargarUsuariosConectadosEnLaTabla));
+            }
         }
 
-        private void hostCuentaOnClosed(Object sender, EventArgs e)
+        private void HostCuentaOnClosed(Object sender, EventArgs e)
         {
             lEstadoServicioCuenta.Content += "Servicio cerrado";
         }
 
-        private void hostChatOnClosed(Object sender, EventArgs e)
+        private void HostChatOnClosed(Object sender, EventArgs e)
         {
             lEstadoServicioChat.Content += "Servicio cerrado";
         }
 
-        private void hostSesionOnClosed(Object sender, EventArgs e)
+        private void HostSesionOnClosed(Object sender, EventArgs e)
         {
             lEstadoServicioSesion.Content += "Servicio cerrado";
         }
 
+        private void SeCreoUnaNuevaSala(Sala NuevaSala)
+        {
+            SalasActuales.Add(NuevaSala);
+            if (Dispatcher != null)
+            {
+                Dispatcher.BeginInvoke(new ThreadStart(CargarInformacionSalasCreadasEnLaTabla));
+            }
+        }
+   
+        private void SeDestruyoUnaSala(Sala SalaDestruida)
+        {
+            Sala SalaADestruir = null;
+            foreach(Sala SalaEnTabla in SalasActuales)
+            {
+                if(SalaEnTabla.Id == SalaDestruida.Id)
+                {
+                    SalaADestruir = SalaEnTabla;
+                }
+            }
+            if(SalaADestruir != null)
+            {
+                SalasActuales.Remove(SalaDestruida);
+                if (Dispatcher != null)
+                {
+                    Dispatcher.BeginInvoke(new ThreadStart(CargarInformacionSalasCreadasEnLaTabla));
+                }
+            }
+        }
+
+        private void SeUnioCuentaASala(String id)
+        {
+            if (Dispatcher != null)
+            {
+                Dispatcher.BeginInvoke(new ThreadStart(CargarInformacionSalasCreadasEnLaTabla));
+            }
+        }
+
+        private void DejoCuentaSala(String id)
+        {
+            if (Dispatcher != null)
+            {
+                Dispatcher.BeginInvoke(new ThreadStart(CargarInformacionSalasCreadasEnLaTabla));
+            }
+        }
+
         
+        void OnClosing(object Sender, EventArgs e)
+        {
+            RecibidorPaquetesUDP.LiberarRecursos();
+            HiloDeEscuchaPaquetesUDP?.Abort();
+        }
+
     }
 }

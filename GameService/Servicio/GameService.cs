@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GameService.Contrato;
 using GameService.Dominio;
 using GameService.Dominio.Enum;
 using LogicaDelNegocio.Modelo;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
+using GameService.Dominio;
 
 namespace GameService.Servicio
 {
@@ -21,6 +24,18 @@ namespace GameService.Servicio
             }
         }
 
+        public String DireccionIpDelCliente
+        {
+            get
+            {
+                OperationContext ContextoActual = OperationContext.Current;
+                MessageProperties PropiedadesDelContexto = ContextoActual.IncomingMessageProperties;
+                RemoteEndpointMessageProperty PropiedadesDelPuntoDeLlegada = (RemoteEndpointMessageProperty)
+                    PropiedadesDelContexto[RemoteEndpointMessageProperty.Name];
+                return PropiedadesDelPuntoDeLlegada.Address;
+            }
+        }
+
         /// <summary>
         /// Crea una sala personalizada
         /// </summary>
@@ -30,7 +45,7 @@ namespace GameService.Servicio
         /// <returns>EnumEstadoCrearSalaConId</returns>
         public EnumEstadoCrearSalaConId CrearSala(string Id, bool EsSalaPublica, CuentaModel Cuenta)
         {
-            return ManejadorDeSala.CrearSala(Id, EsSalaPublica, Cuenta, ActualCallback);
+            return ManejadorDeSala.CrearSala(Id, EsSalaPublica, Cuenta, ActualCallback, DireccionIpDelCliente);
         }
 
         /// <summary>
@@ -41,7 +56,7 @@ namespace GameService.Servicio
         /// <returns>EnumEstadoDeUnirseASala</returns>
         public EnumEstadoDeUnirseASala UnirseASalaPrivada(string Id, CuentaModel Cuenta)
         {
-            return ManejadorDeSala.UnirseASalaConId(Id, Cuenta, ActualCallback);
+            return ManejadorDeSala.UnirseASalaConId(Id, Cuenta, ActualCallback, DireccionIpDelCliente);
         }
 
         /// <summary>
@@ -51,7 +66,7 @@ namespace GameService.Servicio
         /// <returns>Boolean</returns>
         public bool UnirseASala(CuentaModel Cuenta)
         {
-            return ManejadorDeSala.UnisrseASalaDisponible(Cuenta, ActualCallback);
+            return ManejadorDeSala.UnisrseASalaDisponible(Cuenta, ActualCallback, DireccionIpDelCliente);
         }
 
         /// <summary>
@@ -97,6 +112,10 @@ namespace GameService.Servicio
         public bool MiSalaEsPublica(CuentaModel Cuenta)
         {
             Sala MiSala = ManejadorDeSala.RecuperarSalaDeCuenta(Cuenta);
+            EventoEnJuego eventoEnJuego = new EventoEnJuego();
+            eventoEnJuego.Ping = 10;
+            UdpSender EnviadorUdp = new UdpSender(DireccionIpDelCliente);
+            EnviadorUdp.EnviarPaquete(eventoEnJuego);
             if (MiSala != null)
             {
                 return MiSala.EsSalaPublica;

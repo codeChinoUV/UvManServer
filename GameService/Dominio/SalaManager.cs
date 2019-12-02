@@ -4,12 +4,17 @@ using LogicaDelNegocio.Modelo;
 using LogicaDelNegocio.Util;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
+using GameService.Dominio;
+using GameService.Dominio.Enum;
 
 
 namespace GameService.Dominio
 {
     public sealed class SalaManager
     {
+        private readonly int PUERTO_ESCUCHA_UDP = 8090;
         private static SalaManager ManejadorDeSala = new SalaManager();
         private static List<Sala> SalasCreadas = new List<Sala>();
         private SessionManager ManejadorDeSesiones = SessionManager.GetSessionManager();
@@ -66,16 +71,18 @@ namespace GameService.Dominio
         /// <param name="CuentaAAgregar">Cuenta</param>
         /// <param name="ActualCallback">IGameServiceCallback</param>
         /// <returns>EnumEstadoDeUnirseASala</returns>
-        public EnumEstadoDeUnirseASala UnirseASalaConId(String Id, CuentaModel CuentaAAgregar, IGameServiceCallback ActualCallback )
+        public EnumEstadoDeUnirseASala UnirseASalaConId(String Id, CuentaModel CuentaAAgregar, IGameServiceCallback ActualCallback,
+            String DireccionIpDelCliente)
         {
             EnumEstadoDeUnirseASala estadoDeUnirseASala = EnumEstadoDeUnirseASala.NoSeEncuentraEnSesion;
             if (ManejadorDeSesiones.VerificarCuentaLogeada(CuentaAAgregar))
             {
+                CuentaAAgregar = ManejadorDeSesiones.ObtenerCuentaCompleta(CuentaAAgregar);
                 foreach (Sala sala in SalasCreadas)
                 {
                     if (sala.Id == Id)
                     {
-                        if (sala.UnirseASala(CuentaAAgregar, ActualCallback))
+                        if (sala.UnirseASala(CuentaAAgregar, ActualCallback, DireccionIpDelCliente))
                         {
                             estadoDeUnirseASala = EnumEstadoDeUnirseASala.UnidoCorrectamente;
                             SeUnioASala?.Invoke(sala.Id);
@@ -84,10 +91,12 @@ namespace GameService.Dominio
                         {
                             estadoDeUnirseASala = EnumEstadoDeUnirseASala.SalaLlena;
                         }
+                        break;
                     }
                 }
+                estadoDeUnirseASala = EnumEstadoDeUnirseASala.SalaInexistente;
             }
-            estadoDeUnirseASala = EnumEstadoDeUnirseASala.SalaInexistente;
+            
             return estadoDeUnirseASala;
         }
 
@@ -97,21 +106,22 @@ namespace GameService.Dominio
         /// <param name="Cuenta">CuentaModel</param>
         /// <param name="ActualCallback">IGameServiceCallback</param>
         /// <returns>Boolean</returns>
-        public Boolean UnisrseASalaDisponible(CuentaModel Cuenta, IGameServiceCallback ActualCallback)
+        public Boolean UnisrseASalaDisponible(CuentaModel Cuenta, IGameServiceCallback ActualCallback, String DireccionIpDelCliente)
         {
             Boolean seUnioASala = false;
             if (ManejadorDeSesiones.VerificarCuentaLogeada(Cuenta))
             {
+                Cuenta = ManejadorDeSesiones.ObtenerCuentaCompleta(Cuenta);
                 Sala SalaAUnirse = BuscarSalaIncompleta();
                 if (SalaAUnirse != null)
                 {
-                    SalaAUnirse.UnirseASala(Cuenta, ActualCallback);
+                    SalaAUnirse.UnirseASala(Cuenta, ActualCallback, DireccionIpDelCliente);
                     seUnioASala = true;
                     SeUnioASala?.Invoke(SalaAUnirse.Id);
                 }
                 else
                 {
-                    Sala NuevaSala = CrearSalaConIdAleatorio(Cuenta, ActualCallback);
+                    Sala NuevaSala = CrearSalaConIdAleatorio(Cuenta, ActualCallback, DireccionIpDelCliente);
                     SalasCreadas.Add(NuevaSala);
                     SuscribirseAEventosDeSala(NuevaSala);
                     SalaCreada?.Invoke(NuevaSala);
@@ -130,29 +140,33 @@ namespace GameService.Dominio
         /// <param name="ActualCallback">IGameServiceCallback</param>
         /// <returns>EnumEstadoCrearSalaConId</returns>
         public EnumEstadoCrearSalaConId CrearSala(string Id, Boolean EsSalaPublica, CuentaModel Cuenta, 
-            IGameServiceCallback ActualCallback)
+            IGameServiceCallback ActualCallback, String DireccionIpDelCliente)
         {
             EnumEstadoCrearSalaConId EstadoDeCreacionDeSala = EnumEstadoCrearSalaConId.NoSeEncuentraEnSesion;
-            if (!EstaElIdDeSalaEnUso(Id))
+            if (ManejadorDeSesiones.VerificarCuentaLogeada(Cuenta))
             {
-                Sala SalaAAgregar = new Sala(Id, EsSalaPublica, Cuenta, ActualCallback);
-                SalasCreadas.Add(SalaAAgregar);
-                SuscribirseAEventosDeSala(SalaAAgregar);
-                SalaCreada?.Invoke(SalaAAgregar);
-                EstadoDeCreacionDeSala = EnumEstadoCrearSalaConId.CreadaCorrectamente;
+                if (!EstaElIdDeSalaEnUso(Id))
+                {
+                    Sala SalaAAgregar = new Sala(Id, EsSalaPublica, Cuenta, ActualCallback, DireccionIpDelCliente);
+                    SalasCreadas.Add(SalaAAgregar);
+                    SuscribirseAEventosDeSala(SalaAAgregar);
+                    SalaCreada?.Invoke(SalaAAgregar);
+                    EstadoDeCreacionDeSala = EnumEstadoCrearSalaConId.CreadaCorrectamente;
+                }
+                else
+                {
+                    EstadoDeCreacionDeSala = EnumEstadoCrearSalaConId.IdYaExistente;
+                }
             }
-            else
-            {
-                EstadoDeCreacionDeSala = EnumEstadoCrearSalaConId.IdYaExistente;
-            }
+            
             return EstadoDeCreacionDeSala;
         }
 
         /// <summary>
         /// Verifica si la cuenta se encuentra en una sala
         /// </summary>
-        /// <param name="Cuenta"></param>
-        /// <returns></returns>
+        /// <param name="Cuenta">CuentaModel</param>
+        /// <returns>Boolean</returns>
         public bool VerificarSiEstoyEnSala(CuentaModel Cuenta)
         {
             Boolean SeEncuentraEnSala = false;
@@ -254,14 +268,14 @@ namespace GameService.Dominio
         /// <param name="Cuenta">CuentaModel</param>
         /// <param name="ActualCallback">IGameServiceCallback</param>
         /// <returns>Sala</returns>
-        private Sala CrearSalaConIdAleatorio(CuentaModel Cuenta, IGameServiceCallback ActualCallback)
+        private Sala CrearSalaConIdAleatorio(CuentaModel Cuenta, IGameServiceCallback ActualCallback, String DireccionIpDelCliente)
         {
             String IdDeSala;
             do
             {
                 IdDeSala = GeneradorCodigo.GenerarCadena();
             } while (EstaElIdDeSalaEnUso(IdDeSala));
-            Sala NuevaSala = new Sala(IdDeSala, true, Cuenta, ActualCallback);
+            Sala NuevaSala = new Sala(IdDeSala, true, Cuenta, ActualCallback, DireccionIpDelCliente);
             return NuevaSala;
         }
 
@@ -277,6 +291,30 @@ namespace GameService.Dominio
                 SalaDeLaCuenta.AbandonarSala(cuenta);
                 DejoSala?.Invoke(SalaDeLaCuenta.Id) ;
             }
+        }
+        
+        public void ReplicarDatosRecibidosASala(EventoEnJuego eventoEnJuego)
+        {
+            CuentaModel CuentaRecibida = RecuperarCuentaDelEvento(eventoEnJuego);
+            Sala SalaDeLaCuenta = RecuperarSalaDeCuenta(CuentaRecibida);
+            SalaDeLaCuenta.ReplicarMensajeACuentas(eventoEnJuego);
+
+        }
+
+        private CuentaModel RecuperarCuentaDelEvento(EventoEnJuego eventoEnJuego)
+        {
+            CuentaModel cuentaDelEvento = new CuentaModel();
+            switch (eventoEnJuego.TipoDeEvento)
+            {
+                case EnumTipoDeEventoEnJuego.MovimientoJugador:
+                    cuentaDelEvento.NombreUsuario = eventoEnJuego.DatosDelMovimiento.Usuario;
+                    break;
+                case EnumTipoDeEventoEnJuego.MuerteJugador:
+                    cuentaDelEvento.NombreUsuario = eventoEnJuego.DatosMuerteDeUnJugador.Usuario;
+                    break;
+            }
+
+            return cuentaDelEvento;
         }
     }
 }

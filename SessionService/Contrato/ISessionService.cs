@@ -1,11 +1,5 @@
-﻿using SessionService.Dominio;
-using SessionService.Dominio.Enum;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
+﻿using SessionService.Dominio.Enum;
 using System.ServiceModel;
-using System.Text;
 using LogicaDelNegocio.Modelo;
 
 namespace SessionService.Contrato

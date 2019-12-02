@@ -16,5 +16,3 @@ C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\SessionService\obj\Deb
 C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\SessionService\obj\Debug\SessionService.csproj.CopyComplete
 C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\SessionService\obj\Debug\SessionService.dll
 C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\SessionService\obj\Debug\SessionService.pdb
-C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\SessionService\bin\Debug\SessionService.dll.CodeAnalysisLog.xml
-C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\SessionService\bin\Debug\SessionService.dll.lastcodeanalysissucceeded

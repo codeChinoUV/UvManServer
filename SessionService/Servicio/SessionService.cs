@@ -6,6 +6,7 @@ using LogicaDelNegocio.Modelo;
 using LogicaDelNegocio.DataAccess;
 using LogicaDelNegocio.DataAccess.Interfaces;
 using System.Data.Entity.Core;
+using System.Diagnostics;
 using LogicaDelNegocio.Util;
 using System.Threading;
 
@@ -17,9 +18,6 @@ namespace SessionService.Servicio
 
     public class SessionService : ISessionService
     {
-
-        private object ObjetoDeSincronizacion = new object();
-
         public ISessionServiceCallback ActualCallback {
             get {
                 return OperationContext.Current.GetCallbackChannel<ISessionServiceCallback>();
@@ -52,18 +50,17 @@ namespace SessionService.Servicio
                     CuentaModel CuentaCompleta = PersistenciaCuenta.RecuperarCuenta(Cuenta);
                     SessionManager ManejadorDeSesiones = SessionManager.GetSessionManager();
                     Thread HiloDeSeguimientoDeCliente = SeguirEstadoDelCliente(CuentaCompleta,ActualCallback);
-                    if (ManejadorDeSesiones.AgregarCuentaLogeada(CuentaCompleta, null))
+                    if (ManejadorDeSesiones.AgregarCuentaLogeada(CuentaCompleta, HiloDeSeguimientoDeCliente))
                     {
                         return EnumEstadoInicioSesion.InicioSesionCorrecto;
                     }
-                    else
-                    {
-                        return EnumEstadoInicioSesion.SeEncuentraLogeada;
-                    }
+
+                    return EnumEstadoInicioSesion.SeEncuentraLogeada;
                 }
                 return (EnumEstadoInicioSesion) ExisteCuenta ;
-            }catch(EntityException)
+            }catch(EntityException exception)
             {
+                Debug.Write(exception.Message);
                 return EnumEstadoInicioSesion.ErrorBaseDatos;
             }
         }
@@ -76,8 +73,8 @@ namespace SessionService.Servicio
         /// <returns>Thread</returns>
         private Thread SeguirEstadoDelCliente(CuentaModel CuentaASeguir, ISessionServiceCallback CallbackActual)
         {
-            EstadoCliente EstadoCliente = new EstadoCliente(ActualCallback,CuentaASeguir);
-            Thread HiloEstadoDelCliente = new Thread(new ThreadStart(EstadoCliente.ChecarEstadoDelCliente));
+            EstadoCliente EstadoCliente = new EstadoCliente(CallbackActual,CuentaASeguir);
+            Thread HiloEstadoDelCliente = new Thread(EstadoCliente.ChecarEstadoDelCliente);
             HiloEstadoDelCliente.Start();
             return HiloEstadoDelCliente;
         }
@@ -120,6 +117,10 @@ namespace SessionService.Servicio
                     ManejadorDeSesiones.QuitarCuentaLogeada(CuentaSiguiendo);
                 }
                 catch (CommunicationException)
+                {
+                    ManejadorDeSesiones.QuitarCuentaLogeada(CuentaSiguiendo);
+                }
+                catch (TimeoutException)
                 {
                     ManejadorDeSesiones.QuitarCuentaLogeada(CuentaSiguiendo);
                 }

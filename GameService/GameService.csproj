@@ -49,10 +49,17 @@
     <Compile Include="Contrato\IGameServiceCallback.cs" />
     <Compile Include="Dominio\Enum\EnumEstadoCrearSalaConId.cs" />
     <Compile Include="Dominio\Enum\EnumEstadoDeUnirseASala.cs" />
+    <Compile Include="Dominio\InicioPartida.cs" />
+    <Compile Include="Dominio\MovimientoJugador.cs" />
+    <Compile Include="Dominio\MuerteJugador.cs" />
     <Compile Include="Dominio\Sala.cs" />
     <Compile Include="Dominio\SalaManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Servicio\GameService.cs" />
+    <Compile Include="Dominio\Enum\EnumTipoDeEventoEnJuego.cs" />
+    <Compile Include="Dominio\EventoEnJuego.cs" />
+    <Compile Include="UdpConnection\UdpReciver.cs" />
+    <Compile Include="UdpConnection\UdpSender.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

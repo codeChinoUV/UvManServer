@@ -1,7 +1,6 @@
 ﻿using LogicaDelNegocio.Modelo;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 
 namespace LogicaDelNegocio.Util
@@ -31,7 +30,8 @@ namespace LogicaDelNegocio.Util
         /// <summary>
         /// Agrega una CuentaModelYaLogeada en la sesion, si esta aun no se encuentra en la sesion
         /// </summary>
-        /// <param name="cuenta"></param>
+        /// <param name="cuenta">CuentaModel</param>
+        /// <param name="hiloDeSeguimientoDelCliente">Thread</param>
         /// <returns>Boolean</returns>
         public Boolean AgregarCuentaLogeada(CuentaModel cuenta, Thread hiloDeSeguimientoDelCliente)
         {
@@ -65,12 +65,9 @@ namespace LogicaDelNegocio.Util
             if(cuentaActual != null)
             {
                 Thread hiloDeSeguimientoDelCliente = CuentasLogeadas[cuentaActual];
-                if (hiloDeSeguimientoDelCliente != null)
-                {
-                    hiloDeSeguimientoDelCliente.Abort();
-                }
                 CuentasLogeadas.Remove(cuentaActual);
                 UsuarioDesconectado?.Invoke(cuentaActual);
+                hiloDeSeguimientoDelCliente?.Abort();
             }
         }
 
@@ -90,6 +87,25 @@ namespace LogicaDelNegocio.Util
                 }
             }
             return false;
+        }    
+        
+        /// <summary>
+        /// Regresa la cuenta con todos los datos que tiene almacenada la sesion
+        /// </summary>
+        /// <param name="cuenta">CuentaModel</param>
+        /// <returns>CuentaModel</returns>
+        public CuentaModel ObtenerCuentaCompleta(CuentaModel cuenta)
+        {
+            CuentaModel CuentaCompleta = null;
+            foreach (CuentaModel cuentaLoegada in CuentasLogeadas.Keys)
+            {
+                if (cuenta.NombreUsuario == cuentaLoegada.NombreUsuario)
+                {
+                    CuentaCompleta = cuentaLoegada;
+                    break;
+                }
+            }
+            return CuentaCompleta;
         }
     }
 }
