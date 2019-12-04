@@ -3,6 +3,7 @@ using LogicaDelNegocio.Modelo;
 using System;
 using System.Collections.Generic;
 using GameService.Dominio.Enum;
+using System.Timers;
 
 namespace GameService.Dominio
 {
@@ -11,6 +12,8 @@ namespace GameService.Dominio
         private Dictionary<CuentaModel, IGameServiceCallback> CuentasEnLaSala =
             new Dictionary<CuentaModel, IGameServiceCallback>();
         private Dictionary<CuentaModel, String> DireccionesIpDeCuentas = new Dictionary<CuentaModel, string>();
+        private readonly int PUERTO_ENVIO_UDP_1 = 8296;
+        private readonly int PUERTO_ENVIO_UDP_2 = 8297;
 
         public String Id { get; set; }
 
@@ -64,21 +67,55 @@ namespace GameService.Dominio
             {
                 lock (ObjetoParaSincronizar)
                 {
-                    EventoEnJuego eventoEnJuego = new EventoEnJuego();
-                    eventoEnJuego.EventoEnJuegoIniciarPartida();
                     foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
                     {
                         callback.SalaLlena();
                     }
-                    foreach(String direccionIp in DireccionesIpDeCuentas.Values)
-                    {
-                        UdpSender EnviadorDePaquetes = new UdpSender(direccionIp);
-                        EnviadorDePaquetes.EnviarPaquete(eventoEnJuego);
-                    }
-                    
+                    TemporizarEnvioMensajeCambiarPantalla();
                 }
             }
             return true;
+        }
+
+        private void TemporizarEnvioMensajeCambiarPantalla()
+        {
+            Timer temporizador = new Timer(5000);
+            temporizador.Elapsed += EnviarMensajeCambiarDePantalla;
+            temporizador.AutoReset = false;
+            temporizador.Enabled = true;
+            temporizador.Start();
+        }
+
+        private void TemporizarEnvioMensajeInicioJuego()
+        {
+            Timer temporizador = new Timer(6000);
+            temporizador.Elapsed += EnviarMensajeInicioJuego;
+            temporizador.AutoReset = false;
+            temporizador.Enabled = true;
+            temporizador.Start();
+        }
+
+        private void EnviarMensajeCambiarDePantalla(object source, ElapsedEventArgs e)
+        {
+            EventoEnJuego eventoEnJuego = new EventoEnJuego();
+            eventoEnJuego.EventoEnJuegoCambiarPantalla(Id);
+            foreach (String direccionIp in DireccionesIpDeCuentas.Values)
+            {
+                UdpSender EnviadorDePaquetes = new UdpSender(direccionIp, PUERTO_ENVIO_UDP_1, PUERTO_ENVIO_UDP_2);
+                EnviadorDePaquetes.EnviarPaquete(eventoEnJuego);
+            }
+            TemporizarEnvioMensajeInicioJuego();
+        }
+
+        private void EnviarMensajeInicioJuego(object source, ElapsedEventArgs e)
+        {
+            EventoEnJuego eventoEnJuego = new EventoEnJuego();
+            eventoEnJuego.EventoEnJuegoIniciarPartida(Id);
+            foreach (String direccionIp in DireccionesIpDeCuentas.Values)
+            {
+                UdpSender EnviadorDePaquetes = new UdpSender(direccionIp, PUERTO_ENVIO_UDP_1, PUERTO_ENVIO_UDP_2);
+                EnviadorDePaquetes.EnviarPaquete(eventoEnJuego);
+            }
         }
 
         /// <summary>
@@ -167,8 +204,15 @@ namespace GameService.Dominio
             List<CuentaModel> cuentasEnLaSala = RecuperarCuentasEnLaSala();
             foreach (IGameServiceCallback canal in CuentasEnLaSala.Values)
             {
-                canal.CuentaAbandoSala(CuentaAEliminar);
-                canal.RefrescarCuentasEnSala(cuentasEnLaSala);
+                try
+                {
+                    canal.CuentaAbandoSala(CuentaAEliminar);
+                    canal.RefrescarCuentasEnSala(cuentasEnLaSala);
+                }
+                catch (ObjectDisposedException)
+                {
+                    //Preguntar
+                }
             }
         }
         
@@ -209,7 +253,7 @@ namespace GameService.Dominio
         {
             foreach (String DireccionIp in DireccionesIpDeCuentas.Values)
             {
-                UdpSender EnviadorDePaquetesUDP = new UdpSender(DireccionIp);
+                UdpSender EnviadorDePaquetesUDP = new UdpSender(DireccionIp, PUERTO_ENVIO_UDP_1, PUERTO_ENVIO_UDP_2);
                 EnviadorDePaquetesUDP.EnviarPaquete(eventoEnJuego);
             }
         }

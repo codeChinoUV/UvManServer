@@ -17,6 +17,9 @@ namespace Pacman
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly int PUERTO_ESCUCHA_UDP_1 = 8090;
+        private readonly int PUERTO_ESCUCHA_UDP_2 = 8091;
+        
         private const String ENDPOINT_TCP_SERVICIO_CHAT = "net.tcp://localhost:8192/ChatService";
         private const String ENDPOINT_HTTP_SERVICIO_CHAT = "http://localhost:8182/ChatService";
         private const String ENDPOINT_TCP_SERVICIO_CUENTA = "net.tcp://localhost:8092/CuentaService";
@@ -31,8 +34,11 @@ namespace Pacman
         private String DireccionIP;
         private SessionManager ManejadorDesesiones = SessionManager.GetSessionManager();
         private SalaManager ManejadorDeSalas = SalaManager.GetSalaManager();
-        private UdpReciver RecibidorPaquetesUDP = new UdpReciver();
+        private UdpReciver RecibidorPaquetesUDP1 = new UdpReciver();
+        public UdpReciver RecibidorPaquetesUDP2 = new UdpReciver();
+
         private Thread HiloDeEscuchaPaquetesUDP;
+        private Thread HiloDeEscuchaPaquetesUDP2;
 
         public List<CuentaModel> cuentasConectadas = new List<CuentaModel>();
         public List<Sala> SalasActuales = new List<Sala>();
@@ -166,14 +172,16 @@ namespace Pacman
 
         private void InicializarEscuchaDePaquetesUDP()
         {
-            HiloDeEscuchaPaquetesUDP = new Thread(RecibidorPaquetesUDP.RecibirDatos);
-            //HiloDeEscuchaPaquetesUDP.IsBackground = true;
-            HiloDeEscuchaPaquetesUDP.Start();
+            HiloDeEscuchaPaquetesUDP = new Thread(RecibidorPaquetesUDP1.RecibirDatos);
+            HiloDeEscuchaPaquetesUDP2 = new Thread(RecibidorPaquetesUDP2.RecibirDatos);
+            HiloDeEscuchaPaquetesUDP.Start(PUERTO_ESCUCHA_UDP_1);
+            HiloDeEscuchaPaquetesUDP2.Start(PUERTO_ESCUCHA_UDP_2);
         }
 
         private void SuscribirseAEventosDeEscuchaDePaquetesUDP()
         {
-            RecibidorPaquetesUDP.EventoRecibido += ManejadorDeSalas.ReplicarDatosRecibidosASala;
+            RecibidorPaquetesUDP1.EventoRecibido += ManejadorDeSalas.ReplicarDatosRecibidosASala;
+            RecibidorPaquetesUDP2.EventoRecibido += ManejadorDeSalas.ReplicarDatosRecibidosASala;
         }
 
         private void BIniciarServicioDelJuego_Click(object sender, RoutedEventArgs e)
@@ -256,6 +264,7 @@ namespace Pacman
                 try
                 {
                     SesionHost.Close();
+                    ManejadorDesesiones.TerminarTodosLosHilosDeEscucha();
                 }
                 catch (Exception excepcion)
                 {
@@ -280,8 +289,7 @@ namespace Pacman
                 try
                 {
                     JuegoHost.Close();
-                    RecibidorPaquetesUDP.LiberarRecursos();
-                    HiloDeEscuchaPaquetesUDP?.Abort();
+                    CerrarEscuchadorDePaquetesUDP();
                 }
                 catch (Exception ex)
                 {
@@ -377,11 +385,22 @@ namespace Pacman
             }
         }
 
-        
+        private void CerrarEscuchadorDePaquetesUDP()
+        {
+            RecibidorPaquetesUDP1.LiberarRecursos();
+            HiloDeEscuchaPaquetesUDP?.Abort();
+            RecibidorPaquetesUDP2.LiberarRecursos();
+            HiloDeEscuchaPaquetesUDP2.Abort();
+        }
+
+
         void OnClosing(object Sender, EventArgs e)
         {
-            RecibidorPaquetesUDP.LiberarRecursos();
+            RecibidorPaquetesUDP1.LiberarRecursos();
+            RecibidorPaquetesUDP2.LiberarRecursos();
             HiloDeEscuchaPaquetesUDP?.Abort();
+            HiloDeEscuchaPaquetesUDP2?.Abort();
+            ManejadorDesesiones.TerminarTodosLosHilosDeEscucha();
         }
 
     }

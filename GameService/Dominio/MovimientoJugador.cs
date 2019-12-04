@@ -12,14 +12,17 @@ namespace GameService.Dominio
 
         public float PosicionY { get; }
 
-        public String Movimiento { get; }
+        public float MovimientoX { get; }
+        
+        public float MovimentoY { get; }
 
-        public MovimientoJugador(String usuario, float posicionX, float posicionY, String movimiento)
+        public MovimientoJugador(String usuario, float posicionX, float posicionY, float movimientoX, float movimentoY)
         {
             Usuario = usuario;
             PosicionX = posicionX;
             PosicionY = posicionY;
-            Movimiento = movimiento;
+            MovimientoX = movimientoX;
+            MovimentoY = movimentoY;
         }
 
     }

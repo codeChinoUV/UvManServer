@@ -7,14 +7,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using GameService.Dominio;
-using GameService.Dominio.Enum;
+
 
 
 namespace GameService.Dominio
 {
     public sealed class SalaManager
     {
-        private readonly int PUERTO_ESCUCHA_UDP = 8090;
         private static SalaManager ManejadorDeSala = new SalaManager();
         private static List<Sala> SalasCreadas = new List<Sala>();
         private SessionManager ManejadorDeSesiones = SessionManager.GetSessionManager();
@@ -295,10 +294,14 @@ namespace GameService.Dominio
         
         public void ReplicarDatosRecibidosASala(EventoEnJuego eventoEnJuego)
         {
-            CuentaModel CuentaRecibida = RecuperarCuentaDelEvento(eventoEnJuego);
-            Sala SalaDeLaCuenta = RecuperarSalaDeCuenta(CuentaRecibida);
-            SalaDeLaCuenta.ReplicarMensajeACuentas(eventoEnJuego);
-
+            foreach (Sala sala in SalasCreadas)
+            {
+                if (sala.Id == eventoEnJuego.IdSala)
+                {
+                    sala.ReplicarMensajeACuentas(eventoEnJuego);
+                    break;
+                }
+            }
         }
 
         private CuentaModel RecuperarCuentaDelEvento(EventoEnJuego eventoEnJuego)

@@ -6,7 +6,9 @@ namespace GameService.Dominio
     [Serializable]
     public class EventoEnJuego
     {
+        public String IdSala { get; set; }
         
+        public  String CuentaRemitente { get; set; }
         public EnumTipoDeEventoEnJuego TipoDeEvento { get; set; }
        
         public MovimientoJugador DatosDelMovimiento { get; set; }
@@ -17,29 +19,37 @@ namespace GameService.Dominio
         
         public int Ping { get; set; }
 
-        public void EventoEnJuegoMuerteJugador(String usuario, int cantidadDeVidas, int ping)
+        public void EventoEnJuegoMuerteJugador(String cuentaOrigen, String idSala, String usuarioMuerto,
+            int cantidadDeVidas, int ping)
         {
+            CuentaRemitente = cuentaOrigen;
+            IdSala = idSala;
             TipoDeEvento = EnumTipoDeEventoEnJuego.MuerteJugador;
-            DatosMuerteDeUnJugador = new MuerteJugador(usuario, cantidadDeVidas);
+            DatosMuerteDeUnJugador = new MuerteJugador(usuarioMuerto, cantidadDeVidas);
             Ping = ping;
         }
 
-        public void EventoEnJuegoMovimientoJugador(String usuario, float posicionX, float posicionY, String movimiento)
+        public void EventoEnJuegoMovimientoJugador(String cuentaOrigen, String sala, String usuario, 
+            float posicionX, float posicionY, float movimientoX, float movimientoY)
         {
+            CuentaRemitente = cuentaOrigen;
+            IdSala = sala;
             TipoDeEvento = EnumTipoDeEventoEnJuego.MovimientoJugador;
-            DatosDelMovimiento = new MovimientoJugador(usuario, posicionX, posicionY, movimiento);
+            DatosDelMovimiento = new MovimientoJugador(usuario, posicionX, posicionY, movimientoX, movimientoY);
             Ping = Ping;
         }
 
-        public void EventoEnJuegoIniciarPartida()
+        public void EventoEnJuegoIniciarPartida(String sala)
         {
+            IdSala = sala;
             TipoDeEvento = EnumTipoDeEventoEnJuego.IniciarPartida;
             DatosInicioDePartida = new InicioPartida();
             DatosInicioDePartida.IniciarPartida = true;
         }
 
-        public void EventoEnJuegoCambiarPantalla()
+        public void EventoEnJuegoCambiarPantalla(String sala)
         {
+            IdSala = sala;
             TipoDeEvento = EnumTipoDeEventoEnJuego.CambiarPantalla;
             DatosInicioDePartida = new InicioPartida();
             DatosInicioDePartida.CambiarPantallaMultijugador = true;

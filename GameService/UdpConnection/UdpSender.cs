@@ -8,17 +8,18 @@ namespace GameService.Dominio
 {
     public class UdpSender
     {
-        private readonly int PUERTO = 8296;
-        private IPEndPoint IpEnviarPaquete;
+        private IPEndPoint IpEnviarPaquete1;
+        private IPEndPoint IpEnviarPaquete2;
         private UdpClient ClienteUDP;
 
-        public UdpSender(String direccionIp)
+        public UdpSender(String direccionIp, int puerto, int puerto2)
         {
             if (direccionIp == "::1")
             {
                 direccionIp = "127.0.0.1";
             }
-            IpEnviarPaquete = new IPEndPoint(IPAddress.Parse(direccionIp), PUERTO);
+            IpEnviarPaquete1 = new IPEndPoint(IPAddress.Parse(direccionIp), puerto);
+            IpEnviarPaquete2 = new IPEndPoint(IPAddress.Parse(direccionIp), puerto2);
         }
         
         private static byte[] SerializarAArregloDeBytes(EventoEnJuego eventoEnJuego)
@@ -43,7 +44,8 @@ namespace GameService.Dominio
             if (eventoEnJuego != null)
             {
                 byte[] datos = SerializarAArregloDeBytes(eventoEnJuego);
-                ClienteUDP.Send(datos, datos.Length, IpEnviarPaquete);
+                ClienteUDP.Send(datos, datos.Length, IpEnviarPaquete1);
+                ClienteUDP.Send(datos, datos.Length, IpEnviarPaquete2);
             }
         }
     }

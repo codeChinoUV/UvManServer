@@ -114,7 +114,8 @@ namespace LogicaDelNegocio.DataAccess
                 Usuario = CuentaAConvertir.NombreUsuario,
                 Password = Encriptador.ComputeSha256Hash(CuentaAConvertir.Contrasena),
                 CodigoVerificacion = GeneradorCodigo.GenerarCodigoActivacion(),
-                Valida = false
+                Valida = false,
+                CorreoElectronico = CuentaAConvertir.CorreoElectronico
             };
         }
 

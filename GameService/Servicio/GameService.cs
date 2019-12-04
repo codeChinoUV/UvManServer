@@ -6,7 +6,6 @@ using GameService.Dominio.Enum;
 using LogicaDelNegocio.Modelo;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using GameService.Dominio;
 
 namespace GameService.Servicio
 {
@@ -112,10 +111,6 @@ namespace GameService.Servicio
         public bool MiSalaEsPublica(CuentaModel Cuenta)
         {
             Sala MiSala = ManejadorDeSala.RecuperarSalaDeCuenta(Cuenta);
-            EventoEnJuego eventoEnJuego = new EventoEnJuego();
-            eventoEnJuego.Ping = 10;
-            UdpSender EnviadorUdp = new UdpSender(DireccionIpDelCliente);
-            EnviadorUdp.EnviarPaquete(eventoEnJuego);
             if (MiSala != null)
             {
                 return MiSala.EsSalaPublica;

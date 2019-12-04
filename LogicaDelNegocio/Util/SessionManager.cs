@@ -12,6 +12,7 @@ namespace LogicaDelNegocio.Util
         public delegate void NotificacionSobreUsuario(CuentaModel cuenta);
         public event NotificacionSobreUsuario UsuarioDesconectado;
         public event NotificacionSobreUsuario UsuarioConectado;
+        private Object ObjetoSincronizador = new object();
 
         private SessionManager()
         {
@@ -35,15 +36,18 @@ namespace LogicaDelNegocio.Util
         /// <returns>Boolean</returns>
         public Boolean AgregarCuentaLogeada(CuentaModel cuenta, Thread hiloDeSeguimientoDelCliente)
         {
-            foreach(CuentaModel cuentaLogeada in CuentasLogeadas.Keys)
+            lock (ObjetoSincronizador)
             {
-                if(cuentaLogeada.NombreUsuario == cuenta.NombreUsuario)
+                foreach (CuentaModel cuentaLogeada in CuentasLogeadas.Keys)
                 {
-                    return false;
+                    if (cuentaLogeada.NombreUsuario == cuenta.NombreUsuario)
+                    {
+                        return false;
+                    }
                 }
+                CuentasLogeadas.Add(cuenta, hiloDeSeguimientoDelCliente);
             }
             UsuarioConectado?.Invoke(cuenta);
-            CuentasLogeadas.Add(cuenta, hiloDeSeguimientoDelCliente);
             return true;
         }
         
@@ -55,11 +59,14 @@ namespace LogicaDelNegocio.Util
         public void QuitarCuentaLogeada(CuentaModel cuenta)
         {
             CuentaModel cuentaActual = null;
-            foreach(CuentaModel cuentaEnElDiccionario in CuentasLogeadas.Keys)
+            lock (ObjetoSincronizador)
             {
-                if(cuentaEnElDiccionario.NombreUsuario == cuenta.NombreUsuario)
+                foreach (CuentaModel cuentaEnElDiccionario in CuentasLogeadas.Keys)
                 {
-                    cuentaActual = cuentaEnElDiccionario;
+                    if (cuentaEnElDiccionario.NombreUsuario == cuenta.NombreUsuario)
+                    {
+                        cuentaActual = cuentaEnElDiccionario;
+                    }
                 }
             }
             if(cuentaActual != null)
@@ -79,11 +86,14 @@ namespace LogicaDelNegocio.Util
         /// <returns>Boolean</returns>
         public Boolean VerificarCuentaLogeada(CuentaModel cuenta)
         {
-            foreach(CuentaModel cuentaLogeada in CuentasLogeadas.Keys)
+            lock (ObjetoSincronizador)
             {
-                if(cuentaLogeada.NombreUsuario == cuenta.NombreUsuario)
+                foreach (CuentaModel cuentaLogeada in CuentasLogeadas.Keys)
                 {
-                    return true;
+                    if (cuentaLogeada.NombreUsuario == cuenta.NombreUsuario)
+                    {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -107,5 +117,15 @@ namespace LogicaDelNegocio.Util
             }
             return CuentaCompleta;
         }
+
+        public void TerminarTodosLosHilosDeEscucha()
+        {
+            foreach (Thread hilo in CuentasLogeadas.Values)
+            {
+                hilo?.Abort();
+            }
     }
+    }
+
+    
 }

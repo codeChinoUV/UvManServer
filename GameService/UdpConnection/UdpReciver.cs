@@ -29,16 +29,15 @@ namespace GameService.Dominio
             }
         }
 
-        public void RecibirDatos()
+        public void RecibirDatos(object puerto)
         {
-            ClienteUDP = new UdpClient(8090);
+            ClienteUDP = new UdpClient((int) puerto);
             try
             {
                 while (true)
                 {
                     IPEndPoint anyIP = new IPEndPoint(IPAddress.Any, 0);
                     byte[] data = ClienteUDP.Receive(ref anyIP);
-                    Debug.WriteLine("Estoy escuchando en el puerto 0");
                     if (data != null && data.Length > 0 )
                     {
                         EventoEnJuego eventoEnJuego = Deserializar(data);

@@ -2,6 +2,7 @@
 using System.Net.Mail;
 using System.Text;
 using System.Net;
+using System.Diagnostics;
 
 namespace LogicaDelNegocio.Util
 {
@@ -44,8 +45,9 @@ namespace LogicaDelNegocio.Util
                 Cliente.Send(Mensaje);
                 return true;
             }
-            catch (SmtpException)
+            catch (SmtpException ex)
             {
+                Debug.WriteLine(ex.Message);
                 return false;
             }
         }
