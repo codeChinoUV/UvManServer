@@ -1,17 +1,16 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace GameService.Dominio.Enum
 {
-    [DataContract]
+    [Serializable]
     public enum EnumTipoDeEventoEnJuego
     {
-        [EnumMember]
-        CambiarPantalla = 0,
-        [EnumMember]
+        IniciarCuentaRegresivaInicioJuego = 0,
         IniciarPartida = 1,
-        [EnumMember]
         MovimientoJugador = 2,
-        [EnumMember]
         MuerteJugador = 3,
+        IniciarCuentaRegresivaInicioNivel = 4,
+        IniciarNivel = 5
     }
 }

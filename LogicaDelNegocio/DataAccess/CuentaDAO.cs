@@ -24,10 +24,10 @@ namespace LogicaDelNegocio.DataAccess
                 if (UsuariosRepetidos == 0)
                 {
                     Cuenta CuentaAGuardar = CrearCuentaAGuadar(cuentaNueva);
-                    CuentaAGuardar.Usuario1 = ConvertirAUsuario(cuentaNueva.Jugador);
+                    CuentaAGuardar.Usuario1 = ConvertirAJugador(cuentaNueva.Jugador);
                     Persistencia.CuentaSet.Add(CuentaAGuardar);
                     Persistencia.SaveChanges();
-                    CuentaGuardada =  ConvertirACuentaModel(CuentaAGuardar);
+                    CuentaGuardada = ConvertirACuentaModel(CuentaAGuardar);
                     CuentaGuardada.Jugador = ConvertirAUsuarioModel(CuentaAGuardar.Usuario1);
                 }
             }
@@ -139,7 +139,7 @@ namespace LogicaDelNegocio.DataAccess
         /// </summary>
         /// <param name="UsuarioAConvertir">UsuarioModel</param>
         /// <returns>Usuario</returns>
-        private Jugador ConvertirAUsuario(JugadorModel UsuarioAConvertir)
+        private Jugador ConvertirAJugador(JugadorModel UsuarioAConvertir)
         {
             return new Jugador()
             {
@@ -244,21 +244,21 @@ namespace LogicaDelNegocio.DataAccess
         /// <returns>CuentaModel o Null si la cuenta no existe</returns>
         public CuentaModel RecuperarCuenta(CuentaModel CuentaARecuperar)
         {
-            using(PersistenciaContainer Persistencia = new PersistenciaContainer())
+            using (PersistenciaContainer Persistencia = new PersistenciaContainer())
             {
                 Cuenta CuentaRecuperada = Persistencia.CuentaSet.Where
                     (cuenta => cuenta.Usuario == CuentaARecuperar.NombreUsuario).FirstOrDefault();
-                if(CuentaRecuperada != null)
+                if (CuentaRecuperada != null)
                 {
                     CuentaModel Cuenta = ConvertirACuentaModel(CuentaRecuperada);
                     JugadorModel Jugador = ConvertirAUsuarioModel(CuentaRecuperada.Usuario1);
                     List<CorredorAdquiridoModel> CorredoresAdquiridos = new List<CorredorAdquiridoModel>();
                     List<SeguidorAdquiridoModel> SeguidoresAdquiridos = new List<SeguidorAdquiridoModel>();
-                    foreach(CorredorAdquirido Corredor in CuentaRecuperada.Usuario1.CorredoresAdquiridos)
+                    foreach (CorredorAdquirido Corredor in CuentaRecuperada.Usuario1.CorredoresAdquiridos)
                     {
                         CorredoresAdquiridos.Add(ConvertirCorredorAdquiridoModel(Corredor));
                     }
-                    foreach(PerseguidorAdquirido Perseguidor in CuentaRecuperada.Usuario1.PerseguidorAdquirido)
+                    foreach (PerseguidorAdquirido Perseguidor in CuentaRecuperada.Usuario1.PerseguidorAdquirido)
                     {
                         SeguidoresAdquiridos.Add(ConvertirSeguidorAdquiridoModel(Perseguidor));
                     }
@@ -269,6 +269,61 @@ namespace LogicaDelNegocio.DataAccess
                 }
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Actualiza los datos del Jugador de la cuenta
+        /// </summary>
+        /// <param name="CuentaActualizar">Cuenta a la que se actualizaran los datos</param>
+        public void GuardarDatosDeLaCuenta(CuentaModel CuentaActualizar)
+        {
+            using (PersistenciaContainer Persistencia = new PersistenciaContainer())
+            {
+
+                Cuenta CuentaAModificar = Persistencia.CuentaSet.Where(cuenta => cuenta.Usuario == CuentaActualizar.NombreUsuario).FirstOrDefault();
+                Jugador JugadorAGuardar = ConvertirAJugador(CuentaActualizar.Jugador);
+                CuentaAModificar.Usuario1 = JugadorAGuardar;
+                List<CorredorAdquirido> CorredorAdquiridosAGuardar = new List<CorredorAdquirido>();
+                List<PerseguidorAdquirido> PerseguidoresAdquiridosAGuardar = new List<PerseguidorAdquirido>();
+                foreach (CorredorAdquiridoModel CorredorerAdquiridoAConvertir in CuentaActualizar.Jugador.CorredoresAdquiridos)
+                {
+                    CorredorAdquiridosAGuardar.Add(ConvertirCorredorAdquirido(CorredorerAdquiridoAConvertir));
+                }
+                foreach (SeguidorAdquiridoModel PerseguidorAdquiridoAConvertir in CuentaActualizar.Jugador.SeguidoresAdquiridos)
+                {
+                    PerseguidoresAdquiridosAGuardar.Add(ConvertirSeguidorAdquirido(PerseguidorAdquiridoAConvertir));
+                }
+                JugadorAGuardar.PerseguidorAdquirido = PerseguidoresAdquiridosAGuardar;
+                JugadorAGuardar.CorredoresAdquiridos = CorredorAdquiridosAGuardar;
+                Persistencia.SaveChanges();
+            }
+        }
+
+        /// <summary>
+        /// Obtiene las primeras 5 CuentasConLasMejoresPuntuaciones
+        /// </summary>
+        /// <returns>Una lista de CuentaModel que tienen las mejores 5 puntuaciones</returns>
+        public List<CuentaModel> RecuperarMejoresPuntuaciones()
+        {
+            List<CuentaModel> MayoresPuntuaciones = new List<CuentaModel>();
+            using (PersistenciaContainer Persistencia = new PersistenciaContainer())
+            {
+                var CuentasDeMayoresPuntuaciones = Persistencia.CuentaSet.OrderBy(cuenta => cuenta.Usuario1.MejorPuntacion).Take(5);
+                if (CuentasDeMayoresPuntuaciones != null)
+                {
+                    foreach (Cuenta CuentaRecuperada in CuentasDeMayoresPuntuaciones)
+                    {
+                        CuentaModel Cuenta = ConvertirACuentaModel(CuentaRecuperada);
+                        JugadorModel Jugador = ConvertirAUsuarioModel(CuentaRecuperada.Usuario1);
+                        List<CorredorAdquiridoModel> CorredoresAdquiridos = new List<CorredorAdquiridoModel>();
+                        List<SeguidorAdquiridoModel> SeguidoresAdquiridos = new List<SeguidorAdquiridoModel>();
+                        Cuenta.Jugador = Jugador;
+                        MayoresPuntuaciones.Add(Cuenta);
+                    }
+
+                }
+            }
+            return MayoresPuntuaciones;
         }
     }
 }

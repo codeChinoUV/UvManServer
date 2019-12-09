@@ -8,7 +8,7 @@ namespace GameService.Contrato
     public interface IGameServiceCallback
     {
         [OperationContract(IsOneWay = true)]
-        void TerminarPartida();
+        void NotificarTerminaPartida();
         [OperationContract(IsOneWay = true)]
         void SalaLlena();
         [OperationContract(IsOneWay = true)]
@@ -17,5 +17,7 @@ namespace GameService.Contrato
         void CuentaAbandoSala(CuentaModel cuenta);
         [OperationContract(IsOneWay = true)]
         void RefrescarCuentasEnSala(List<CuentaModel> CuentasEnMiSala);
+        [OperationContract(IsOneWay = true)]
+        void NuevoNivel();
     }
 }

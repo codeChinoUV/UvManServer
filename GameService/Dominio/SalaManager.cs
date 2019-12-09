@@ -76,6 +76,7 @@ namespace GameService.Dominio
             EnumEstadoDeUnirseASala estadoDeUnirseASala = EnumEstadoDeUnirseASala.NoSeEncuentraEnSesion;
             if (ManejadorDeSesiones.VerificarCuentaLogeada(CuentaAAgregar))
             {
+                estadoDeUnirseASala = EnumEstadoDeUnirseASala.SalaInexistente;
                 CuentaAAgregar = ManejadorDeSesiones.ObtenerCuentaCompleta(CuentaAAgregar);
                 foreach (Sala sala in SalasCreadas)
                 {
@@ -93,7 +94,6 @@ namespace GameService.Dominio
                         break;
                     }
                 }
-                estadoDeUnirseASala = EnumEstadoDeUnirseASala.SalaInexistente;
             }
             
             return estadoDeUnirseASala;
@@ -114,8 +114,7 @@ namespace GameService.Dominio
                 Sala SalaAUnirse = BuscarSalaIncompleta();
                 if (SalaAUnirse != null)
                 {
-                    SalaAUnirse.UnirseASala(Cuenta, ActualCallback, DireccionIpDelCliente);
-                    seUnioASala = true;
+                    seUnioASala = SalaAUnirse.UnirseASala(Cuenta, ActualCallback, DireccionIpDelCliente);
                     SeUnioASala?.Invoke(SalaAUnirse.Id);
                 }
                 else
@@ -144,6 +143,7 @@ namespace GameService.Dominio
             EnumEstadoCrearSalaConId EstadoDeCreacionDeSala = EnumEstadoCrearSalaConId.NoSeEncuentraEnSesion;
             if (ManejadorDeSesiones.VerificarCuentaLogeada(Cuenta))
             {
+                Cuenta = ManejadorDeSesiones.ObtenerCuentaCompleta(Cuenta);
                 if (!EstaElIdDeSalaEnUso(Id))
                 {
                     Sala SalaAAgregar = new Sala(Id, EsSalaPublica, Cuenta, ActualCallback, DireccionIpDelCliente);
@@ -318,6 +318,24 @@ namespace GameService.Dominio
             }
 
             return cuentaDelEvento;
+        }
+
+        public void TerminarPartida(CuentaModel CuentaDelCorredor)
+        {
+            Sala MiSala = ManejadorDeSala.RecuperarSalaDeCuenta(CuentaDelCorredor);
+            if (MiSala != null)
+            {
+                MiSala.TerminarPartida(CuentaDelCorredor);
+            }
+        }
+
+        public void IniciarNivel(CuentaModel CuentaDelCorredor)
+        {
+            Sala MiSala = ManejadorDeSala.RecuperarSalaDeCuenta(CuentaDelCorredor);
+            if (MiSala != null)
+            {
+                MiSala.NotificarIniciarNivel();
+            }
         }
     }
 }

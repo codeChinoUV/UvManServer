@@ -54,11 +54,8 @@
   <ItemGroup>
     <Compile Include="DataAccess\CuentaDAO.cs" />
     <Compile Include="DataAccess\Interfaces\ICuentaDAO.cs" />
-    <Compile Include="Modelo\Corredor.cs" />
     <Compile Include="Modelo\CuentaModel.cs" />
     <Compile Include="Modelo\Enum\EnumTipoDeJugador.cs" />
-    <Compile Include="Modelo\PartidaModel.cs" />
-    <Compile Include="Modelo\Seguidor.cs" />
     <Compile Include="Modelo\CorredorAdquiridoModel.cs" />
     <Compile Include="Modelo\SeguidorAdquiridoModel.cs" />
     <Compile Include="Modelo\JugadorModel.cs" />

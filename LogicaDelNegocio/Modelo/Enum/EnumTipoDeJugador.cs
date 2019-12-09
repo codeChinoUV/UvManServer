@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace GameService.Dominio.Enum
+namespace LogicaDelNegocio.Modelo.Enum
 {
     [DataContract]
     public enum EnumTipoDeJugador

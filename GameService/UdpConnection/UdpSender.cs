@@ -26,9 +26,9 @@ namespace GameService.Dominio
         {
             if (eventoEnJuego != null)
             {
+                BinaryFormatter FormateadorBinario = new BinaryFormatter();
                 using (MemoryStream StreamDeMemoria = new MemoryStream())
                 {
-                    BinaryFormatter FormateadorBinario = new BinaryFormatter();
                     FormateadorBinario.Serialize(StreamDeMemoria, eventoEnJuego);
                     return StreamDeMemoria.ToArray();
                 }

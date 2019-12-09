@@ -2,8 +2,13 @@
 using LogicaDelNegocio.Modelo;
 using System;
 using System.Collections.Generic;
-using GameService.Dominio.Enum;
 using System.Timers;
+using LogicaDelNegocio.Modelo.Enum;
+using LogicaDelNegocio.DataAccess.Interfaces;
+using LogicaDelNegocio.DataAccess;
+using System.Diagnostics;
+using GameService.Dominio.Enum;
+using System.ServiceModel;
 
 namespace GameService.Dominio
 {
@@ -60,26 +65,30 @@ namespace GameService.Dominio
                 {
                     callback.NuevoCuentaEnLaSala(cuenta);
                 }
-            }
-            CuentasEnLaSala.Add(cuenta, serviceCallback);
-            DireccionesIpDeCuentas.Add(cuenta, DireccionIpDelCliente);
-            if (NumeroJugadoresEnSala != 5) return true;
-            {
-                lock (ObjetoParaSincronizar)
-                {
-                    foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
-                    {
-                        callback.SalaLlena();
-                    }
-                    TemporizarEnvioMensajeCambiarPantalla();
-                }
+                CuentasEnLaSala.Add(cuenta, serviceCallback);
+                DireccionesIpDeCuentas.Add(cuenta, DireccionIpDelCliente);
             }
             return true;
         }
 
+        public void VerificarSalaLlena()
+        {
+            if(NumeroJugadoresEnSala == 2)
+            {
+                lock (ObjetoParaSincronizar)
+                {
+                    foreach (CuentaModel cuentaEnLaSala in CuentasEnLaSala.Keys)
+                    {
+                        CuentasEnLaSala[cuentaEnLaSala].SalaLlena();
+                    }
+                    TemporizarEnvioMensajeCambiarPantalla();
+                }
+            }
+        }
+
         private void TemporizarEnvioMensajeCambiarPantalla()
         {
-            Timer temporizador = new Timer(5000);
+            Timer temporizador = new Timer(6000);
             temporizador.Elapsed += EnviarMensajeCambiarDePantalla;
             temporizador.AutoReset = false;
             temporizador.Enabled = true;
@@ -127,7 +136,7 @@ namespace GameService.Dominio
             {
                 foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
                 {
-                    callback.TerminarPartida();
+                    callback.NotificarTerminaPartida();
                 }
             }
         }
@@ -213,6 +222,10 @@ namespace GameService.Dominio
                 {
                     //Preguntar
                 }
+                catch (CommunicationObjectAbortedException)
+                {
+
+                }
             }
         }
         
@@ -258,6 +271,72 @@ namespace GameService.Dominio
             }
         }
 
-        
+        public EnumEstadoTerminarPartida TerminarPartida(CuentaModel CuentaDelCorredor)
+        {
+            foreach(IGameServiceCallback callback in CuentasEnLaSala.Values)
+            {
+                callback.NotificarTerminaPartida();
+            }
+            ICuentaDAO PersistenciaDeCuenta = new CuentaDAO();
+            try
+            {
+                PersistenciaDeCuenta.GuardarDatosDeLaCuenta(CuentaDelCorredor);
+            }
+            catch (Exception Ex)
+            {
+                Debug.WriteLine(Ex.InnerException.Message);
+            }
+            return EnumEstadoTerminarPartida.TerminadaCorrectamente;
+        }
+
+        public void NotificarIniciarNivel()
+        {
+            foreach(IGameServiceCallback callback in CuentasEnLaSala.Values)
+            {
+                callback.NuevoNivel();
+            }
+            TemporizarEnvioMensajeCuentaRegresivaNuevoNivel();
+        }
+
+        private void TemporizarEnvioMensajeCuentaRegresivaNuevoNivel()
+        {
+            Timer temporizador = new Timer(6000);
+            temporizador.Elapsed += EnviarMensajeInicioCuentaRegresivaNuevoNivel;
+            temporizador.AutoReset = false;
+            temporizador.Enabled = true;
+            temporizador.Start();
+        }
+
+        private void TemporizarEnvioMensajeInicioNivel()
+        {
+            Timer temporizador = new Timer(6000);
+            temporizador.Elapsed += EnviarMensajeInicioJuego;
+            temporizador.AutoReset = false;
+            temporizador.Enabled = true;
+            temporizador.Start();
+        }
+
+        private void EnviarMensajeInicioCuentaRegresivaNuevoNivel(object source, ElapsedEventArgs e)
+        {
+            EventoEnJuego eventoEnJuego = new EventoEnJuego();
+            eventoEnJuego.EventoEnJuegoIniciarConteoNuevoNivel(Id);
+            foreach (String direccionIp in DireccionesIpDeCuentas.Values)
+            {
+                UdpSender EnviadorDePaquetes = new UdpSender(direccionIp, PUERTO_ENVIO_UDP_1, PUERTO_ENVIO_UDP_2);
+                EnviadorDePaquetes.EnviarPaquete(eventoEnJuego);
+            }
+            TemporizarEnvioMensajeInicioNivel();
+        }
+
+        private void EnviarMensajeInicioNivel(object source, ElapsedEventArgs e)
+        {
+            EventoEnJuego eventoEnJuego = new EventoEnJuego();
+            eventoEnJuego.EventoEnJuegoIniciarNuevoNivel(Id);
+            foreach (String direccionIp in DireccionesIpDeCuentas.Values)
+            {
+                UdpSender EnviadorDePaquetes = new UdpSender(direccionIp, PUERTO_ENVIO_UDP_1, PUERTO_ENVIO_UDP_2);
+                EnviadorDePaquetes.EnviarPaquete(eventoEnJuego);
+            }
+        }
     }
 }

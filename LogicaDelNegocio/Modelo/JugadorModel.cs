@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
 using AccesoDatos;
-using GameService.Dominio.Enum;
+using LogicaDelNegocio.Modelo.Enum;
 
 namespace LogicaDelNegocio.Modelo
 {

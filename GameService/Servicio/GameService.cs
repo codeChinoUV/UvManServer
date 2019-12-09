@@ -6,6 +6,8 @@ using GameService.Dominio.Enum;
 using LogicaDelNegocio.Modelo;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using LogicaDelNegocio.DataAccess.Interfaces;
+using LogicaDelNegocio.DataAccess;
 
 namespace GameService.Servicio
 {
@@ -116,6 +118,40 @@ namespace GameService.Servicio
                 return MiSala.EsSalaPublica;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Notifica al manejador de salas que se desea terminar una partida
+        /// </summary>
+        /// <param name="CuentaDeCorredor">Cuenta del corredor que terminara la partida</param>
+        public void TerminarPartida(CuentaModel CuentaDeCorredor)
+        {
+            ManejadorDeSala.TerminarPartida(CuentaDeCorredor);
+        }
+
+        /// <summary>
+        /// Notifica a las demas Cuentas de la sala que se iniciara un nuevo nivel
+        /// </summary>
+        /// <param name="CuentaDelCorredor">Cuenta del corredor que iniciara el nuevo nivel</param>
+        public void NotificarIniciarNivel(CuentaModel CuentaDelCorredor)
+        {
+            ManejadorDeSala.IniciarNivel(CuentaDelCorredor);
+        }
+
+        /// <summary>
+        /// Recupera las mejores 5 puntuaciones
+        /// </summary>
+        /// <returns>Una lista con las 5 cuentas con mejores puntuaciones</returns>
+        public List<CuentaModel> RecuperarMejoresPuntuaciones()
+        {
+            ICuentaDAO PersistenciaDeCuentas = new CuentaDAO();
+            return PersistenciaDeCuentas.RecuperarMejoresPuntuaciones();
+        }
+
+        public void EstaLaSalaLlena(CuentaModel CuentaEnSala)
+        {
+            Sala salaDeLaCuenta = ManejadorDeSala.RecuperarSalaDeCuenta(CuentaEnSala);
+            salaDeLaCuenta.VerificarSalaLlena();
         }
     }
 }

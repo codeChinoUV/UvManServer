@@ -43,16 +43,34 @@ namespace GameService.Dominio
         {
             IdSala = sala;
             TipoDeEvento = EnumTipoDeEventoEnJuego.IniciarPartida;
-            DatosInicioDePartida = new InicioPartida();
-            DatosInicioDePartida.IniciarPartida = true;
+            DatosInicioDePartida = new InicioPartida
+            {
+                IniciarPartida = true
+            };
         }
 
         public void EventoEnJuegoCambiarPantalla(String sala)
         {
             IdSala = sala;
-            TipoDeEvento = EnumTipoDeEventoEnJuego.CambiarPantalla;
+            TipoDeEvento = EnumTipoDeEventoEnJuego.IniciarCuentaRegresivaInicioJuego;
             DatosInicioDePartida = new InicioPartida();
-            DatosInicioDePartida.CambiarPantallaMultijugador = true;
+            DatosInicioDePartida.IniciarCuentaRegresivaInicioPartida = true;
+        }
+
+        public void EventoEnJuegoIniciarConteoNuevoNivel(String sala)
+        {
+            IdSala = sala;
+            TipoDeEvento = EnumTipoDeEventoEnJuego.IniciarCuentaRegresivaInicioNivel;
+            DatosInicioDePartida = new InicioPartida();
+            DatosInicioDePartida.IniciarCuentaRegresivaInicioNivel = true;
+        }
+
+        public void EventoEnJuegoIniciarNuevoNivel(String sala)
+        {
+            IdSala = sala;
+            TipoDeEvento = EnumTipoDeEventoEnJuego.IniciarNivel;
+            DatosInicioDePartida = new InicioPartida();
+            DatosInicioDePartida.IniciarCuentaRegresivaInicioNivel = true;
         }
     }
     

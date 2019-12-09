@@ -211,26 +211,7 @@ namespace Pacman
 
         private void BDetenerServicioChat_Click(object sender, RoutedEventArgs e)
         {
-            if (ChatHost != null )
-            {
-                try
-                {
-                    ChatHost.Close();
-                }
-                catch (Exception excepcion)
-                {
-                    lEstadoServicioChat.Content = excepcion.Message;
-                }
-                finally
-                {
-                    if (ChatHost.State == CommunicationState.Closed)
-                    {
-                        lEstadoServicioChat.Content = "Cerrada";
-                        bIniciarServicioChat.IsEnabled = true;
-                        bDetenerServicioChat.IsEnabled = false;
-                    }
-                }
-            }
+            DetenerServicioChat();
         }
 
         private void BDetenerServicioCuenta_Click(object sender, RoutedEventArgs e)
@@ -284,27 +265,7 @@ namespace Pacman
 
         private void BDetenerServicioDelJuego_Click(object sender, RoutedEventArgs args)
         {
-            if (JuegoHost != null)
-            {
-                try
-                {
-                    JuegoHost.Close();
-                    CerrarEscuchadorDePaquetesUDP();
-                }
-                catch (Exception ex)
-                {
-                    lEstadoServicioDeJuego.Content = ex.Message;
-                }
-                finally
-                {
-                    if (JuegoHost.State == CommunicationState.Closed)
-                    {
-                        lEstadoServicioDeJuego.Content = "Cerrada";
-                        bIniciarServicioDelJuego.IsEnabled = true;
-                        bDetenerServicioDelJuego.IsEnabled = false;
-                    }
-                }
-            }
+            DetenerServicioJuego();
         }
         
         private void UsuarioDejoSession(CuentaModel cuenta)
@@ -327,17 +288,19 @@ namespace Pacman
 
         private void HostCuentaOnClosed(Object sender, EventArgs e)
         {
-            lEstadoServicioCuenta.Content += "Servicio cerrado";
+            lEstadoServicioCuenta.Content = "Servicio cerrado";
         }
 
         private void HostChatOnClosed(Object sender, EventArgs e)
         {
-            lEstadoServicioChat.Content += "Servicio cerrado";
+            lEstadoServicioChat.Content = "Servicio cerrado";
         }
 
         private void HostSesionOnClosed(Object sender, EventArgs e)
         {
-            lEstadoServicioSesion.Content += "Servicio cerrado";
+            lEstadoServicioSesion.Content = "Servicio cerrado";
+            DetenerServicioJuego();
+            DetenerServicioChat();
         }
 
         private void SeCreoUnaNuevaSala(Sala NuevaSala)
@@ -401,6 +364,55 @@ namespace Pacman
             HiloDeEscuchaPaquetesUDP?.Abort();
             HiloDeEscuchaPaquetesUDP2?.Abort();
             ManejadorDesesiones.TerminarTodosLosHilosDeEscucha();
+        }
+
+        private void DetenerServicioChat()
+        {
+            if (ChatHost != null)
+            {
+                try
+                {
+                    ChatHost.Close();
+                }
+                catch (Exception excepcion)
+                {
+                    lEstadoServicioChat.Content = excepcion.Message;
+                }
+                finally
+                {
+                    if (ChatHost.State == CommunicationState.Closed)
+                    {
+                        lEstadoServicioChat.Content = "Cerrada";
+                        bIniciarServicioChat.IsEnabled = true;
+                        bDetenerServicioChat.IsEnabled = false;
+                    }
+                }
+            }
+        }
+
+        private void DetenerServicioJuego()
+        {
+            if (JuegoHost != null)
+            {
+                try
+                {
+                    JuegoHost.Close();
+                    CerrarEscuchadorDePaquetesUDP();
+                }
+                catch (Exception ex)
+                {
+                    lEstadoServicioDeJuego.Content = ex.Message;
+                }
+                finally
+                {
+                    if (JuegoHost.State == CommunicationState.Closed)
+                    {
+                        lEstadoServicioDeJuego.Content = "Cerrada";
+                        bIniciarServicioDelJuego.IsEnabled = true;
+                        bDetenerServicioDelJuego.IsEnabled = false;
+                    }
+                }
+            }
         }
 
     }

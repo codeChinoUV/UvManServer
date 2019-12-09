@@ -49,6 +49,7 @@
     <Compile Include="Contrato\IGameServiceCallback.cs" />
     <Compile Include="Dominio\Enum\EnumEstadoCrearSalaConId.cs" />
     <Compile Include="Dominio\Enum\EnumEstadoDeUnirseASala.cs" />
+    <Compile Include="Dominio\Enum\EnumEstadoTerminarPartida.cs" />
     <Compile Include="Dominio\InicioPartida.cs" />
     <Compile Include="Dominio\MovimientoJugador.cs" />
     <Compile Include="Dominio\MuerteJugador.cs" />

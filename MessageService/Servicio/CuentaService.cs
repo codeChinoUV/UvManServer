@@ -7,6 +7,7 @@ using System.Data.Entity.Core;
 using LogicaDelNegocio.Modelo;
 using CuentaService.Contrato;
 using MessageService.Dominio.Enum;
+using System.Net.Mail;
 
 namespace CuentaService.Servicio
 {
@@ -17,6 +18,23 @@ namespace CuentaService.Servicio
     {
         private ClienteCorreo ClienteCorreo = new ClienteCorreo();
         ICuentaDAO PersistenciaCuenta = new CuentaDAO();
+
+        /// <summary>
+        /// Envia el codigo de verifiacion al correo de la ceunta
+        /// </summary>
+        /// <param name="Cuenta">Cuenta a la que se le enviara el correo de verificacion</param>
+        public void ReEnviarCorreoVerificacion(CuentaModel Cuenta)
+        {
+            try
+            {
+                CuentaModel CuentaAReEnviarCorreoCompleta = PersistenciaCuenta.RecuperarCuenta(Cuenta);
+                EnviarCorreoDeVerificacion(Cuenta);
+            }
+            catch (SmtpException)
+            {
+                
+            }
+        }
 
         /// <summary>
         /// Guarda un User en la base de datos si el nombre de usuario no existe en la base de datos.

@@ -10,8 +10,9 @@ namespace CuentaService.Contrato
     {
         [OperationContract]
         EnumEstadoRegistro Registrarse(CuentaModel CuentaNueva);
-
         [OperationContract]
         EnumEstadoVerificarCuenta VerificarCuenta(String CodigoDeVerificacion, CuentaModel CuentaAVerificar);
+        [OperationContract]
+        void ReEnviarCorreoVerificacion(CuentaModel Cuenta);
     }
 }
