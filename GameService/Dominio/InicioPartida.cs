@@ -2,6 +2,9 @@
 
 namespace GameService.Dominio
 {
+    /// <summary>
+    /// Almacena los datos de un evento de tipo iniciarPartida
+    /// </summary>
     [Serializable]
     public class InicioPartida
     {

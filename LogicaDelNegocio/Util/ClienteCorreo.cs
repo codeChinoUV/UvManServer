@@ -6,6 +6,9 @@ using System.Diagnostics;
 
 namespace LogicaDelNegocio.Util
 {
+    /// <summary>
+    /// Se encarga de enivar correo electronicos
+    /// </summary>
     public class ClienteCorreo
     {
         private SmtpClient Cliente = new SmtpClient();
@@ -56,10 +59,10 @@ namespace LogicaDelNegocio.Util
         /// Genera una cadena html que contiene el texto necesario para enviar el mensaje
         /// </summary>
         /// <param name="Code"></param>
-        /// <returns></returns>
+        /// <returns>Una cadena que contiene el texto del mensaje</returns>
         public static String GenerarContenidoVerificacion(String Code)
         {
-            return "<h1>Estas a un paso de jugar UvMan</h1><h2>Tu codig de verificación es: </h2><h3>" + Code
+            return "<h1>Estas a un paso de jugar UvMan</h1><h2>Tu codigo de verificación es: </h2><h3>" + Code
                 + "</h3>";
         }
     }

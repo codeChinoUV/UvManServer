@@ -12,6 +12,9 @@ using System.ServiceModel;
 
 namespace GameService.Dominio
 {
+    /// <summary>
+    /// Se encarga de almacenar a cuentas y sus callback permitiendo
+    /// </summary>
     public class Sala
     {
         private Dictionary<CuentaModel, IGameServiceCallback> CuentasEnLaSala =
@@ -19,6 +22,7 @@ namespace GameService.Dominio
         private Dictionary<CuentaModel, String> DireccionesIpDeCuentas = new Dictionary<CuentaModel, string>();
         private readonly int PUERTO_ENVIO_UDP_1 = 8296;
         private readonly int PUERTO_ENVIO_UDP_2 = 8297;
+        private const int CANTIDAD_CUENTAS_MAXIMAS = 4;
 
         public String Id { get; set; }
 
@@ -33,6 +37,14 @@ namespace GameService.Dominio
 
         public delegate void NotificacionSalaVacia(Sala sala);
 
+        /// <summary>
+        /// Construye una sala con los datos necesarios 
+        /// </summary>
+        /// <param name="id">String</param>
+        /// <param name="EsSalaPublica">Boolean</param>
+        /// <param name="cuenta">CuentaModel</param>
+        /// <param name="serviceCallback">IGameServiceCallback</param>
+        /// <param name="DireccionIpDelCliente">String</param>
         public Sala(String id, Boolean EsSalaPublica, CuentaModel cuenta, IGameServiceCallback serviceCallback, 
             String DireccionIpDelCliente)
         {
@@ -43,6 +55,11 @@ namespace GameService.Dominio
             this.EsSalaPublica = EsSalaPublica;
         }
 
+        /// <summary>
+        /// Crea una sala con la información basica
+        /// </summary>
+        /// <param name="id">String</param>
+        /// <param name="EsSalaPublica">Boolean</param>
         public Sala(String id, Boolean EsSalaPublica)
         {
             Id = id;
@@ -54,26 +71,44 @@ namespace GameService.Dominio
         /// </summary>
         /// <param name="cuenta">CuentaModel</param>
         /// <param name="serviceCallback">IGameServiceCallback</param>
-        /// <returns>Boolean</returns>
+        /// <returns>Verdadero si me pude la cuenta se unio a la sala, falso si no</returns>
         public Boolean UnirseASala(CuentaModel cuenta, IGameServiceCallback serviceCallback, String DireccionIpDelCliente)
         {
             if (NumeroJugadoresEnSala >= 5) return false;
             lock (ObjetoParaSincronizar)
             {
-                AsignarTipoDeJugador(cuenta);
-                foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
+                try
                 {
-                    callback.NuevoCuentaEnLaSala(cuenta);
+                    AsignarTipoDeJugador(cuenta);
+                    foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
+                    {
+                        callback.NuevoCuentaEnLaSala(cuenta);
+                    }
+                    CuentasEnLaSala.Add(cuenta, serviceCallback);
+                    DireccionesIpDeCuentas.Add(cuenta, DireccionIpDelCliente);
                 }
-                CuentasEnLaSala.Add(cuenta, serviceCallback);
-                DireccionesIpDeCuentas.Add(cuenta, DireccionIpDelCliente);
+                catch (ObjectDisposedException)
+                {
+
+                }
+                catch(TimeoutException)
+                {
+
+                }
+                catch (CommunicationException)
+                {
+
+                }
             }
             return true;
         }
 
+        /// <summary>
+        /// Verifica si la sala esta llena
+        /// </summary>
         public void VerificarSalaLlena()
         {
-            if(NumeroJugadoresEnSala == 2)
+            if(NumeroJugadoresEnSala == CANTIDAD_CUENTAS_MAXIMAS)
             {
                 lock (ObjetoParaSincronizar)
                 {
@@ -86,6 +121,9 @@ namespace GameService.Dominio
             }
         }
 
+        /// <summary>
+        /// Temporiza el envio de mensajes que indica que se inicia el conteo regresivo del inicio de la partida
+        /// </summary>
         private void TemporizarEnvioMensajeCambiarPantalla()
         {
             Timer temporizador = new Timer(6000);
@@ -95,6 +133,9 @@ namespace GameService.Dominio
             temporizador.Start();
         }
 
+        /// <summary>
+        /// Temporiza el envio de mensajes que indica que se inicia el juego
+        /// </summary>
         private void TemporizarEnvioMensajeInicioJuego()
         {
             Timer temporizador = new Timer(6000);
@@ -104,6 +145,11 @@ namespace GameService.Dominio
             temporizador.Start();
         }
 
+        /// <summary>
+        /// Envia a las cuentas de la sala un menasje indicando que inicia la cuenta regresiva
+        /// </summary>
+        /// <param name="source">object</param>
+        /// <param name="e">ElapsedEventArgs</param>
         private void EnviarMensajeCambiarDePantalla(object source, ElapsedEventArgs e)
         {
             EventoEnJuego eventoEnJuego = new EventoEnJuego();
@@ -116,6 +162,11 @@ namespace GameService.Dominio
             TemporizarEnvioMensajeInicioJuego();
         }
 
+        /// <summary>
+        /// Envia un mensaje a las cuentas de la sala indicando que el juego esta por comenzar
+        /// </summary>
+        /// <param name="source">object</param>
+        /// <param name="e">ElapsedEventArgs</param>
         private void EnviarMensajeInicioJuego(object source, ElapsedEventArgs e)
         {
             EventoEnJuego eventoEnJuego = new EventoEnJuego();
@@ -134,10 +185,26 @@ namespace GameService.Dominio
         {
             lock (ObjetoParaSincronizar)
             {
-                foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
+                try
                 {
-                    callback.NotificarTerminaPartida();
+                    foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
+                    {
+                        callback.NotificarTerminaPartida();
+                    }
                 }
+                catch (ObjectDisposedException)
+                {
+
+                }
+                catch (CommunicationException)
+                {
+
+                }
+                catch (TimeoutException)
+                {
+
+                }
+                
             }
         }
 
@@ -145,7 +212,7 @@ namespace GameService.Dominio
         /// Busca si la cuenta esta en la sala
         /// </summary>
         /// <param name="cuentaABuscar">CuentaModel</param>
-        /// <returns>Boolean</returns>
+        /// <returns>Verdadero si la sala se encuentra en la sala, falso si no</returns>
         public Boolean EstaLaCuentaEnLaSala(CuentaModel cuentaABuscar)
         {
             Boolean EstaEnLaSala = false;
@@ -162,16 +229,16 @@ namespace GameService.Dominio
         /// <summary>
         /// Verifica si la sala tiene 5 jugadores
         /// </summary>
-        /// <returns>Boolean</returns>
+        /// <returns>Verdadero si esta la sala llena, falso si no</returns>
         public Boolean EstaLaSalaLlena()
         {
-            return NumeroJugadoresEnSala >= 5;
+            return NumeroJugadoresEnSala >= CANTIDAD_CUENTAS_MAXIMAS;
         }
 
         /// <summary>
         /// Regresa las cuentas que se encuentran en la sala
         /// </summary>
-        /// <returns>List</returns>
+        /// <returns>Una lista de cuentas con las cuentas que se encuentran en las salas</returns>
         public List<CuentaModel> RecuperarCuentasEnLaSala()
         {
             List<CuentaModel> CuentasEnSala = new List<CuentaModel>();
@@ -186,7 +253,7 @@ namespace GameService.Dominio
         /// <summary>
         /// Elimina a la cuenta de las cuentas en la sala y notifica a las demas cuentas
         /// </summary>
-        /// <param name="cuenta"></param>
+        /// <param name="cuenta">CuentaModel</param>
         public void AbandonarSala(CuentaModel cuenta)
         {
             CuentaModel cuentaAEliminar = null;
@@ -210,21 +277,28 @@ namespace GameService.Dominio
         /// <param name="CuentaAEliminar">CuentaModel</param>
         private void NotificarCuentasEnSalaSalidaDeJugador(CuentaModel CuentaAEliminar)
         {
-            List<CuentaModel> cuentasEnLaSala = RecuperarCuentasEnLaSala();
-            foreach (IGameServiceCallback canal in CuentasEnLaSala.Values)
+            lock (ObjetoParaSincronizar)
             {
-                try
+                List<CuentaModel> cuentasEnLaSala = RecuperarCuentasEnLaSala();
+                foreach (IGameServiceCallback canal in CuentasEnLaSala.Values)
                 {
-                    canal.CuentaAbandoSala(CuentaAEliminar);
-                    canal.RefrescarCuentasEnSala(cuentasEnLaSala);
-                }
-                catch (ObjectDisposedException)
-                {
-                    //Preguntar
-                }
-                catch (CommunicationObjectAbortedException)
-                {
+                    try
+                    {
+                        canal.CuentaAbandoSala(CuentaAEliminar);
+                        canal.RefrescarCuentasEnSala(cuentasEnLaSala);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        //Preguntar
+                    }
+                    catch (CommunicationObjectAbortedException)
+                    {
 
+                    }
+                    catch (TimeoutException)
+                    {
+
+                    }
                 }
             }
         }
@@ -262,6 +336,10 @@ namespace GameService.Dominio
             }
         }
 
+        /// <summary>
+        /// Replica un mensaje recibido de una cuenta a las demas cuentas de las sala
+        /// </summary>
+        /// <param name="eventoEnJuego">EventoEnJuego</param>
         public void ReplicarMensajeACuentas(EventoEnJuego eventoEnJuego)
         {
             foreach (String DireccionIp in DireccionesIpDeCuentas.Values)
@@ -271,6 +349,11 @@ namespace GameService.Dominio
             }
         }
 
+        /// <summary>
+        /// Notifica a las cuentas que la partida a terminado y almacena los datos del corredor
+        /// </summary>
+        /// <param name="CuentaDelCorredor">CuentaModel</param>
+        /// <returns>EnumEstadoTerminarPartida</returns>
         public EnumEstadoTerminarPartida TerminarPartida(CuentaModel CuentaDelCorredor)
         {
             foreach(IGameServiceCallback callback in CuentasEnLaSala.Values)
@@ -289,15 +372,37 @@ namespace GameService.Dominio
             return EnumEstadoTerminarPartida.TerminadaCorrectamente;
         }
 
+        /// <summary>
+        /// Notifica a las cuentas en la sesion que se iniciara un nuevo nivel
+        /// </summary>
         public void NotificarIniciarNivel()
         {
-            foreach(IGameServiceCallback callback in CuentasEnLaSala.Values)
+            try
             {
-                callback.NuevoNivel();
+                foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
+                {
+                    callback.NuevoNivel();
+                }
             }
+            catch (TimeoutException)
+            {
+
+            }
+            catch (ObjectDisposedException)
+            {
+
+            }
+            catch (CommunicationException)
+            {
+
+            }
+            
             TemporizarEnvioMensajeCuentaRegresivaNuevoNivel();
         }
 
+        /// <summary>
+        /// Temporiza el envio de un mensaje de iniciarCuenta
+        /// </summary>
         private void TemporizarEnvioMensajeCuentaRegresivaNuevoNivel()
         {
             Timer temporizador = new Timer(6000);
@@ -307,6 +412,9 @@ namespace GameService.Dominio
             temporizador.Start();
         }
 
+        /// <summary>
+        /// Temporiza el envio de mensaje de inicio de nivel
+        /// </summary>
         private void TemporizarEnvioMensajeInicioNivel()
         {
             Timer temporizador = new Timer(6000);
@@ -316,6 +424,11 @@ namespace GameService.Dominio
             temporizador.Start();
         }
 
+        /// <summary>
+        /// Envia un mensaje de inicio de cuenta regresiva de nuevo nivel
+        /// </summary>
+        /// <param name="source">object</param>
+        /// <param name="e">ElapsedEventAergs</param>
         private void EnviarMensajeInicioCuentaRegresivaNuevoNivel(object source, ElapsedEventArgs e)
         {
             EventoEnJuego eventoEnJuego = new EventoEnJuego();
@@ -328,6 +441,11 @@ namespace GameService.Dominio
             TemporizarEnvioMensajeInicioNivel();
         }
 
+        /// <summary>
+        /// Envia un mensaje de inicio de nivel a las cuentas en la sala
+        /// </summary>
+        /// <param name="source">object</param>
+        /// <param name="e">ElapsedEventArgs</param>
         private void EnviarMensajeInicioNivel(object source, ElapsedEventArgs e)
         {
             EventoEnJuego eventoEnJuego = new EventoEnJuego();

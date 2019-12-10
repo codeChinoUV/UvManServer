@@ -21,11 +21,9 @@ namespace Pacman
         private readonly int PUERTO_ESCUCHA_UDP_2 = 8091;
         
         private const String ENDPOINT_TCP_SERVICIO_CHAT = "net.tcp://localhost:8192/ChatService";
-        private const String ENDPOINT_HTTP_SERVICIO_CHAT = "http://localhost:8182/ChatService";
         private const String ENDPOINT_TCP_SERVICIO_CUENTA = "net.tcp://localhost:8092/CuentaService";
-        private const String ENDPOINT_HTTP_SERVICIO_CUENTA = "http://localhost:8082/CuentaService";
         private const String ENDPOINT_TCP_SERVICIO_SESION = "net.tcp://localhost:7972/SessionService";
-        private const String ENDPOINT_HTTP_SERVICIO_SESION = "http://localhost:7982/SessionService";
+        private const String ENDPOINT_TCP_SERVICIO_JUEGO = "net.tcp://localhost:8292/GameService";
 
         private ServiceHost CuentaHost;
         private ServiceHost ChatHost;
@@ -43,18 +41,27 @@ namespace Pacman
         public List<CuentaModel> cuentasConectadas = new List<CuentaModel>();
         public List<Sala> SalasActuales = new List<Sala>();
 
+        /// <summary>
+        /// Establece el Item source de la tabla DGUsuariosConectados
+        /// </summary>
         private void CargarUsuariosConectadosEnLaTabla()
         {
             DGUsuariosConectados.ItemsSource = null;
             DGUsuariosConectados.ItemsSource = cuentasConectadas;
         }
 
+        /// <summary>
+        /// Establece el Item source de la tabla DGSalasConectadas
+        /// </summary>
         private void CargarInformacionSalasCreadasEnLaTabla()
         {
             DGSalasConectadas.ItemsSource = null;
             DGSalasConectadas.ItemsSource = SalasActuales;
         }
 
+        /// <summary>
+        /// Obtiene la direccion ip del adaptador de red
+        /// </summary>
         private void ObtenerDireccionIpLocal()
         {
             IPHostEntry Host;
@@ -68,20 +75,30 @@ namespace Pacman
             }
         }
 
+        /// <summary>
+        /// Muestra las direccines TCP de los servicios
+        /// </summary>
         private void MostrarDireccionesDeServicios()
         {
             lDireccionIpServicioChat.Text = ENDPOINT_TCP_SERVICIO_CHAT;
             lDireccionIpServicioCuenta.Text = ENDPOINT_TCP_SERVICIO_CUENTA;
             lDireccionIpServicioSesion.Text = ENDPOINT_TCP_SERVICIO_SESION;
+            lDireccionIpServicioDeJuego.Text = ENDPOINT_TCP_SERVICIO_JUEGO;
             lDireccionIp.Content = DireccionIP;
         }
 
+        /// <summary>
+        /// Se suscribe a los serviciosde el manejador de sesiones
+        /// </summary>
         private void SuscribirseAEscuchaDeServicioDeSession()
         {
             ManejadorDesesiones.UsuarioConectado += NuevoUsuarioEnSession;
             ManejadorDesesiones.UsuarioDesconectado += UsuarioDejoSession;
         }
 
+        /// <summary>
+        /// Se suscribe a los servicios de el manejador de salas
+        /// </summary>
         private void SuscribirseAEscuchaDeServicioDeSala()
         {
             ManejadorDeSalas.SalaCreada += SeCreoUnaNuevaSala;
@@ -90,6 +107,10 @@ namespace Pacman
             ManejadorDeSalas.DejoSala += DejoCuentaSala;
         }
 
+        /// <summary>
+        /// Inicializa todos los elementos de la pantalla y se suscribe a los servicios
+        /// de manejo de sesiones y manejo de salas
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
@@ -101,6 +122,11 @@ namespace Pacman
             SuscribirseAEscuchaDeServicioDeSala();
         }
 
+        /// <summary>
+        /// Inicia el host del servicio de cuentas
+        /// </summary>
+        /// <param name="sender">object</param>
+        /// <param name="e">RoutedEventArgs</param>
         private void BIniciarServicioCuenta_Click(object sender, RoutedEventArgs e)
         {
             bIniciarServicioCuenta.IsEnabled = false;
@@ -124,6 +150,11 @@ namespace Pacman
             }
         }
 
+        /// <summary>
+        /// Inicia el host del servicio de chat
+        /// </summary>
+        /// <param name="sender">object</param>
+        /// <param name="e">RoutedEventArgs</param>
         private void BIniciarServicioChat_Click(object sender, RoutedEventArgs e)
         {
             ChatHost = new ServiceHost(typeof(ChatService));
@@ -147,6 +178,11 @@ namespace Pacman
             }
         }
 
+        /// <summary>
+        /// Crea el host del servicio de sesion
+        /// </summary>
+        /// <param name="sender">object</param>
+        /// <param name="e">RoutedEventoArgs</param>
         private void BIniciarServicioSesion_Click(object sender, RoutedEventArgs e)
         {
             bIniciarServicioSesion.IsEnabled = false;
@@ -170,6 +206,9 @@ namespace Pacman
             }
         }
 
+        /// <summary>
+        /// Crea un hilo para la esucha de paquetes udp
+        /// </summary>
         private void InicializarEscuchaDePaquetesUDP()
         {
             HiloDeEscuchaPaquetesUDP = new Thread(RecibidorPaquetesUDP1.RecibirDatos);
@@ -178,12 +217,20 @@ namespace Pacman
             HiloDeEscuchaPaquetesUDP2.Start(PUERTO_ESCUCHA_UDP_2);
         }
 
+        /// <summary>
+        /// Se suscribe a los eventos de escucha de paquetes udp
+        /// </summary>
         private void SuscribirseAEventosDeEscuchaDePaquetesUDP()
         {
             RecibidorPaquetesUDP1.EventoRecibido += ManejadorDeSalas.ReplicarDatosRecibidosASala;
             RecibidorPaquetesUDP2.EventoRecibido += ManejadorDeSalas.ReplicarDatosRecibidosASala;
         }
 
+        /// <summary>
+        /// Inicia el host del servio de juego
+        /// </summary>
+        /// <param name="sender">Object</param>
+        /// <param name="e">RoutedEventArgs</param>
         private void BIniciarServicioDelJuego_Click(object sender, RoutedEventArgs e)
         {
             bIniciarServicioDelJuego.IsEnabled = false;
@@ -209,11 +256,21 @@ namespace Pacman
             }
         }
 
+        /// <summary>
+        /// Cierra el host de servicio de chat
+        /// </summary>
+        /// <param name="sender">object</param>
+        /// <param name="e">RoutedEventArgs</param>
         private void BDetenerServicioChat_Click(object sender, RoutedEventArgs e)
         {
             DetenerServicioChat();
         }
 
+        /// <summary>
+        /// Detiene el host del servicio de cuenta
+        /// </summary>
+        /// <param name="sender">object</param>
+        /// <param name="e">RoutedEventArgs</param>
         private void BDetenerServicioCuenta_Click(object sender, RoutedEventArgs e)
         {
             if (CuentaHost != null)
@@ -238,6 +295,11 @@ namespace Pacman
             }
         }
 
+        /// <summary>
+        /// Detiene el host del servicio de sesion
+        /// </summary>
+        /// <param name="sender">object</param>
+        /// <param name="e">RoutedEventArgs</param>
         private void BDetenerServicioSesion_Click(object sender, RoutedEventArgs e)
         {
             if (SesionHost != null)
@@ -263,11 +325,20 @@ namespace Pacman
             }
         }
 
+        /// <summary>
+        /// Detiene el host del servicio del juego
+        /// </summary>
+        /// <param name="sender">Object</param>
+        /// <param name="args">RoutedEventArgs</param>
         private void BDetenerServicioDelJuego_Click(object sender, RoutedEventArgs args)
         {
             DetenerServicioJuego();
         }
         
+        /// <summary>
+        /// Actualiza la tabla de usuarios conectados de la interfaz
+        /// </summary>
+        /// <param name="cuenta"></param>
         private void UsuarioDejoSession(CuentaModel cuenta)
         {
             cuentasConectadas.Remove(cuenta);
@@ -277,6 +348,10 @@ namespace Pacman
             }
         }
    
+        /// <summary>
+        /// Agrega un nuevo usuario a la lista de usuarios conectados
+        /// </summary>
+        /// <param name="cuenta">CuentaModel</param>
         private void NuevoUsuarioEnSession(CuentaModel cuenta)
         {
             cuentasConectadas.Add(cuenta);
@@ -286,16 +361,31 @@ namespace Pacman
             }
         }
 
+        /// <summary>
+        /// Cambia el etado del host en el label de estadoServicioCuenta
+        /// </summary>
+        /// <param name="sender">Object</param>
+        /// <param name="e">EventArgs</param>
         private void HostCuentaOnClosed(Object sender, EventArgs e)
         {
             lEstadoServicioCuenta.Content = "Servicio cerrado";
         }
 
+        /// <summary>
+        /// Cambia el estado del host en el label de estadoServicioChat
+        /// </summary>
+        /// <param name="sender">object</param>
+        /// <param name="e">EventArgs</param>
         private void HostChatOnClosed(Object sender, EventArgs e)
         {
             lEstadoServicioChat.Content = "Servicio cerrado";
         }
 
+        /// <summary>
+        /// Cambia el estado del host en el label de estadoServicioSesion y detiene el host del juego y del chat
+        /// </summary>
+        /// <param name="sender">Object</param>
+        /// <param name="e">EventArgs</param>
         private void HostSesionOnClosed(Object sender, EventArgs e)
         {
             lEstadoServicioSesion.Content = "Servicio cerrado";
@@ -303,6 +393,10 @@ namespace Pacman
             DetenerServicioChat();
         }
 
+        /// <summary>
+        /// Agrega a una lista de salas la nueva sala creada
+        /// </summary>
+        /// <param name="NuevaSala">Sala</param>
         private void SeCreoUnaNuevaSala(Sala NuevaSala)
         {
             SalasActuales.Add(NuevaSala);
@@ -312,6 +406,11 @@ namespace Pacman
             }
         }
    
+        /// <summary>
+        /// Busca el id de la sala destruida, la elimina de la lista de
+        /// la salas creadas y actualiza la tabla de las salas creadas en la interfaz
+        /// </summary>
+        /// <param name="SalaDestruida">Sala</param>
         private void SeDestruyoUnaSala(Sala SalaDestruida)
         {
             Sala SalaADestruir = null;
@@ -332,6 +431,10 @@ namespace Pacman
             }
         }
 
+        /// <summary>
+        /// Actualiza la informacion de la sala en la interfaz grafica
+        /// </summary>
+        /// <param name="id">String</param>
         private void SeUnioCuentaASala(String id)
         {
             if (Dispatcher != null)
@@ -340,6 +443,10 @@ namespace Pacman
             }
         }
 
+        /// <summary>
+        /// Actualiza la infromacion de la sala en la interfaz grafica
+        /// </summary>
+        /// <param name="id">String</param>
         private void DejoCuentaSala(String id)
         {
             if (Dispatcher != null)
@@ -348,6 +455,9 @@ namespace Pacman
             }
         }
 
+        /// <summary>
+        /// Libera los recursos utilizados por el hilo de escucha UDP y termina los hilos
+        /// </summary>
         private void CerrarEscuchadorDePaquetesUDP()
         {
             RecibidorPaquetesUDP1.LiberarRecursos();
@@ -356,7 +466,11 @@ namespace Pacman
             HiloDeEscuchaPaquetesUDP2.Abort();
         }
 
-
+        /// <summary>
+        /// Libera los recursos utilizados antes de cerrar la ventana
+        /// </summary>
+        /// <param name="Sender">object</param>
+        /// <param name="e">EventArgs</param>
         void OnClosing(object Sender, EventArgs e)
         {
             RecibidorPaquetesUDP1.LiberarRecursos();
@@ -366,6 +480,9 @@ namespace Pacman
             ManejadorDesesiones.TerminarTodosLosHilosDeEscucha();
         }
 
+        /// <summary>
+        /// Detiene el host del servicio de chat
+        /// </summary>
         private void DetenerServicioChat()
         {
             if (ChatHost != null)
@@ -390,6 +507,9 @@ namespace Pacman
             }
         }
 
+        /// <summary>
+        /// Detiene el host del servicio del juego
+        /// </summary>
         private void DetenerServicioJuego()
         {
             if (JuegoHost != null)

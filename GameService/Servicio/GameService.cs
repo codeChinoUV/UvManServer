@@ -11,6 +11,9 @@ using LogicaDelNegocio.DataAccess;
 
 namespace GameService.Servicio
 {
+    /// <summary>
+    /// Se encarga de proporciona lo servicios de sesion
+    /// </summary>
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single,
     ConcurrencyMode = ConcurrencyMode.Multiple,
     UseSynchronizationContext = false)]

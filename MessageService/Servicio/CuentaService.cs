@@ -11,6 +11,9 @@ using System.Net.Mail;
 
 namespace CuentaService.Servicio
 {
+    /// <summary>
+    /// Se encarga de proporcionar los servicios del juego
+    /// </summary>
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single,
     ConcurrencyMode = ConcurrencyMode.Multiple,
     UseSynchronizationContext = false)]
@@ -22,7 +25,7 @@ namespace CuentaService.Servicio
         /// <summary>
         /// Envia el codigo de verifiacion al correo de la ceunta
         /// </summary>
-        /// <param name="Cuenta">Cuenta a la que se le enviara el correo de verificacion</param>
+        /// <param name="Cuenta">CuentaModel</param>
         public void ReEnviarCorreoVerificacion(CuentaModel Cuenta)
         {
             try
@@ -99,7 +102,7 @@ namespace CuentaService.Servicio
         /// Envia un correo a la Cuenta con su codigo de verificación
         /// </summary>
         /// <param name="CuentaAEnviar"></param>
-        /// <returns>Boolean</returns>
+        /// <returns>Verdadero si se envio el correo de verificacion, falso si no</returns>
         private Boolean EnviarCorreoDeVerificacion(CuentaModel CuentaAEnviar)
         {
             String Contenido = ClienteCorreo.GenerarContenidoVerificacion(CuentaAEnviar.CodigoVerificacion);

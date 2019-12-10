@@ -2,6 +2,9 @@
 
 namespace GameService.Dominio
 {
+    /// <summary>
+    /// Almacena los datos de un movimiento de un jugador
+    /// </summary>
     [Serializable]
     public class MovimientoJugador
     {

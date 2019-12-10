@@ -4,13 +4,13 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="075e315cc4ed4c60baa8bd955b62abdf" Name="Diagram1" >
+      <Diagram DiagramId="075e315cc4ed4c60baa8bd955b62abdf" Name="Diagram1" ZoomLevel="74" >
         <EntityTypeShape EntityType="Persistencia.Cuenta" Width="1.5" PointX="0.875" PointY="0.625" />
         <EntityTypeShape EntityType="Persistencia.Jugador" Width="1.5" PointX="3.625" PointY="0.625" />
-        <EntityTypeShape EntityType="Persistencia.CorredorAdquirido" Width="1.5" PointX="1.375" PointY="3.625" />
+        <EntityTypeShape EntityType="Persistencia.CorredorAdquirido" Width="1.5" PointX="3.5" PointY="3.5" />
         <AssociationConnector Association="Persistencia.CuentaUsuario" />
         <AssociationConnector Association="Persistencia.JugadorCorredoresAdquiridos" />
-        <EntityTypeShape EntityType="Persistencia.PerseguidorAdquirido" Width="1.5" PointX="4.25" PointY="3.625" />
+        <EntityTypeShape EntityType="Persistencia.PerseguidorAdquirido" Width="1.5" PointX="6.625" PointY="0.625" />
         <AssociationConnector Association="Persistencia.JugadorPerseguidorAdquirido" />
       </Diagram>
     </edmx:Diagrams>

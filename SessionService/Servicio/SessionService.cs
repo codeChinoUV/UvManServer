@@ -12,6 +12,9 @@ using System.Threading;
 
 namespace SessionService.Servicio
 {
+    /// <summary>
+    /// Se encarga de ofrecer los servicios de sesion
+    /// </summary>
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single,
     ConcurrencyMode = ConcurrencyMode.Multiple,
     UseSynchronizationContext = false)]
@@ -27,7 +30,7 @@ namespace SessionService.Servicio
         /// <summary>
         /// Termina la sesion de una ceunta en el servidor
         /// </summary>
-        /// <param name="Cuenta"></param>
+        /// <param name="Cuenta">CuentaModel</param>
         public void CerrarSesion(CuentaModel Cuenta)
         {
             SessionManager ManejadorDeSesiones = SessionManager.GetSessionManager();
@@ -37,7 +40,7 @@ namespace SessionService.Servicio
         /// <summary>
         /// Inicia sesion en el servidor si las credenciales pasadas en cuenta son validas
         /// </summary>
-        /// <param name="Cuenta"></param>
+        /// <param name="Cuenta">CuentaModel</param>
         /// <returns>EnumEstadoInicioSesion</returns>
         public EnumEstadoInicioSesion IniciarSesion(CuentaModel Cuenta)
         {
@@ -70,7 +73,7 @@ namespace SessionService.Servicio
         /// </summary>
         /// <param name="CuentaASeguir">CuentaModel</param>
         /// <param name="CallbackActual">ISessionService</param>
-        /// <returns>Thread</returns>
+        /// <returns>Un hilo que esta siguiendo la conexion con el cliente</returns>
         private Thread SeguirEstadoDelCliente(CuentaModel CuentaASeguir, ISessionServiceCallback CallbackActual)
         {
             EstadoCliente EstadoCliente = new EstadoCliente(CallbackActual,CuentaASeguir);

@@ -8,13 +8,16 @@ using LogicaDelNegocio.Util;
 
 namespace LogicaDelNegocio.DataAccess
 {
+    /// <summary>
+    /// Se encarga del almacenamiento de los datos de una cuenta
+    /// </summary>
     public class CuentaDAO : ICuentaDAO
     {
         /// <summary>
         /// Almacena en la base de datos una cuenta si el nombre de usuario no se repite
         /// </summary>
         /// <param name="cuentaNueva">CuentaModel</param>
-        /// <returns>CuentaModel</returns>
+        /// <returns>La cuenta registrada</returns>
         public CuentaModel Registrarse(CuentaModel cuentaNueva)
         {
             CuentaModel CuentaGuardada = null;
@@ -68,8 +71,8 @@ namespace LogicaDelNegocio.DataAccess
         /// <summary>
         /// Cambia el estado de la cuenta de no verificada a verificada
         /// </summary>
-        /// <param name="Cuenta"></param>
-        /// <returns>Boolean</returns>
+        /// <param name="Cuenta">CuentaModel</param>
+        /// <returns>Verdadero si la cuenta se verifico correctamente, falso si no</returns>
         public Boolean VerificarCuenta(CuentaModel Cuenta)
         {
             using (PersistenciaContainer Persistencia = new PersistenciaContainer())
@@ -91,7 +94,7 @@ namespace LogicaDelNegocio.DataAccess
         /// Cuenta el numero de Cuentas que tienen el mismo nombre de usuario
         /// </summary>
         /// <param name="NombreUsuario">String</param>
-        /// <returns>La canitdad de usuarios repetidos</returns>
+        /// <returns>La cantidad de usuarios repetidos</returns>
         private int ContarNombreDeUsuariosRepetidos(String NombreUsuario)
         {
             using (PersistenciaContainer Persistencia = new PersistenciaContainer())
@@ -106,7 +109,7 @@ namespace LogicaDelNegocio.DataAccess
         /// registrarla en la base de datos
         /// </summary>
         /// <param name="CuentaAConvertir">CuentaModel</param>
-        /// <returns>Cuenta</returns>
+        /// <returns>Una Cuenta con la informacion necesaria para ser alamcenada en la base de datos </returns>
         private Cuenta CrearCuentaAGuadar(CuentaModel CuentaAConvertir)
         {
             return new Cuenta()
@@ -123,7 +126,7 @@ namespace LogicaDelNegocio.DataAccess
         /// Convierte un objeto CuentaModel a Cuenta
         /// </summary>
         /// <param name="CuentaAConvertir">CuentaModel</param>
-        /// <returns>Cuenta</returns>
+        /// <returns>La CuentaModel convertida a Cuenta</returns>
         private Cuenta ConvertirACuenta(CuentaModel CuentaAConvertir)
         {
             return new Cuenta()
@@ -135,10 +138,10 @@ namespace LogicaDelNegocio.DataAccess
         }
 
         /// <summary>
-        /// Convierte un objeto UsuarioModel a Usuario
+        /// Convierte un JugadorModel a Jugador
         /// </summary>
-        /// <param name="UsuarioAConvertir">UsuarioModel</param>
-        /// <returns>Usuario</returns>
+        /// <param name="UsuarioAConvertir">JugadorModel</param>
+        /// <returns>El JugadorModel convertido a JugadorModel</returns>
         private Jugador ConvertirAJugador(JugadorModel UsuarioAConvertir)
         {
             return new Jugador()
@@ -152,7 +155,7 @@ namespace LogicaDelNegocio.DataAccess
         /// Convierte un objeto Cuenta a CuentaModel
         /// </summary>
         /// <param name="CuentaAConvertir">Cuenta</param>
-        /// <returns>CuentaModel</returns>
+        /// <returns>La Cuenta convertida a CuentaModel</returns>
         private CuentaModel ConvertirACuentaModel(Cuenta CuentaAConvertir)
         {
             return new CuentaModel()
@@ -166,10 +169,10 @@ namespace LogicaDelNegocio.DataAccess
         }
 
         /// <summary>
-        /// Convierte un objeto Jugador a JugadorModel
+        /// Convierte Jugador a JugadorModel
         /// </summary>
         /// <param name="UsuarioAConvertir">UsuarioAConvertir</param>
-        /// <returns>JugadorModel</returns>
+        /// <returns>El Juegador converitido a JugadorModel</returns>
         private JugadorModel ConvertirAUsuarioModel(Jugador UsuarioAConvertir)
         {
             return new JugadorModel()
@@ -180,10 +183,10 @@ namespace LogicaDelNegocio.DataAccess
         }
 
         /// <summary>
-        /// Convierte un objeto CorredorAdquiridoModel a CorredorAdquirido
+        /// Convierte un CorredorAdquiridoModel a CorredorAdquirido
         /// </summary>
         /// <param name="PersonajeCorredorAConvertir">PersonajeCorredorAConvertir</param>
-        /// <returns>CorredorAdquirido</returns>
+        /// <returns>El CorredorAdquieridoModel a CorredorAdquirido</returns>
         private CorredorAdquirido ConvertirCorredorAdquirido(CorredorAdquiridoModel PersonajeCorredorAConvertir)
         {
             return new CorredorAdquirido()
@@ -198,7 +201,7 @@ namespace LogicaDelNegocio.DataAccess
         /// Convierte un objeto CorredorAdquirido a CorredorAdquiridoModel
         /// </summary>
         /// <param name="CorredorAdquirdoAConvertir">CorredorAdquirdoAConvertir</param>
-        /// <returns>CorredorAdquiridoModel</returns>
+        /// <returns>El CorredorAdquirido a CorredorAdquiridoModel</returns>
         private CorredorAdquiridoModel ConvertirCorredorAdquiridoModel(CorredorAdquirido CorredorAdquirdoAConvertir)
         {
             return new CorredorAdquiridoModel()
@@ -213,7 +216,7 @@ namespace LogicaDelNegocio.DataAccess
         /// Convierte un objeto PerseguidorAdquirido a SeguidorAdquiridoModel
         /// </summary>
         /// <param name="SeguidorAdquiridoAConvertir">CorredorAdquirido</param>
-        /// <returns>CorredorAdquiridoModel</returns>
+        /// <returns>El PerseguidorAdquirido a AdquiridoModel</returns>
         private SeguidorAdquiridoModel ConvertirSeguidorAdquiridoModel(PerseguidorAdquirido SeguidorAdquiridoAConvertir)
         {
             return new SeguidorAdquiridoModel()
@@ -227,7 +230,7 @@ namespace LogicaDelNegocio.DataAccess
         /// Convierte un objeto SeguidorAdquiridoModel a SeguirAdquirido
         /// </summary>
         /// <param name="SeguidorAdquirido">SeguidorAdquirido</param>
-        /// <returns>PerseguidorAdquirido</returns>
+        /// <returns>El PersegudirAdquierodoModel convertido a PerseguidorAdquirido</returns>
         private PerseguidorAdquirido ConvertirSeguidorAdquirido(SeguidorAdquiridoModel SeguidorAdquirido)
         {
             return new PerseguidorAdquirido()

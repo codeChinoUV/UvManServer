@@ -4,7 +4,6 @@ using System.Runtime.Serialization;
 namespace LogicaDelNegocio.Modelo
 {
     /// <summary>
-    /// Clase Cuenta
     /// Contiene todos los atributos para la autenticación del usuario
     /// </summary>
     

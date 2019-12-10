@@ -8,6 +8,9 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace GameService.Dominio
 {
+    /// <summary>
+    /// Se encarfa de recibir paquetes UDP
+    /// </summary>
     public class UdpReciver
     {
         private UdpClient ClienteUDP;
@@ -15,6 +18,11 @@ namespace GameService.Dominio
         public delegate void RecibirEventoEnJuego(EventoEnJuego eventoEnJuego);
         public event RecibirEventoEnJuego EventoRecibido;
 
+        /// <summary>
+        /// Deseariliza un arreglo de bytes en un EventoEnJuego
+        /// </summary>
+        /// <param name="byteArray">byte[]</param>
+        /// <returns>El EventoEnJuego deserializado</returns>
         public static EventoEnJuego Deserializar(byte[] byteArray)
         {
             if (byteArray == null)
@@ -31,6 +39,10 @@ namespace GameService.Dominio
             }
         }
 
+        /// <summary>
+        /// Se encarga de escuhar en la red a la espera de paquetes UDP
+        /// </summary>
+        /// <param name="puerto">Int</param>
         public void RecibirDatos(object puerto)
         {
             ClienteUDP = new UdpClient((int) puerto);
@@ -53,6 +65,9 @@ namespace GameService.Dominio
             }
         }
 
+        /// <summary>
+        /// Libera los recursos utilizados al escuchar paquetes en la red
+        /// </summary>
         public void LiberarRecursos()
         {
             if(ClienteUDP != null)

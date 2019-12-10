@@ -4,6 +4,9 @@ using System.Text;
 
 namespace LogicaDelNegocio.Util
 {
+    /// <summary>
+    /// Se encarga de encriptar informacion
+    /// </summary>
     public class Encriptador
     {
         /// <summary>

@@ -2,10 +2,13 @@
 
 namespace LogicaDelNegocio.Util
 {
+    /// <summary>
+    /// Se encarga de generar codigos aleatorios
+    /// </summary>
     public class GeneradorCodigo
     {
         private const int TAMANO_DE_CADENA_DE_TEXTO = 10;
-        private const int TAMANO_DE_CODIGO_VERIFICACION = 10;
+        private const int TAMANO_DE_CODIGO_VERIFICACION = 5;
 
         /// <summary>
         /// Genera un codigo aleatorio de 10 digitos
@@ -30,7 +33,7 @@ namespace LogicaDelNegocio.Util
         public static string GenerarCadena()
         {
             Random GeneradorRandom = new Random();
-            string CadenaDeCaracteresPosibles = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            string CadenaDeCaracteresPosibles = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             int Largo = CadenaDeCaracteresPosibles.Length;
             char Caracter;
             string CadenaGenerada = string.Empty;

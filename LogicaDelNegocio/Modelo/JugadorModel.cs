@@ -6,7 +6,6 @@ using LogicaDelNegocio.Modelo.Enum;
 namespace LogicaDelNegocio.Modelo
 {
     /// <summary>
-    /// Clase Usuario
     /// Contiene toda la información del usuario que se almacenara en la base de datos
     /// </summary>
     [DataContract]

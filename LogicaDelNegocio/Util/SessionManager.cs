@@ -5,6 +5,9 @@ using System.Threading;
 
 namespace LogicaDelNegocio.Util
 {
+    /// <summary>
+    /// Se encarga de manejar a las cuentas que se encuentran en sesion
+    /// </summary>
     public sealed class SessionManager
     {
         private static Dictionary<CuentaModel, Thread> CuentasLogeadas = new Dictionary<CuentaModel, Thread>();
@@ -22,7 +25,7 @@ namespace LogicaDelNegocio.Util
         /// <summary>
         /// Retorna una instancia singleton del manejador de sesiones
         /// </summary>
-        /// <returns>SessionManager</returns>
+        /// <returns>La instancia del SessionManager</returns>
         public static SessionManager GetSessionManager()
         {
             return ManejadorDeSesiones;
@@ -33,7 +36,7 @@ namespace LogicaDelNegocio.Util
         /// </summary>
         /// <param name="cuenta">CuentaModel</param>
         /// <param name="hiloDeSeguimientoDelCliente">Thread</param>
-        /// <returns>Boolean</returns>
+        /// <returns>Verdadeo si la cuenta se logeo correctamente, falso si no</returns>
         public Boolean AgregarCuentaLogeada(CuentaModel cuenta, Thread hiloDeSeguimientoDelCliente)
         {
             lock (ObjetoSincronizador)
@@ -83,7 +86,7 @@ namespace LogicaDelNegocio.Util
         /// Verifica si una cuenta ya se encuentra en la sesion
         /// </summary>
         /// <param name="cuenta">CuentaModel</param>
-        /// <returns>Boolean</returns>
+        /// <returns>Verdadero si la cuenta se cuentra en la sesion, falso si no</returns>
         public Boolean VerificarCuentaLogeada(CuentaModel cuenta)
         {
             lock (ObjetoSincronizador)
@@ -103,7 +106,7 @@ namespace LogicaDelNegocio.Util
         /// Regresa la cuenta con todos los datos que tiene almacenada la sesion
         /// </summary>
         /// <param name="cuenta">CuentaModel</param>
-        /// <returns>CuentaModel</returns>
+        /// <returns>La cuentaModel que contiene los datos completos de la cuenta que se le pasa como parametro</returns>
         public CuentaModel ObtenerCuentaCompleta(CuentaModel cuenta)
         {
             CuentaModel CuentaCompleta = null;
@@ -118,14 +121,15 @@ namespace LogicaDelNegocio.Util
             return CuentaCompleta;
         }
 
+        /// <summary>
+        /// Termina a todos los hilos que estaban supervisando la conexion de los clientes.
+        /// </summary>
         public void TerminarTodosLosHilosDeEscucha()
         {
             foreach (Thread hilo in CuentasLogeadas.Values)
             {
                 hilo?.Abort();
             }
+        }
     }
-    }
-
-    
 }

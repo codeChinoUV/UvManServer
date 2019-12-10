@@ -4,14 +4,12 @@ using LogicaDelNegocio.Modelo;
 using LogicaDelNegocio.Util;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
-using GameService.Dominio;
-
-
 
 namespace GameService.Dominio
 {
+    /// <summary>
+    /// Se encarga de administrar la salas
+    /// </summary>
     public sealed class SalaManager
     {
         private static SalaManager ManejadorDeSala = new SalaManager();
@@ -34,7 +32,7 @@ namespace GameService.Dominio
         /// <summary>
         /// Se suscribe a los eventos que ofrece la sala
         /// </summary>
-        /// <param name="salaASuscribirse"></param>
+        /// <param name="salaASuscribirse">Sala</param>
         private void SuscribirseAEventosDeSala(Sala salaASuscribirse)
         {
             salaASuscribirse.SalaVacia += DestruirSala;
@@ -58,6 +56,10 @@ namespace GameService.Dominio
             ManejadorDeSesiones.UsuarioDesconectado += AbandonarSala;
         }
 
+        /// <summary>
+        /// Regresa la instacia de la clase SalaManager
+        /// </summary>
+        /// <returns>SalaManager</returns>
         public static SalaManager GetSalaManager()
         {
             return ManejadorDeSala;
@@ -104,7 +106,7 @@ namespace GameService.Dominio
         /// </summary>
         /// <param name="Cuenta">CuentaModel</param>
         /// <param name="ActualCallback">IGameServiceCallback</param>
-        /// <returns>Boolean</returns>
+        /// <returns>Verdadero si la sala cuenta se unico correctamenete a la sala o falso si no</returns>
         public Boolean UnisrseASalaDisponible(CuentaModel Cuenta, IGameServiceCallback ActualCallback, String DireccionIpDelCliente)
         {
             Boolean seUnioASala = false;
@@ -165,7 +167,7 @@ namespace GameService.Dominio
         /// Verifica si la cuenta se encuentra en una sala
         /// </summary>
         /// <param name="Cuenta">CuentaModel</param>
-        /// <returns>Boolean</returns>
+        /// <returns>Verdadero si la cuenta se encuentra en la sala, falso si no</returns>
         public bool VerificarSiEstoyEnSala(CuentaModel Cuenta)
         {
             Boolean SeEncuentraEnSala = false;
@@ -183,7 +185,7 @@ namespace GameService.Dominio
         /// Recupera las cuentas que estan en la sala de la cuenta
         /// </summary>
         /// <param name="Cuenta">CuentaModel</param>
-        /// <returns>List</returns>
+        /// <returns>Una lista con las cuentas de la sala del jugagor</returns>
         public List<CuentaModel> RecuperarCuentasDeSalaDeJugador(CuentaModel Cuenta)
         {
             List<CuentaModel> CuentasDeLaSala;
@@ -203,7 +205,7 @@ namespace GameService.Dominio
         /// Recupera la sala en la que se encuentra la cuenta
         /// </summary>
         /// <param name="Cuenta">Cuenta</param>
-        /// <returns>Sala</returns>
+        /// <returns>La sala de la cuenta</returns>
         public Sala RecuperarSalaDeCuenta(CuentaModel Cuenta)
         {
             Sala SalaDondeSeEncuentraLaCuenta = null;
@@ -220,7 +222,7 @@ namespace GameService.Dominio
         /// <summary>
         /// Busca la sala incompleta con mas cuentas
         /// </summary>
-        /// <returns>Sala</returns>
+        /// <returns>La sala que aun no esta completa</returns>
         private Sala BuscarSalaIncompleta()
         {
             Sala SalaConMayorNumeroDeJugadores = null;
@@ -247,7 +249,7 @@ namespace GameService.Dominio
         /// Busca si el Id ya se encuentra ocupado por una sala
         /// </summary>
         /// <param name="idAComparar">String</param>
-        /// <returns>Boolean</returns>
+        /// <returns>Verdadero si el Id ya se encuentra en uso por otra sala y falso si no</returns>
         private Boolean EstaElIdDeSalaEnUso(String idAComparar)
         {
             Boolean IdEstaOcupado = false;
@@ -266,7 +268,7 @@ namespace GameService.Dominio
         /// </summary>
         /// <param name="Cuenta">CuentaModel</param>
         /// <param name="ActualCallback">IGameServiceCallback</param>
-        /// <returns>Sala</returns>
+        /// <returns>La sala que se creada</returns>
         private Sala CrearSalaConIdAleatorio(CuentaModel Cuenta, IGameServiceCallback ActualCallback, String DireccionIpDelCliente)
         {
             String IdDeSala;
@@ -292,6 +294,10 @@ namespace GameService.Dominio
             }
         }
         
+        /// <summary>
+        /// Busca la sala a la cual se le deben de reenviar los datos y se los reenvia
+        /// </summary>
+        /// <param name="eventoEnJuego">EventoEnJuego</param>
         public void ReplicarDatosRecibidosASala(EventoEnJuego eventoEnJuego)
         {
             foreach (Sala sala in SalasCreadas)
@@ -304,6 +310,11 @@ namespace GameService.Dominio
             }
         }
 
+        /// <summary>
+        /// Recupera la cuenta la cual envio el EventoEnJuego
+        /// </summary>
+        /// <param name="eventoEnJuego">EventoEnJuego</param>
+        /// <returns>La cuenta que envio el evento </returns>
         private CuentaModel RecuperarCuentaDelEvento(EventoEnJuego eventoEnJuego)
         {
             CuentaModel cuentaDelEvento = new CuentaModel();
@@ -320,6 +331,10 @@ namespace GameService.Dominio
             return cuentaDelEvento;
         }
 
+        /// <summary>
+        /// Le indica a la sala de la CuentaDelCorredor que se envio un mensaje de terminar partida
+        /// </summary>
+        /// <param name="CuentaDelCorredor">CuentaModel</param>
         public void TerminarPartida(CuentaModel CuentaDelCorredor)
         {
             Sala MiSala = ManejadorDeSala.RecuperarSalaDeCuenta(CuentaDelCorredor);

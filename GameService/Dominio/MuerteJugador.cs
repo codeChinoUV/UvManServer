@@ -2,6 +2,9 @@
 
 namespace GameService.Dominio
 {
+    /// <summary>
+    /// Almacena los datos de un evento muerte de jugador
+    /// </summary>
     [Serializable]
     public class MuerteJugador
     {
