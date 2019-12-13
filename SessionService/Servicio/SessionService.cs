@@ -89,7 +89,7 @@ namespace SessionService.Servicio
         
         private ISessionServiceCallback ActualCallback;
         private CuentaModel CuentaSiguiendo;
-        private const int TIEMPO_ESPERA_CHECAR_CLIENTE = 2500;
+        private const int TIEMPO_ESPERA_CHECAR_CLIENTE = 10000;
 
         public EstadoCliente(ISessionServiceCallback ActualCallback, CuentaModel CuentaSiguiendo)
         {

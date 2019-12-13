@@ -11,6 +11,7 @@ namespace GameService.Dominio.Enum
         MovimientoJugador = 2,
         MuerteJugador = 3,
         IniciarCuentaRegresivaInicioNivel = 4,
-        IniciarNivel = 5
+        IniciarNivel = 5,
+        IniciaTiempoMatar = 6
     }
 }

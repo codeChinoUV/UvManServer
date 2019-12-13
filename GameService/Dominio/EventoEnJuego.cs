@@ -12,6 +12,7 @@ namespace GameService.Dominio
         public String IdSala { get; set; }
         
         public  String CuentaRemitente { get; set; }
+
         public EnumTipoDeEventoEnJuego TipoDeEvento { get; set; }
        
         public MovimientoJugador DatosDelMovimiento { get; set; }
@@ -20,7 +21,6 @@ namespace GameService.Dominio
         
         public InicioPartida DatosInicioDePartida { set; get; }
         
-        public int Ping { get; set; }
 
         /// <summary>
         /// Crea un evento del juego indicando la muerte de un jugador
@@ -31,13 +31,12 @@ namespace GameService.Dominio
         /// <param name="cantidadDeVidas">String</param>
         /// <param name="ping">int</param>
         public void EventoEnJuegoMuerteJugador(String cuentaOrigen, String idSala, String usuarioMuerto,
-            int cantidadDeVidas, int ping)
+            int cantidadDeVidas)
         {
             CuentaRemitente = cuentaOrigen;
             IdSala = idSala;
             TipoDeEvento = EnumTipoDeEventoEnJuego.MuerteJugador;
             DatosMuerteDeUnJugador = new MuerteJugador(usuarioMuerto, cantidadDeVidas);
-            Ping = ping;
         }
 
         /// <summary>
@@ -57,7 +56,6 @@ namespace GameService.Dominio
             IdSala = sala;
             TipoDeEvento = EnumTipoDeEventoEnJuego.MovimientoJugador;
             DatosDelMovimiento = new MovimientoJugador(usuario, posicionX, posicionY, movimientoX, movimientoY);
-            Ping = Ping;
         }
 
         /// <summary>
@@ -108,6 +106,17 @@ namespace GameService.Dominio
             TipoDeEvento = EnumTipoDeEventoEnJuego.IniciarNivel;
             DatosInicioDePartida = new InicioPartida();
             DatosInicioDePartida.IniciarCuentaRegresivaInicioNivel = true;
+        }
+
+        /// <summary>
+        /// Crea un evento en el juego de tipo se inicio tiempo de matar
+        /// </summary>
+        /// <param name="sala"></param>
+        public void SeInicioTiempoDeMatar(String CuentaDeOrigen, String sala)
+        {
+            TipoDeEvento = EnumTipoDeEventoEnJuego.IniciaTiempoMatar;
+            IdSala = sala;
+            CuentaRemitente = CuentaDeOrigen;
         }
     }
     

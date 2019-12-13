@@ -8,7 +8,7 @@ namespace LogicaDelNegocio.Util
     public class GeneradorCodigo
     {
         private const int TAMANO_DE_CADENA_DE_TEXTO = 10;
-        private const int TAMANO_DE_CODIGO_VERIFICACION = 5;
+        private const int TAMANO_DE_CODIGO_VERIFICACION = 10;
 
         /// <summary>
         /// Genera un codigo aleatorio de 10 digitos
@@ -45,6 +45,5 @@ namespace LogicaDelNegocio.Util
             return CadenaGenerada;
         }
     }
-
    
 }
