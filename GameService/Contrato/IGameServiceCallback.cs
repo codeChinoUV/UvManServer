@@ -17,7 +17,5 @@ namespace GameService.Contrato
         void CuentaAbandoSala(CuentaModel cuenta);
         [OperationContract(IsOneWay = true)]
         void RefrescarCuentasEnSala(List<CuentaModel> CuentasEnMiSala);
-        [OperationContract(IsOneWay = true)]
-        void NuevoNivel();
     }
 }

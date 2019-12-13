@@ -5,6 +5,8 @@ using LogicaDelNegocio.DataAccess.Interfaces;
 using LogicaDelNegocio.Modelo;
 using AccesoDatos;
 using LogicaDelNegocio.Util;
+using System.Data.Entity.Core;
+using System.Diagnostics;
 
 namespace LogicaDelNegocio.DataAccess
 {
@@ -140,15 +142,28 @@ namespace LogicaDelNegocio.DataAccess
         /// <summary>
         /// Convierte un JugadorModel a Jugador
         /// </summary>
-        /// <param name="UsuarioAConvertir">JugadorModel</param>
+        /// <param name="JugadorAConvertir">JugadorModel</param>
         /// <returns>El JugadorModel convertido a JugadorModel</returns>
-        private Jugador ConvertirAJugador(JugadorModel UsuarioAConvertir)
+        private Jugador ConvertirAJugador(JugadorModel JugadorAConvertir)
         {
-            return new Jugador()
+            Jugador JugadorConvertido;
+            if(JugadorAConvertir != null)
             {
-                MejorPuntacion = 0,
-                UvCoins = 0
-            };
+                JugadorConvertido= new Jugador()
+                {
+                    MejorPuntacion = JugadorAConvertir.MejorPuntacion,
+                    UvCoins = JugadorAConvertir.UvCoins
+                };
+            }
+            else
+            {
+                JugadorConvertido = new Jugador()
+                {
+                    MejorPuntacion = 0,
+                    UvCoins = 0
+                };
+            }
+            return JugadorConvertido;
         }
 
         /// <summary>
@@ -284,20 +299,8 @@ namespace LogicaDelNegocio.DataAccess
             {
 
                 Cuenta CuentaAModificar = Persistencia.CuentaSet.Where(cuenta => cuenta.Usuario == CuentaActualizar.NombreUsuario).FirstOrDefault();
-                Jugador JugadorAGuardar = ConvertirAJugador(CuentaActualizar.Jugador);
-                CuentaAModificar.Usuario1 = JugadorAGuardar;
-                List<CorredorAdquirido> CorredorAdquiridosAGuardar = new List<CorredorAdquirido>();
-                List<PerseguidorAdquirido> PerseguidoresAdquiridosAGuardar = new List<PerseguidorAdquirido>();
-                foreach (CorredorAdquiridoModel CorredorerAdquiridoAConvertir in CuentaActualizar.Jugador.CorredoresAdquiridos)
-                {
-                    CorredorAdquiridosAGuardar.Add(ConvertirCorredorAdquirido(CorredorerAdquiridoAConvertir));
-                }
-                foreach (SeguidorAdquiridoModel PerseguidorAdquiridoAConvertir in CuentaActualizar.Jugador.SeguidoresAdquiridos)
-                {
-                    PerseguidoresAdquiridosAGuardar.Add(ConvertirSeguidorAdquirido(PerseguidorAdquiridoAConvertir));
-                }
-                JugadorAGuardar.PerseguidorAdquirido = PerseguidoresAdquiridosAGuardar;
-                JugadorAGuardar.CorredoresAdquiridos = CorredorAdquiridosAGuardar;
+                CuentaAModificar.Usuario1.UvCoins = CuentaActualizar.Jugador.UvCoins;
+                CuentaAModificar.Usuario1.MejorPuntacion = CuentaActualizar.Jugador.MejorPuntacion;
                 Persistencia.SaveChanges();
             }
         }
@@ -311,7 +314,7 @@ namespace LogicaDelNegocio.DataAccess
             List<CuentaModel> MayoresPuntuaciones = new List<CuentaModel>();
             using (PersistenciaContainer Persistencia = new PersistenciaContainer())
             {
-                var CuentasDeMayoresPuntuaciones = Persistencia.CuentaSet.OrderBy(cuenta => cuenta.Usuario1.MejorPuntacion).Take(5);
+                var CuentasDeMayoresPuntuaciones = Persistencia.CuentaSet.OrderByDescending(cuenta => cuenta.Usuario1.MejorPuntacion).Take(5);
                 if (CuentasDeMayoresPuntuaciones != null)
                 {
                     foreach (Cuenta CuentaRecuperada in CuentasDeMayoresPuntuaciones)

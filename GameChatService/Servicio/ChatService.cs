@@ -107,7 +107,6 @@ namespace GameChatService.Servicio
                         if (CuentaClave.NombreUsuario == CuentaEnSala.NombreUsuario)
                         {
                             IChatServiceCallback Callback = CuentasConetadas[CuentaClave];
-                            Callback.RefrescarCuentasConectadas(Cuentas);
                             Callback.Abandonar(Cuenta);        
                         }
                     }       
@@ -147,29 +146,6 @@ namespace GameChatService.Servicio
         }
 
         /// <summary>
-        /// Notifica a las cuentas que una cuenta esta escribiendo
-        /// </summary>
-        /// <param name="Cuenta">String</param>
-        public void EstaEscribiendo(CuentaModel Cuenta)
-        {
-            lock (SincronizarObjeto)
-            {
-                List<CuentaModel> CuentasEnLaSala = ManejadorDeSalas.RecuperarCuentasDeSalaDeJugador((Cuenta));
-                foreach (CuentaModel CuentaClave in CuentasConetadas.Keys)
-                {
-                    foreach (CuentaModel CuentaEnSala in CuentasEnLaSala)
-                    {
-                        if (CuentaClave.NombreUsuario == CuentaEnSala.NombreUsuario)
-                        {
-                            IChatServiceCallback Callback = CuentasConetadas[CuentaClave];
-                            Callback.EstaEscribiendoCallback(Cuenta.NombreUsuario);
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Recorre el diccionario de CuentasModel conectados, notificando que la cuenta se ha conectado
         /// </summary>
         /// <param name="Cuenta">CuentaModel</param>
@@ -189,7 +165,6 @@ namespace GameChatService.Servicio
                             IChatServiceCallback Callback = CuentasConetadas[CuentaClave];
                             try
                             {
-                                Callback.RefrescarCuentasConectadas(Cuentas);
                                 Callback.Unirse(Cuenta);
                             }
                             catch (Exception)

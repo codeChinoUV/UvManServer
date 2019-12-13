@@ -133,15 +133,6 @@ namespace GameService.Servicio
         }
 
         /// <summary>
-        /// Notifica a las demas Cuentas de la sala que se iniciara un nuevo nivel
-        /// </summary>
-        /// <param name="CuentaDelCorredor">Cuenta del corredor que iniciara el nuevo nivel</param>
-        public void NotificarIniciarNivel(CuentaModel CuentaDelCorredor)
-        {
-            ManejadorDeSala.IniciarNivel(CuentaDelCorredor);
-        }
-
-        /// <summary>
         /// Recupera las mejores 5 puntuaciones
         /// </summary>
         /// <returns>Una lista con las 5 cuentas con mejores puntuaciones</returns>

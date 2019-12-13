@@ -343,14 +343,5 @@ namespace GameService.Dominio
                 MiSala.TerminarPartida(CuentaDelCorredor);
             }
         }
-
-        public void IniciarNivel(CuentaModel CuentaDelCorredor)
-        {
-            Sala MiSala = ManejadorDeSala.RecuperarSalaDeCuenta(CuentaDelCorredor);
-            if (MiSala != null)
-            {
-                MiSala.NotificarIniciarNivel();
-            }
-        }
     }
 }

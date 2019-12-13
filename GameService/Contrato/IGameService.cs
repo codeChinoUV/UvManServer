@@ -27,8 +27,6 @@ namespace GameService.Contrato
         [OperationContract]
         void TerminarPartida(CuentaModel CuentaDeCorredor);
         [OperationContract]
-        void NotificarIniciarNivel(CuentaModel CuentaDelCorredor);
-        [OperationContract]
         List<CuentaModel> RecuperarMejoresPuntuaciones();
         [OperationContract]
         void EstaLaSalaLlena(CuentaModel CuentaEnSala);

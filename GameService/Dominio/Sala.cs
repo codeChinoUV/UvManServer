@@ -6,9 +6,10 @@ using System.Timers;
 using LogicaDelNegocio.Modelo.Enum;
 using LogicaDelNegocio.DataAccess.Interfaces;
 using LogicaDelNegocio.DataAccess;
-using System.Diagnostics;
 using GameService.Dominio.Enum;
 using System.ServiceModel;
+using System.Diagnostics;
+using System.Data.SqlClient;
 
 namespace GameService.Dominio
 {
@@ -22,7 +23,9 @@ namespace GameService.Dominio
         private Dictionary<CuentaModel, String> DireccionesIpDeCuentas = new Dictionary<CuentaModel, string>();
         private readonly int PUERTO_ENVIO_UDP_1 = 8296;
         private readonly int PUERTO_ENVIO_UDP_2 = 8297;
-        private const int CANTIDAD_CUENTAS_MAXIMAS = 4;
+        private const int CUENTAS_MAXIMAS = 4;
+        public EnumEstadoSala EstadoDeLaPartida;
+
 
         public String Id { get; set; }
 
@@ -74,7 +77,8 @@ namespace GameService.Dominio
         /// <returns>Verdadero si me pude la cuenta se unio a la sala, falso si no</returns>
         public Boolean UnirseASala(CuentaModel cuenta, IGameServiceCallback serviceCallback, String DireccionIpDelCliente)
         {
-            if (NumeroJugadoresEnSala >= 5) return false;
+            bool SeConectoALaSala = false;
+            if (NumeroJugadoresEnSala >= 5) SeConectoALaSala = false;
             lock (ObjetoParaSincronizar)
             {
                 try
@@ -86,21 +90,30 @@ namespace GameService.Dominio
                     }
                     CuentasEnLaSala.Add(cuenta, serviceCallback);
                     DireccionesIpDeCuentas.Add(cuenta, DireccionIpDelCliente);
+                    SeConectoALaSala = true;
                 }
-                catch (ObjectDisposedException)
+                catch (ArgumentException)
                 {
-
+                    SeConectoALaSala = false;
                 }
-                catch(TimeoutException)
-                {
 
+                catch (ObjectDisposedException Dispose)
+                {
+                    NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                    logger.Warn(Dispose.Message);
                 }
-                catch (CommunicationException)
+                catch(TimeoutException Time)
                 {
-
+                    NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                    logger.Warn(Time.Message);
+                }
+                catch (CommunicationException Communication)
+                {
+                    NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                    logger.Warn(Communication.Message);
                 }
             }
-            return true;
+            return SeConectoALaSala;
         }
 
         /// <summary>
@@ -108,14 +121,33 @@ namespace GameService.Dominio
         /// </summary>
         public void VerificarSalaLlena()
         {
-            if(NumeroJugadoresEnSala == CANTIDAD_CUENTAS_MAXIMAS)
+            if(NumeroJugadoresEnSala == CUENTAS_MAXIMAS)
             {
+                EstadoDeLaPartida = EnumEstadoSala.EnPartida;
                 lock (ObjetoParaSincronizar)
                 {
-                    foreach (CuentaModel cuentaEnLaSala in CuentasEnLaSala.Keys)
+                    try
                     {
-                        CuentasEnLaSala[cuentaEnLaSala].SalaLlena();
+                        foreach (CuentaModel cuentaEnLaSala in CuentasEnLaSala.Keys)
+                        {
+                            CuentasEnLaSala[cuentaEnLaSala].SalaLlena();
+                        }
                     }
+                    catch (ObjectDisposedException Dispose)
+                    {
+                        NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                        logger.Warn(Dispose.Message);
+                    }
+                    catch (TimeoutException Time)
+                    {
+                        NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                        logger.Warn(Time.Message);
+                    }
+                    catch (CommunicationException Communication)
+                    {
+                        NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                        logger.Warn(Communication.Message);
+                    }                    
                     TemporizarEnvioMensajeCambiarPantalla();
                 }
             }
@@ -192,17 +224,20 @@ namespace GameService.Dominio
                         callback.NotificarTerminaPartida();
                     }
                 }
-                catch (ObjectDisposedException)
+                catch (ObjectDisposedException Dispose)
                 {
-
+                    NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                    logger.Warn(Dispose.Message);
                 }
-                catch (CommunicationException)
+                catch (CommunicationException Communication)
                 {
-
+                    NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                    logger.Warn(Communication.Message);
                 }
-                catch (TimeoutException)
+                catch (TimeoutException Time)
                 {
-
+                    NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                    logger.Warn(Time.Message);
                 }
                 
             }
@@ -232,7 +267,7 @@ namespace GameService.Dominio
         /// <returns>Verdadero si esta la sala llena, falso si no</returns>
         public Boolean EstaLaSalaLlena()
         {
-            return NumeroJugadoresEnSala >= CANTIDAD_CUENTAS_MAXIMAS;
+            return NumeroJugadoresEnSala >= CUENTAS_MAXIMAS;
         }
 
         /// <summary>
@@ -267,7 +302,10 @@ namespace GameService.Dominio
             CuentasEnLaSala.Remove(cuentaAEliminar);
             DireccionesIpDeCuentas.Remove(cuentaAEliminar);
             VerificarSiLaSalaEstaVacia();
-            ReasignarTipoDeJugador();
+            if(EstadoDeLaPartida != EnumEstadoSala.EnPartida)
+            {
+                ReasignarTipoDeJugador();
+            }
             NotificarCuentasEnSalaSalidaDeJugador(cuentaAEliminar);
         }
 
@@ -280,24 +318,32 @@ namespace GameService.Dominio
             lock (ObjetoParaSincronizar)
             {
                 List<CuentaModel> cuentasEnLaSala = RecuperarCuentasEnLaSala();
-                foreach (IGameServiceCallback canal in CuentasEnLaSala.Values)
+                IGameServiceCallback[] ServiciosCallback = new IGameServiceCallback[CuentasEnLaSala.Values.Count];
+                CuentasEnLaSala.Values.CopyTo(ServiciosCallback,0);
+                foreach (IGameServiceCallback canal in ServiciosCallback)
                 {
                     try
                     {
                         canal.CuentaAbandoSala(CuentaAEliminar);
-                        canal.RefrescarCuentasEnSala(cuentasEnLaSala);
+                        if (EstadoDeLaPartida != EnumEstadoSala.EnPartida)
+                        {
+                            canal.RefrescarCuentasEnSala(cuentasEnLaSala);
+                        }
                     }
-                    catch (ObjectDisposedException)
+                    catch (ObjectDisposedException Dispose)
                     {
-                        //Preguntar
+                        NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                        logger.Warn(Dispose.Message);
                     }
-                    catch (CommunicationObjectAbortedException)
+                    catch (CommunicationObjectAbortedException Communication)
                     {
-
+                        NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                        logger.Warn(Communication.Message);
                     }
-                    catch (TimeoutException)
+                    catch (TimeoutException Time)
                     {
-
+                        NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                        logger.Warn(Time.Message);
                     }
                 }
             }
@@ -353,108 +399,23 @@ namespace GameService.Dominio
         /// Notifica a las cuentas que la partida a terminado y almacena los datos del corredor
         /// </summary>
         /// <param name="CuentaDelCorredor">CuentaModel</param>
-        /// <returns>EnumEstadoTerminarPartida</returns>
-        public EnumEstadoTerminarPartida TerminarPartida(CuentaModel CuentaDelCorredor)
+        public void TerminarPartida(CuentaModel CuentaDelCorredor)
         {
-            foreach(IGameServiceCallback callback in CuentasEnLaSala.Values)
-            {
-                callback.NotificarTerminaPartida();
-            }
             ICuentaDAO PersistenciaDeCuenta = new CuentaDAO();
             try
             {
                 PersistenciaDeCuenta.GuardarDatosDeLaCuenta(CuentaDelCorredor);
             }
-            catch (Exception Ex)
+            catch (SqlException ex)
             {
-                Debug.WriteLine(Ex.InnerException.Message);
+                NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+                logger.Warn(ex.Message);
             }
-            return EnumEstadoTerminarPartida.TerminadaCorrectamente;
-        }
-
-        /// <summary>
-        /// Notifica a las cuentas en la sesion que se iniciara un nuevo nivel
-        /// </summary>
-        public void NotificarIniciarNivel()
-        {
-            try
+            foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
             {
-                foreach (IGameServiceCallback callback in CuentasEnLaSala.Values)
-                {
-                    callback.NuevoNivel();
-                }
+                callback.NotificarTerminaPartida();
             }
-            catch (TimeoutException)
-            {
-
-            }
-            catch (ObjectDisposedException)
-            {
-
-            }
-            catch (CommunicationException)
-            {
-
-            }
-            
-            TemporizarEnvioMensajeCuentaRegresivaNuevoNivel();
-        }
-
-        /// <summary>
-        /// Temporiza el envio de un mensaje de iniciarCuenta
-        /// </summary>
-        private void TemporizarEnvioMensajeCuentaRegresivaNuevoNivel()
-        {
-            Timer temporizador = new Timer(6000);
-            temporizador.Elapsed += EnviarMensajeInicioCuentaRegresivaNuevoNivel;
-            temporizador.AutoReset = false;
-            temporizador.Enabled = true;
-            temporizador.Start();
-        }
-
-        /// <summary>
-        /// Temporiza el envio de mensaje de inicio de nivel
-        /// </summary>
-        private void TemporizarEnvioMensajeInicioNivel()
-        {
-            Timer temporizador = new Timer(6000);
-            temporizador.Elapsed += EnviarMensajeInicioJuego;
-            temporizador.AutoReset = false;
-            temporizador.Enabled = true;
-            temporizador.Start();
-        }
-
-        /// <summary>
-        /// Envia un mensaje de inicio de cuenta regresiva de nuevo nivel
-        /// </summary>
-        /// <param name="source">object</param>
-        /// <param name="e">ElapsedEventAergs</param>
-        private void EnviarMensajeInicioCuentaRegresivaNuevoNivel(object source, ElapsedEventArgs e)
-        {
-            EventoEnJuego eventoEnJuego = new EventoEnJuego();
-            eventoEnJuego.EventoEnJuegoIniciarConteoNuevoNivel(Id);
-            foreach (String direccionIp in DireccionesIpDeCuentas.Values)
-            {
-                UdpSender EnviadorDePaquetes = new UdpSender(direccionIp, PUERTO_ENVIO_UDP_1, PUERTO_ENVIO_UDP_2);
-                EnviadorDePaquetes.EnviarPaquete(eventoEnJuego);
-            }
-            TemporizarEnvioMensajeInicioNivel();
-        }
-
-        /// <summary>
-        /// Envia un mensaje de inicio de nivel a las cuentas en la sala
-        /// </summary>
-        /// <param name="source">object</param>
-        /// <param name="e">ElapsedEventArgs</param>
-        private void EnviarMensajeInicioNivel(object source, ElapsedEventArgs e)
-        {
-            EventoEnJuego eventoEnJuego = new EventoEnJuego();
-            eventoEnJuego.EventoEnJuegoIniciarNuevoNivel(Id);
-            foreach (String direccionIp in DireccionesIpDeCuentas.Values)
-            {
-                UdpSender EnviadorDePaquetes = new UdpSender(direccionIp, PUERTO_ENVIO_UDP_1, PUERTO_ENVIO_UDP_2);
-                EnviadorDePaquetes.EnviarPaquete(eventoEnJuego);
-            }
+            SalaVacia?.Invoke(this);
         }
     }
 }
