@@ -23,7 +23,7 @@ namespace GameService.Dominio
         private Dictionary<CuentaModel, String> DireccionesIpDeCuentas = new Dictionary<CuentaModel, string>();
         private readonly int PUERTO_ENVIO_UDP_1 = 8296;
         private readonly int PUERTO_ENVIO_UDP_2 = 8297;
-        private const int CUENTAS_MAXIMAS = 4;
+        private const int CUENTAS_MAXIMAS = 2;
         public EnumEstadoSala EstadoDeLaPartida;
 
 

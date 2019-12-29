@@ -28,3 +28,40 @@ C:\Users\arturovilla\Desktop\UvManServer-master\GameServiceTests\obj\Debug\GameS
 C:\Users\arturovilla\Desktop\UvManServer-master\GameServiceTests\bin\Debug\GameServiceTests.dll.config
 C:\Users\arturovilla\Desktop\UvManServer-master\GameServiceTests\bin\Debug\EntityFramework.SqlServer.dll
 C:\Users\arturovilla\Desktop\UvManServer-master\GameServiceTests\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\es\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.resources.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\es\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.resources.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\es\Microsoft.VisualStudio.TestPlatform.TestFramework.resources.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\NLog.config
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\GameServiceTests.dll.config
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\GameServiceTests.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\GameServiceTests.pdb
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\EntityFramework.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\GameService.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\LogicaDelNegocio.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\NLog.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\AccesoDatos.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\GameService.pdb
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\GameService.dll.config
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\LogicaDelNegocio.pdb
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\LogicaDelNegocio.dll.config
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\EntityFramework.xml
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.xml
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\NLog.xml
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\AccesoDatos.pdb
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\AccesoDatos.dll.config
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\obj\Debug\GameServiceTests.csprojAssemblyReference.cache
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\obj\Debug\GameServiceTests.csproj.CoreCompileInputs.cache
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\obj\Debug\GameServiceTests.csproj.CopyComplete
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\obj\Debug\GameServiceTests.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\obj\Debug\GameServiceTests.pdb
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\SessionService.dll
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\SessionService.pdb
+C:\Users\Miguel\Dropbox\Tecnologías Proyecto\UvManServer\GameServiceTests\bin\Debug\SessionService.dll.config

@@ -1,11 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using GameService.Servicio;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LogicaDelNegocio.Modelo;
+using GameService.Dominio.Enum;
 
 namespace GameService.Servicio.Tests
 {
@@ -24,22 +21,24 @@ namespace GameService.Servicio.Tests
             };
             bool expectedResut = false;
 
-            string id = "1234";
+            EnumEstadoDeUnirseASala estado = EnumEstadoDeUnirseASala.NoSeEncuentraEnSesion;
 
             GameService service = new GameService();
 
-            Assert.AreEqual(expectedResut, service.UnirseASalaPrivada(id, cuenta));
+            Assert.AreEqual(expectedResut, service.UnirseASalaPrivada("1234", cuenta));
         }
 
         [TestMethod()]
-        public void UnirseASalaPrivadaTestExito()
+        public void UnirseASalaPrivadaTestNoexisteSala()
         {
+            SessionService.Servicio.SessionService ServicioSesion = new SessionService.Servicio.SessionService();
             CuentaModel cuenta = new CuentaModel()
             {
-                NombreUsuario = "WingXstar",
-                Contrasena = "PepitoElgrillo45",
-                CorreoElectronico = "man_spider.345@hotmail.com"
+                NombreUsuario = "chino",
+                Contrasena = "joseMiguel",
+                CorreoElectronico = "pumas.chino99@gmail.com"
             };
+            ServicioSesion.IniciarSesion(cuenta);
             bool expectedResut = true;
 
             string id = "qM3A20";
@@ -52,6 +51,24 @@ namespace GameService.Servicio.Tests
         [TestMethod()]
         public void UnirseASalaTest()
         {
+            SessionService.Servicio.SessionService ServicioSesion = new SessionService.Servicio.SessionService();
+            CuentaModel cuenta = new CuentaModel()
+            {
+                NombreUsuario = "hachi",
+                Contrasena = "hola9011",
+                CorreoElectronico = "pumas.chino99@gmail.com"
+            };
+            ServicioSesion.IniciarSesion(cuenta);
+            bool expectedResut = true;
+
+            GameService service = new GameService();
+
+            Assert.AreEqual(expectedResut, service.UnirseASala(cuenta));
+        }
+
+        [TestMethod()]
+        public void VerificarSiEstoyEnSalaTest()
+        {
             CuentaModel cuenta = new CuentaModel()
             {
                 NombreUsuario = "WingXstar",
@@ -62,23 +79,7 @@ namespace GameService.Servicio.Tests
 
             GameService service = new GameService();
 
-            Assert.AreEqual(expectedResut, service.UnirseASala(cuenta));
-        }
-
-        [TestMethod()]
-        public void VerificarSiEstoyEnSalaTest()
-        {
-                CuentaModel cuenta = new CuentaModel()
-                {
-                    NombreUsuario = "WingXstar",
-                    Contrasena = "PepitoElgrillo45",
-                    CorreoElectronico = "man_spider.345@hotmail.com"
-                };
-                bool expectedResut = false;
-
-                GameService service = new GameService();
-
-                Assert.AreEqual(expectedResut, service.VerificarSiEstoyEnSala(cuenta));
+            Assert.AreEqual(expectedResut, service.VerificarSiEstoyEnSala(cuenta));
         }
 
         [TestMethod()]
@@ -106,7 +107,7 @@ namespace GameService.Servicio.Tests
                 Contrasena = "PepitoElgrillo45",
                 CorreoElectronico = "man_spider.345@hotmail.com"
             };
-            string expectedResut = null;
+            string expectedResut = String.Empty;
 
             GameService service = new GameService();
 
@@ -149,11 +150,16 @@ namespace GameService.Servicio.Tests
         [TestMethod()]
         public void RecuperarMejoresPuntuacionesTest()
         {
-                List<CuentaModel> expectedResut = new List<CuentaModel>();
+            List<CuentaModel> ListaDeCuentas = new List<CuentaModel>();
+            ListaDeCuentas.Add(new CuentaModel());
+            ListaDeCuentas.Add(new CuentaModel());
+            ListaDeCuentas.Add(new CuentaModel());
+            ListaDeCuentas.Add(new CuentaModel());
+            ListaDeCuentas.Add(new CuentaModel());
+            int expectedResult = ListaDeCuentas.Count;
+            GameService service = new GameService();
 
-                GameService service = new GameService();
-
-                Assert.AreEqual(expectedResut, service.RecuperarMejoresPuntuaciones());
+            Assert.AreEqual(expectedResult, service.RecuperarMejoresPuntuaciones().Count);
         }
 
     }

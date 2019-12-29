@@ -1,10 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using CuentaService.Servicio;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LogicaDelNegocio.Modelo;
 using MessageService.Dominio.Enum;
 
@@ -14,21 +8,21 @@ namespace CuentaService.Servicio.Tests
     public class CuentaServiceTests
     {
         [TestMethod()]
-        public void RegistrarseTest()
+        public void RegistrarseTestUsuarioExistente()
         {
             CuentaModel cuenta = new CuentaModel()
             {
-                NombreUsuario = "",
-                Contrasena = "",
+                NombreUsuario = "chino",
+                Contrasena = "joseMiguel",
                 Jugador = null,
                 Verificado = false,
                 CodigoVerificacion = "",
-                CorreoElectronico = ""
+                CorreoElectronico = "pumas.chino99@gmail.com"
             };
-            EnumEstadoRegistro expectedResut = EnumEstadoRegistro.ErrorEnBaseDatos;
+            EnumEstadoRegistro expectedResut = EnumEstadoRegistro.UsuarioExistente;
 
             CuentaService service = new CuentaService();
-            
+
             Assert.AreEqual(expectedResut,service.Registrarse(null));
 
         }
@@ -38,16 +32,15 @@ namespace CuentaService.Servicio.Tests
         {
             CuentaModel cuenta = new CuentaModel()
             {
-                NombreUsuario = "WingXstar",
-                Contrasena = "PepitoElgrillo45",
-                CorreoElectronico = "man_spider.345@hotmail.com"
+                NombreUsuario = "chino3",
+                Contrasena = "hola9011",
+                CorreoElectronico = "pumas.chino99@gmail.com"
             };
             EnumEstadoRegistro expectedResut = EnumEstadoRegistro.RegistroCorrecto;
 
             CuentaService service = new CuentaService();
 
             Assert.AreEqual(expectedResut, service.Registrarse(cuenta));
-
         }
 
         [TestMethod()]
@@ -64,21 +57,6 @@ namespace CuentaService.Servicio.Tests
             CuentaService service = new CuentaService();
 
             Assert.AreEqual(expectedResut, service.VerificarCuenta("432",cuenta));
-        }
-
-        public void VerificarCuentaTestErrorr()
-        {
-            CuentaModel cuenta = new CuentaModel()
-            {
-                NombreUsuario = "WingXstar",
-                Contrasena = "PepitoElgrillo45",
-                CorreoElectronico = " "
-            };
-            EnumEstadoVerificarCuenta expectedResut = EnumEstadoVerificarCuenta.ErrorEnBaseDatos;
-
-            CuentaService service = new CuentaService();
-
-            Assert.AreEqual(expectedResut, service.VerificarCuenta(" ", cuenta));
         }
 
     }

@@ -1,10 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using LogicaDelNegocio.DataAccess;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LogicaDelNegocio.Modelo;
 
 namespace LogicaDelNegocio.DataAccess.Tests
@@ -17,14 +11,17 @@ namespace LogicaDelNegocio.DataAccess.Tests
         {
             CuentaModel cuenta = new CuentaModel()
             {
-                NombreUsuario = "WingXstar",
+                NombreUsuario = "chino4",
                 Contrasena = "PepitoElgrillo45",
                 CorreoElectronico = "man_spider.345@hotmail.com"
             };
-            CuentaModel expectedResut = null;
+            CuentaModel expectedResut = new CuentaModel()
+            {
+                NombreUsuario = "chino4"
+            };
             CuentaDAO cuentaDAO = new CuentaDAO();
 
-            Assert.AreEqual(expectedResut,cuentaDAO.Registrarse(cuenta)); 
+            Assert.AreEqual(expectedResut.NombreUsuario,cuentaDAO.Registrarse(cuenta).NombreUsuario); 
         }
     }
 }
